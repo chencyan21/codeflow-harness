@@ -47,6 +47,15 @@ def get_diff(repo: str) -> str:
     return result.stdout
 
 
+def get_changed_files(repo: str) -> list[str]:
+    diff = run_cmd(["git", "diff", "--name-only"], repo)
+    if diff.returncode != 0:
+        raise RuntimeError(diff.stderr.strip() or "Failed to list changed files")
+    changed = set(diff.stdout.splitlines())
+    changed.update(get_untracked_files(repo))
+    return sorted(path for path in changed if path)
+
+
 def get_untracked_files(repo: str) -> list[str]:
     result = run_cmd(["git", "ls-files", "--others", "--exclude-standard"], repo)
     if result.returncode != 0:

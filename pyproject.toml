@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "codeflow-agent"
 version = "0.1.0"
-description = "Trusted workflow wrapper for mini-swe-agent v2"
+description = "Trusted execution harness for mini-swe-agent v2"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

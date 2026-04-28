@@ -169,3 +169,56 @@ def test_commit_is_refused_when_checks_fail(
     assert state.commit_action == "refused"
     assert _head(tmp_path) == before
     assert bool(_status(tmp_path)) is True
+
+
+def test_high_risk_commit_requires_override(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _init_repo(tmp_path)
+    policy_dir = tmp_path / ".codeflow"
+    policy_dir.mkdir()
+    (policy_dir / "codeflow.yaml").write_text(
+        f"""
+harness:
+  required_checks:
+    - {sys.executable} -c "print(1)"
+  max_repair_rounds: 0
+  high_risk_paths:
+    - app/auth/
+  governance:
+    block_commit_on_high_risk: true
+""",
+        encoding="utf-8",
+    )
+    _run(["git", "add", ".codeflow/codeflow.yaml"], tmp_path)
+    _run(
+        [
+            "git",
+            "-c",
+            "user.email=test@example.local",
+            "-c",
+            "user.name=Test",
+            "commit",
+            "-m",
+            "policy",
+        ],
+        tmp_path,
+    )
+    before = _head(tmp_path)
+
+    def fake_mini(repo: str, prompt: str, model: str | None = None, mini_config: str | None = None) -> str:
+        auth_dir = Path(repo) / "app" / "auth"
+        auth_dir.mkdir(parents=True)
+        (auth_dir / "service.py").write_text("TOKEN = 'placeholder'\n", encoding="utf-8")
+        return str(Path(repo) / ".git" / "fake.log")
+
+    monkeypatch.setattr("codeflow.runner.run_mini_agent", fake_mini)
+    monkeypatch.setattr("codeflow.runner.Prompt.ask", lambda *_args, **_kwargs: "commit")
+
+    state = run_codeflow(CodeFlowConfig(repo=str(tmp_path), task="touch auth"))
+
+    assert state.status == "commit_refused_high_risk"
+    assert state.commit_action == "refused"
+    assert _head(tmp_path) == before
+    assert bool(_status(tmp_path)) is True

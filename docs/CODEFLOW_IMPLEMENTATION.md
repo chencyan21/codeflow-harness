@@ -1,6 +1,6 @@
-# CodeFlow Agent 当前实现说明
+# CodeFlow Harness 当前实现说明
 
-本文档记录当前仓库中 CodeFlow Agent 的具体实现。项目定位是基于 `mini-swe-agent v2` 的可信工作流包装层，不重新实现 coding agent。
+本文档记录当前仓库中 CodeFlow Harness 的具体实现。项目定位是基于 `mini-swe-agent v2` 的可信执行与验证 Harness，不重新实现 coding agent。
 
 ## 总体流程
 
@@ -9,16 +9,18 @@
 1. 校验目标目录是 Git 仓库。
 2. 校验目标工作区干净。
 3. 读取项目规则 `.codeflow/project_rules.md`，不存在则使用默认规则。
-4. 根据自然语言任务生成结构化 `Spec`。
-5. 构造传给 mini-swe-agent 的初始 prompt。
-6. 如果是 `--dry-run`，只返回 prompt，不创建分支、不调用 mini。
-7. 创建 `ai/{task_slug}-{timestamp}` 分支。
-8. 调用 mini-swe-agent 执行代码修改。
-9. 运行用户传入的 checks，例如 `pytest -q`、`ruff check .`。
-10. checks 失败时构造 repair prompt，最多自动修复 3 轮。
-11. 读取 `git diff` 并生成 Markdown 风险审查报告。
-12. 如果 `--no-commit`，保留当前状态并跳过人工确认。
-13. 否则要求人工选择 `commit` / `rollback` / `keep`。
+4. 读取 `.codeflow/codeflow.yaml` 并合并 CLI 覆盖项。
+5. 根据自然语言任务生成结构化 `Spec`。
+6. 构造传给 mini-swe-agent 的初始 prompt，注入 Spec、project rules 和 Harness Policy。
+7. 如果是 `--dry-run`，只返回 prompt，不创建分支、不调用 mini。
+8. 创建 `ai/{task_slug}-{timestamp}` 分支。
+9. 调用 mini-swe-agent 执行代码修改。
+10. 运行 required checks，例如 `pytest -q`、`ruff check .`。
+11. 运行 Harness Sensors，生成 sensor report。
+12. checks 或可修复 sensor 失败时构造 repair prompt，最多自动修复 3 轮。
+13. 读取 `git diff` 并生成 Markdown 风险审查报告。
+14. 如果 `--no-commit`，保留当前状态并跳过人工确认。
+15. 否则要求人工选择 `commit` / `rollback` / `keep`，commit 前按 policy 二次验证。
 
 ## CLI
 
@@ -43,6 +45,7 @@ codeflow run \
 - `--mini-config`：传给 mini-swe-agent 的配置路径或配置 spec。
 - `--no-commit`：不进入 commit / rollback / keep 交互。
 - `--dry-run`：只生成 prompt，不调用 mini，不切分支。
+- `--allow-high-risk-commit`：允许高风险 sensor 存在时继续提交。
 
 ## 核心数据结构
 
@@ -52,6 +55,8 @@ codeflow run \
 - `Spec`：任务规格，包括目标、验收标准和约束。
 - `CheckResult`：单条校验命令的结构化结果。
 - `RunState`：一次 CodeFlow 运行的状态。
+- `HarnessPolicy`：结构化 Harness Policy。
+- `SensorResult` / `HarnessSensorReport`：sensor 输出与汇总结果。
 
 `RunState.status` 表示主状态，例如：
 
@@ -62,6 +67,8 @@ codeflow run \
 - `rolled_back`
 - `kept_uncommitted`
 - `commit_refused_checks_failed`
+- `sensor_failed`
+- `review_required`
 
 `RunState.commit_action` 单独记录提交相关动作：
 
@@ -103,6 +110,49 @@ codeflow run \
 - `build_repair_prompt()`：checks 失败后，把失败命令、stdout、stderr 和原任务一起交给 mini-swe-agent 修复。
 
 prompt 中包含任务、结构化 Spec、项目规则和 required checks。
+
+## Harness Policy
+
+`codeflow/harness/policy.py` 负责读取 `.codeflow/codeflow.yaml`。支持结构：
+
+```yaml
+harness:
+  required_checks:
+    - pytest -q
+    - ruff check .
+  max_repair_rounds: 3
+  max_diff_lines: 500
+  allowed_paths:
+    - app/
+    - tests/
+  forbidden_paths:
+    - .env
+    - secrets/
+    - credentials/
+    - "*.pem"
+    - "*.key"
+  high_risk_paths:
+    - app/auth/
+    - app/db/
+    - migrations/
+    - config/
+  require_test_change: true
+  allow_dependency_change: false
+  allow_delete_tests: false
+  governance:
+    block_commit_on_failed_checks: true
+    block_commit_on_high_risk: false
+    require_human_approval: true
+    rerun_checks_before_commit: true
+```
+
+优先级：
+
+```text
+CLI 参数 > codeflow.yaml > project_rules.md > 默认值
+```
+
+当前实现中，`project_rules.md` 作为文本 guidance 注入 prompt；`codeflow.yaml` 作为可执行 policy 驱动 checks、sensors、repair loop 和 governance。
 
 ## mini-swe-agent 调用
 
@@ -148,6 +198,22 @@ base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
 - `all_checks_passed()` 判断全部通过。
 - `failed_checks()` 提取失败项用于 repair prompt。
 
+## Harness Sensors
+
+`codeflow/harness/builtin_sensors.py` 提供第一批可组合 sensor：
+
+- `check_commands`：汇总 required checks。
+- `forbidden_path`：检测 `.env`、secret、key 等敏感路径修改，命中为 high 且 blocking。
+- `allowed_path`：配置 `allowed_paths` 时检测越界文件修改，命中为 high 且 blocking。
+- `high_risk_path`：检测 policy 配置的高风险路径；默认命中为 medium warning，启用 `block_commit_on_high_risk` 时升级为 high 并要求 `--allow-high-risk-commit` 才能提交。
+- `test_deletion`：检测删除测试函数、断言或 `pytest.raises`，命中为 high 且 blocking。
+- `missing_test_change`：`require_test_change=true` 时，业务代码变更但未改测试会标记 medium warning。
+- `dependency_change`：检测 `pyproject.toml`、`requirements.txt`、`poetry.lock`、`uv.lock` 等依赖文件变更。
+- `max_diff`：diff 行数超过 policy 限制时 high 且 blocking。
+- `no_change`：没有 diff 且没有 changed files 时 fail，防止原测试通过被误判为成功。
+
+sensor report 会进入 repair prompt 和最终 review report。当前可自动 repair 的失败包括 checks、no-change、missing-test warning 和 dependency policy；forbidden path、test deletion、大 diff 不做盲目 repair，直接进入 review-required / blocked 状态。
+
 ## Diff Reviewer
 
 `codeflow/diff_reviewer.py` 生成 Markdown 审查报告，包含：
@@ -158,6 +224,8 @@ base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
 - Risk Level
 - Risk Notes
 - Diff Size
+- Sensor Report
+- Blocking Reasons
 - Recommendation
 
 风险评分是规则版：
@@ -198,6 +266,8 @@ base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
 - `tests/test_test_gate.py`：checks 成功/失败结果收集。
 - `tests/test_runner.py`：dry-run 不切分支、no-commit 状态语义、人审 keep/rollback/commit、失败 commit 拒绝。
 - `tests/test_mini_runner.py`：mini 调用环境映射、显式 model 优先级、已有标准环境变量保留。
+- `tests/test_harness_policy.py`：policy fallback、yaml 解析、CLI 覆盖、prompt 注入。
+- `tests/test_harness_sensors.py`：forbidden path、删除测试、无测试变更、无 diff、大 diff、依赖变更、checks fail。
 
 已验证命令：
 

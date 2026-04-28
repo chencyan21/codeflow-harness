@@ -1,1113 +1,1193 @@
-目标是：**基于 mini-swe-agent v2 做二次开发，不从零写 Agent，只做 CodeFlow 的可信工作流增强层**。mini-swe-agent v2 本身是轻量 coding agent，官方说明它是 v2 版本，并默认支持 native tool calling；SWE-bench 官网也支持用 mini-SWE-agent v2 作为统一 scaffold 做评测。([GitHub](https://github.com/SWE-agent/mini-swe-agent?utm_source=chatgpt.com))
+# CodeFlow Harness 完整 Plan
 
-------
+## 0. 新定位
 
-# CodeFlow Agent 实现方案
-
-## 1. 项目目标
-
-基于 `mini-swe-agent v2` 实现一个 Python 项目的可信 AI 编程工作流系统。
-
-不要从零实现 coding agent。
-直接把 `mini-swe-agent` 作为代码执行引擎，在外层增加：
+原定位：
 
 ```text
-Git 分支隔离
-Spec 任务规格化
-项目规则注入
-强制测试门禁
-失败自动修复循环
-Diff 风险审查
-人工确认 commit / rollback
-小型 benchmark
+CodeFlow Agent：基于 mini-swe-agent v2 的可信工作流包装层
 ```
 
-最终命令效果：
+新定位：
+
+```text
+CodeFlow Harness：面向 Python 项目的 AI Coding Agent 可信执行与验证 Harness
+```
+
+核心思想：
+
+```text
+mini-swe-agent v2 = Executor
+CodeFlow Harness = Guidance + Sensors + Control Loop + Governance + Observability + Evaluation
+```
+
+LangChain 对 agent harness 的解释可以概括为：**Agent = Model + Harness**，模型提供智能，harness 让智能变得可用、可控、可执行。([LangChain][1]) Martin Fowler 也强调 coding agent harness 通过 feed-forward 和 feedback 调节代码库走向目标状态。([martinfowler.com][2]) 所以你现在要做的不是“再造一个 coding agent”，而是**设计一套让 coding agent 更可靠的工程外骨骼**。
+
+---
+
+# 1. Harness 总体架构
+
+## 1.1 Harness 分层
+
+把系统拆成 6 层：
+
+```text
+1. Guidance Layer：事前指导
+   Spec、project_rules、codeflow.yaml、允许/禁止路径、任务约束
+
+2. Executor Layer：执行器
+   mini-swe-agent v2
+
+3. Sensor Layer：反馈传感器
+   pytest、ruff、mypy、coverage、diff scan、test deletion scan、forbidden path scan
+
+4. Control Loop Layer：闭环控制
+   checks 失败 → repair prompt → mini-swe-agent 修复 → 再验证
+
+5. Governance Layer：治理与审批
+   commit/rollback/keep、risk policy、commit 前二次检查、人类审批
+
+6. Observability & Evaluation Layer：可观测与评测
+   runs 目录、trajectory、prompt、checks、report、benchmark
+```
+
+## 1.2 新流程
+
+```text
+User Task
+  ↓
+Git Guard
+  ↓
+Harness Policy Loader
+  ↓
+Spec Builder / Guidance Builder
+  ↓
+Prompt Builder
+  ↓
+mini-swe-agent v2 Executor
+  ↓
+Harness Sensors
+  ├─ pytest sensor
+  ├─ ruff sensor
+  ├─ forbidden path sensor
+  ├─ test deletion sensor
+  ├─ no-change sensor
+  ├─ max-diff sensor
+  └─ dependency change sensor
+  ↓
+Harness Control Loop
+  ├─ pass → Review
+  └─ fail → Repair Prompt → Executor
+  ↓
+Risk Review
+  ↓
+Human Approval
+  ↓
+Commit / Rollback / Keep
+  ↓
+Run Report + Benchmark Result
+```
+
+---
+
+# 2. 目录结构调整 Plan
+
+你当前结构可以保留，但建议新增 `harness/` 目录，把 Harness Engineering 显式化。
+
+```text
+codeflow/
+├── cli.py
+├── runner.py
+├── models.py
+├── mini_runner.py
+├── spec_builder.py
+├── prompt_builder.py
+├── git_guard.py
+├── test_gate.py
+├── diff_reviewer.py
+├── report_writer.py
+├── utils.py
+├── harness/
+│   ├── __init__.py
+│   ├── policy.py              # codeflow.yaml / project_rules 解析与合并
+│   ├── guidance.py            # Spec、规则、上下文注入
+│   ├── sensors.py             # Sensor 抽象基类
+│   ├── builtin_sensors.py     # forbidden_path / test_deletion / no_change 等
+│   ├── control_loop.py        # repair loop / stop condition
+│   ├── governance.py          # commit policy / approval policy
+│   ├── observability.py       # run_dir / state / artifacts
+│   └── evaluation.py          # benchmark 统计
+├── benchmark/
+├── examples/
+├── tests/
+└── docs/
+```
+
+不要一开始全量重构，可以分阶段迁移。
+
+---
+
+# 3. Phase 1：项目定位与文档重构
+
+## 目标
+
+先把项目从 “wrapper” 明确升级为 “harness”。
+
+## 要做什么
+
+### 3.1 改 README 项目介绍
+
+新增：
+
+```markdown
+# CodeFlow Harness
+
+CodeFlow Harness is a trusted harness engineering layer for mini-swe-agent v2.
+
+It does not reimplement a coding agent. Instead, it wraps mini-swe-agent with:
+- feed-forward guidance
+- validation sensors
+- repair control loops
+- risk governance
+- audit logs
+- benchmark evaluation
+```
+
+### 3.2 新增 `docs/harness_design.md`
+
+内容结构：
+
+```text
+1. 什么是 Harness Engineering
+2. 为什么 CodeFlow 是 Harness，而不是 Coding Agent
+3. mini-swe-agent 负责什么
+4. CodeFlow Harness 负责什么
+5. Guidance / Sensors / Control Loop / Governance / Observability 五层架构
+6. 运行流程图
+```
+
+### 3.3 更新项目命名
+
+推荐统一使用：
+
+```text
+CodeFlow Harness
+```
+
+副标题：
+
+```text
+Harness Engineering for Reliable AI Coding Agents
+```
+
+## 验收标准
+
+```text
+README 中明确出现 Harness Engineering 设计
+docs/harness_design.md 能解释项目定位
+不再把项目描述为“从零实现 coding agent”
+```
+
+---
+
+# 4. Phase 2：Harness Policy 系统
+
+## 目标
+
+把 `.codeflow/project_rules.md` 从“文本提示”升级成“可执行策略”。
+
+你现在已经支持读取 `.codeflow/project_rules.md`，不存在则使用默认规则。 下一步要加入结构化策略文件。
+
+## 4.1 新增 `.codeflow/codeflow.yaml`
+
+示例：
+
+```yaml
+harness:
+  required_checks:
+    - pytest -q
+    - ruff check .
+
+  max_repair_rounds: 3
+  max_diff_lines: 500
+
+  allowed_paths:
+    - app/
+    - tests/
+
+  forbidden_paths:
+    - .env
+    - secrets/
+    - credentials/
+    - "*.pem"
+    - "*.key"
+
+  high_risk_paths:
+    - app/auth/
+    - app/db/
+    - migrations/
+    - config/
+
+  require_test_change: true
+  allow_dependency_change: false
+  allow_delete_tests: false
+
+  governance:
+    block_commit_on_failed_checks: true
+    block_commit_on_high_risk: false
+    require_human_approval: true
+    rerun_checks_before_commit: true
+```
+
+## 4.2 新增模型
+
+在 `models.py` 或 `harness/policy.py` 中新增：
+
+```python
+class HarnessPolicy(BaseModel):
+    required_checks: list[str] = Field(default_factory=lambda: ["pytest -q"])
+    max_repair_rounds: int = 3
+    max_diff_lines: int = 500
+    allowed_paths: list[str] = Field(default_factory=list)
+    forbidden_paths: list[str] = Field(default_factory=lambda: [".env", "secrets/", "credentials/"])
+    high_risk_paths: list[str] = Field(default_factory=list)
+    require_test_change: bool = False
+    allow_dependency_change: bool = True
+    allow_delete_tests: bool = False
+    block_commit_on_failed_checks: bool = True
+    block_commit_on_high_risk: bool = False
+    require_human_approval: bool = True
+    rerun_checks_before_commit: bool = True
+```
+
+## 4.3 规则优先级
+
+```text
+CLI 参数 > codeflow.yaml > project_rules.md > 默认值
+```
+
+例如：
 
 ```bash
-codeflow run \
-  --repo ./examples/todo_api \
-  --task "给 Todo 增加 due_date 字段，并补充测试" \
-  --checks "pytest -q" \
-  --checks "ruff check ."
+codeflow run --checks "pytest -q"
 ```
 
-------
+覆盖 yaml 里的 `required_checks`。
 
-## 2. 技术边界
+## 4.4 Prompt 注入
 
-只支持：
+initial prompt 和 repair prompt 中必须注入：
 
 ```text
-Python 项目
-本地 Git 仓库
-pytest
-ruff
-CLI 使用
-mini-swe-agent v2
-最多 3 轮自动修复
-人工确认后 commit
+Harness Policy:
+- required checks
+- forbidden paths
+- max repair rounds
+- test policy
+- dependency policy
 ```
 
-暂时不要做：
+## 验收标准
 
 ```text
-Web 前端
-IDE 插件
-Docker 沙盒
-多语言支持
-复杂数据库
-SWE-bench 全量评测
+codeflow.yaml 不存在时正常 fallback
+CLI checks 能覆盖 yaml checks
+policy 能进入 prompt
+单元测试覆盖 policy 合并逻辑
 ```
 
-------
+---
 
-## 3. 目标架构
+# 5. Phase 3：Harness Sensors
 
-```text
-codeflow run
-   ↓
-检查 Git 仓库状态
-   ↓
-创建 ai/* 独立分支
-   ↓
-生成结构化 Spec
-   ↓
-读取 .codeflow/project_rules.md
-   ↓
-构造 mini-swe-agent 任务 prompt
-   ↓
-调用 mini-swe-agent 执行代码修改
-   ↓
-运行 pytest / ruff
-   ↓
-失败则再次调用 mini-swe-agent 修复，最多 3 轮
-   ↓
-读取 git diff
-   ↓
-生成风险报告
-   ↓
-人工选择 commit / rollback / keep
-```
+## 目标
 
-------
+把现在的 `Test Gate + Diff Reviewer` 升级成多个可组合 sensor。
 
-## 4. 项目目录结构
+SIG 对 harness engineering 的定义里强调，harness 包括 agent 运行环境中的规则、检查和反馈循环，用来让不稳定 agent 更可靠。([SIG][3]) 所以你要把 checks、diff 风险、路径限制都做成传感器。
 
-在新仓库中实现：
+## 5.1 Sensor 抽象
 
-```text
-codeflow-agent/
-├── codeflow/
-│   ├── __init__.py
-│   ├── cli.py
-│   ├── runner.py
-│   ├── config.py
-│   ├── models.py
-│   ├── mini_runner.py
-│   ├── spec_builder.py
-│   ├── prompt_builder.py
-│   ├── git_guard.py
-│   ├── test_gate.py
-│   ├── diff_reviewer.py
-│   ├── report_writer.py
-│   └── utils.py
-├── examples/
-│   └── todo_api/
-├── benchmark/
-│   ├── tasks.yaml
-│   └── run_benchmark.py
-├── tests/
-├── pyproject.toml
-└── README.md
-```
-
-------
-
-## 5. 依赖
-
-`pyproject.toml` 使用：
-
-```toml
-[project]
-name = "codeflow-agent"
-version = "0.1.0"
-description = "Trusted workflow wrapper for mini-swe-agent v2"
-requires-python = ">=3.10"
-dependencies = [
-    "typer>=0.12.0",
-    "rich>=13.0.0",
-    "pydantic>=2.0.0",
-    "pyyaml>=6.0.0",
-    "mini-swe-agent>=2.0.0",
-]
-
-[project.scripts]
-codeflow = "codeflow.cli:app"
-
-[tool.ruff]
-line-length = 100
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-```
-
-------
-
-## 6. 核心数据结构
-
-创建 `codeflow/models.py`：
+新增：
 
 ```python
-from __future__ import annotations
+class SensorResult(BaseModel):
+    name: str
+    passed: bool
+    severity: Literal["info", "low", "medium", "high"]
+    message: str
+    details: dict = Field(default_factory=dict)
+```
 
-from pydantic import BaseModel, Field
+```python
+class BaseSensor(Protocol):
+    name: str
+    def run(self, context: SensorContext) -> SensorResult:
+        ...
+```
 
+`SensorContext` 包括：
 
-class CodeFlowConfig(BaseModel):
+```python
+class SensorContext(BaseModel):
     repo: str
     task: str
-    checks: list[str] = Field(default_factory=lambda: ["pytest -q"])
-    max_repair_rounds: int = 3
-    model: str | None = None
-    mini_config: str | None = None
-    no_commit: bool = False
-    dry_run: bool = False
-
-
-class Spec(BaseModel):
-    task_type: str
-    goal: str
-    acceptance_criteria: list[str]
-    constraints: list[str]
-
-
-class CheckResult(BaseModel):
-    command: str
-    success: bool
-    returncode: int
-    stdout: str
-    stderr: str
-
-
-class RunState(BaseModel):
-    repo: str
-    task: str
-    branch: str
-    spec: Spec | None = None
-    rules: str = ""
-    mini_runs: list[str] = Field(default_factory=list)
-    check_results: list[CheckResult] = Field(default_factory=list)
-    repair_round: int = 0
-    diff: str = ""
-    report: str = ""
-    status: str = "initialized"
+    diff: str
+    changed_files: list[str]
+    policy: HarnessPolicy
+    check_results: list[CheckResult]
 ```
 
-------
+## 5.2 第一批 Sensors
 
-## 7. CLI
+### 1. CheckCommandSensor
 
-创建 `codeflow/cli.py`：
-
-```python
-import typer
-from rich.console import Console
-
-from codeflow.models import CodeFlowConfig
-from codeflow.runner import run_codeflow
-
-app = typer.Typer(help="CodeFlow Agent: trusted workflow wrapper for mini-swe-agent v2")
-console = Console()
-
-
-@app.command()
-def run(
-    repo: str = typer.Option(..., help="Path to target Git repository"),
-    task: str = typer.Option(..., help="Natural language coding task"),
-    checks: list[str] = typer.Option(["pytest -q"], help="Validation commands"),
-    max_repair_rounds: int = typer.Option(3, help="Maximum repair attempts"),
-    model: str | None = typer.Option(None, help="Model name passed to mini-swe-agent"),
-    mini_config: str | None = typer.Option(None, help="mini-swe-agent config path"),
-    no_commit: bool = typer.Option(False, help="Do not commit automatically"),
-    dry_run: bool = typer.Option(False, help="Build prompt but do not run agent"),
-):
-    config = CodeFlowConfig(
-        repo=repo,
-        task=task,
-        checks=checks,
-        max_repair_rounds=max_repair_rounds,
-        model=model,
-        mini_config=mini_config,
-        no_commit=no_commit,
-        dry_run=dry_run,
-    )
-    state = run_codeflow(config)
-    console.print(state.report)
-```
-
-------
-
-## 8. Git Guard
-
-创建 `codeflow/git_guard.py`：
-
-功能要求：
+已有 `pytest` / `ruff` 逻辑迁移过来。
 
 ```text
-1. 检查 repo 是否是 Git 仓库
-2. 检查工作区是否干净
-3. 创建 ai/{slug} 分支
-4. 获取 git diff
-5. commit
-6. rollback
+输入：required_checks
+输出：每条命令 pass/fail
 ```
 
-实现要求：
+### 2. ForbiddenPathSensor
 
-```python
-import re
-import subprocess
-from datetime import datetime
-from pathlib import Path
+检测 diff 是否修改：
 
-
-def run_cmd(cmd: list[str], cwd: str) -> subprocess.CompletedProcess:
-    return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
-
-
-def ensure_git_repo(repo: str) -> None:
-    result = run_cmd(["git", "rev-parse", "--is-inside-work-tree"], repo)
-    if result.returncode != 0 or result.stdout.strip() != "true":
-        raise RuntimeError(f"{repo} is not a Git repository")
-
-
-def ensure_clean_worktree(repo: str) -> None:
-    result = run_cmd(["git", "status", "--porcelain"], repo)
-    if result.stdout.strip():
-        raise RuntimeError("Git worktree is not clean. Commit or stash changes first.")
-
-
-def slugify(text: str) -> str:
-    text = text.lower()
-    text = re.sub(r"[^a-z0-9\u4e00-\u9fff]+", "-", text)
-    text = text.strip("-")
-    return text[:40] or "task"
-
-
-def create_ai_branch(repo: str, task: str) -> str:
-    branch = f"ai/{slugify(task)}-{datetime.now().strftime('%m%d-%H%M%S')}"
-    result = run_cmd(["git", "checkout", "-b", branch], repo)
-    if result.returncode != 0:
-        raise RuntimeError(result.stderr)
-    return branch
-
-
-def get_diff(repo: str) -> str:
-    return run_cmd(["git", "diff"], repo).stdout
-
-
-def commit_changes(repo: str, message: str) -> None:
-    add = run_cmd(["git", "add", "."], repo)
-    if add.returncode != 0:
-        raise RuntimeError(add.stderr)
-
-    commit = run_cmd(["git", "commit", "-m", message], repo)
-    if commit.returncode != 0:
-        raise RuntimeError(commit.stderr)
-
-
-def rollback(repo: str) -> None:
-    run_cmd(["git", "restore", "."], repo)
+```text
+.env
+secrets/
+credentials/
+*.pem
+*.key
+policy.forbidden_paths
 ```
 
-------
+命中则：
 
-## 9. Spec Builder
-
-创建 `codeflow/spec_builder.py`。
-
-先不要调用大模型，第一版用规则生成，确保稳定。
-
-```python
-from codeflow.models import Spec
-
-
-def build_spec(task: str) -> Spec:
-    return Spec(
-        task_type="coding_task",
-        goal=task,
-        acceptance_criteria=[
-            "Implementation satisfies the user task.",
-            "Existing tests pass.",
-            "New or updated tests are added when appropriate.",
-            "No unrelated files are modified.",
-        ],
-        constraints=[
-            "Do not delete existing tests.",
-            "Do not bypass failing tests.",
-            "Do not modify environment secrets.",
-            "Keep changes minimal and relevant.",
-        ],
-    )
+```text
+passed = false
+severity = high
 ```
 
-后续再替换成 LLM Spec Agent。
+### 3. HighRiskPathSensor
 
-------
+检测是否修改：
 
-## 10. 项目规则读取
-
-创建 `codeflow/utils.py`：
-
-```python
-from pathlib import Path
-
-
-def read_project_rules(repo: str) -> str:
-    path = Path(repo) / ".codeflow" / "project_rules.md"
-    if path.exists():
-        return path.read_text(encoding="utf-8")
-    return """
-Default project rules:
-- Keep changes minimal.
-- Do not delete existing tests.
-- Do not modify .env or secret files.
-- Run required checks before reporting success.
-"""
+```text
+app/auth/
+app/db/
+migrations/
+config/
 ```
 
-------
+命中则：
 
-## 11. Prompt Builder
+```text
+passed = true
+severity = medium/high
+```
 
-创建 `codeflow/prompt_builder.py`：
+不一定阻断，但要提示人工重点看。
+
+### 4. TestDeletionSensor
+
+检测是否删除测试：
+
+```text
+- def test_
+- assert
+- pytest.raises
+```
+
+命中则：
+
+```text
+passed = false
+severity = high
+```
+
+### 5. MissingTestChangeSensor
+
+如果任务是 `feature` / `bugfix`，且改了业务代码但没有改 `tests/`：
+
+```text
+passed = true
+severity = medium
+message = "功能代码变更但没有测试变更"
+```
+
+### 6. DependencyChangeSensor
+
+检测：
+
+```text
+pyproject.toml
+requirements.txt
+poetry.lock
+uv.lock
+```
+
+如果 `allow_dependency_change=false`，则标 high。
+
+### 7. MaxDiffSensor
+
+如果 diff 行数超过 `max_diff_lines`：
+
+```text
+severity = high
+message = "Diff 过大，需要人工重点审查"
+```
+
+### 8. NoChangeSensor
+
+如果 `git diff` 为空：
+
+```text
+passed = false
+severity = medium
+message = "没有检测到代码修改，不能把原有测试通过误判为任务成功"
+```
+
+## 5.3 Sensor 汇总
+
+新增：
 
 ```python
-from codeflow.models import CheckResult, Spec
+class HarnessSensorReport(BaseModel):
+    results: list[SensorResult]
+    overall_passed: bool
+    max_severity: Literal["info", "low", "medium", "high"]
+    blocking_reasons: list[str]
+```
 
+## 验收标准
 
-def build_initial_prompt(task: str, spec: Spec, rules: str, checks: list[str]) -> str:
-    criteria = "\n".join(f"- {x}" for x in spec.acceptance_criteria)
-    constraints = "\n".join(f"- {x}" for x in spec.constraints)
-    checks_text = "\n".join(f"- {x}" for x in checks)
+```text
+pytest/ruff 仍能正常运行
+forbidden path 命中 high
+删除测试命中 high
+无 diff 命中 fail
+功能变更无测试变更有 warning
+所有 sensor 结果进入 report
+```
 
-    return f"""
-You are working inside a local Git repository.
+---
 
-User task:
-{task}
+# 6. Phase 4：PEV + Repair Control Loop
 
-Structured spec:
-Goal: {spec.goal}
+## 目标
 
-Acceptance criteria:
-{criteria}
+把现在的 repair loop 明确包装为 Harness Control Loop。
 
-Constraints:
-{constraints}
+PEV 可以定义为：
 
-Project rules:
-{rules}
+```text
+Plan → Execute → Verify → Repair
+```
 
-Required validation commands:
-{checks_text}
+你当前已经有：构造 prompt → 调用 mini-swe-agent → 运行 checks → 失败修复，文档里也记录了 checks 失败时最多自动修复 3 轮。 下一步要让 loop 不只看 pytest，还看所有 sensors。
 
-Instructions:
-1. Inspect the repository before editing.
-2. Make the minimal necessary code changes.
-3. Add or update tests when appropriate.
-4. Do not claim success unless the required validation commands can pass.
-5. Do not modify unrelated files.
-"""
+## 6.1 新 loop 逻辑
 
+```text
+Plan:
+  build spec
+  load harness policy
+  build guidance prompt
 
-def build_repair_prompt(
-    task: str,
-    spec: Spec,
-    rules: str,
-    failed_results: list[CheckResult],
-    checks: list[str],
-) -> str:
-    failure_logs = "\n\n".join(
-        f"Command: {r.command}\nReturn code: {r.returncode}\nSTDOUT:\n{r.stdout}\nSTDERR:\n{r.stderr}"
-        for r in failed_results
-    )
-    checks_text = "\n".join(f"- {x}" for x in checks)
+Execute:
+  run mini-swe-agent
 
-    return f"""
-The previous implementation did not pass validation.
+Verify:
+  run check sensors
+  run diff sensors
+  build sensor report
 
-Original task:
-{task}
+Repair:
+  if blocking sensor failed and repair_round < max:
+      build repair prompt with sensor report
+      run mini-swe-agent again
+  else:
+      stop
+```
 
-Goal:
-{spec.goal}
+## 6.2 哪些失败可以 repair
 
-Project rules:
-{rules}
+可以进入 repair：
 
-Failed validation logs:
-{failure_logs}
+```text
+pytest failed
+ruff failed
+missing test change
+no change
+dependency error
+```
 
-Required validation commands:
-{checks_text}
+不建议自动 repair 或要谨慎：
+
+```text
+forbidden path modified
+test deletion detected
+too large diff
+```
+
+这些更适合直接 `review_required` 或 `reject`。
+
+## 6.3 Repair Prompt 增强
+
+repair prompt 不只放 stdout/stderr，还要放 sensor report：
+
+```text
+Failed Sensors:
+- pytest: failed
+- missing_test_change: warning
+- no_change: failed
+
+Blocking Reasons:
+- pytest -q failed
+- implementation changed app/ but no tests were added
 
 Please fix the implementation with minimal changes.
 Do not delete tests.
-Do not bypass tests.
-Do not modify unrelated files.
-"""
+Do not modify forbidden paths.
 ```
 
-------
-
-## 12. mini-swe-agent 调用器
-
-创建 `codeflow/mini_runner.py`。
-
-优先使用 subprocess 调用 `mini`，因为这样最稳定、最容易落地。
-
-```python
-import subprocess
-from pathlib import Path
-from uuid import uuid4
-
-
-def run_mini_agent(
-    repo: str,
-    prompt: str,
-    model: str | None = None,
-    mini_config: str | None = None,
-) -> str:
-    run_id = str(uuid4())[:8]
-    prompt_path = Path(repo) / f".codeflow_prompt_{run_id}.txt"
-    prompt_path.write_text(prompt, encoding="utf-8")
-
-    cmd = ["mini", "--prompt", prompt]
-    if model:
-        cmd.extend(["--model", model])
-    if mini_config:
-        cmd.extend(["--config", mini_config])
-
-    result = subprocess.run(
-        cmd,
-        cwd=repo,
-        text=True,
-        capture_output=True,
-    )
-
-    log_path = Path(repo) / f".codeflow_mini_run_{run_id}.log"
-    log_path.write_text(
-        f"COMMAND: {' '.join(cmd)}\n\nSTDOUT:\n{result.stdout}\n\nSTDERR:\n{result.stderr}",
-        encoding="utf-8",
-    )
-
-    prompt_path.unlink(missing_ok=True)
-
-    if result.returncode != 0:
-        raise RuntimeError(f"mini-swe-agent failed. See {log_path}")
-
-    return str(log_path)
-```
-
-注意：如果本地 `mini` 的参数不是 `--prompt`，就让 Codex 根据当前安装版本调整这一处。mini-swe-agent 文档说明 `mini` 是本地 REPL 风格 CLI，且 v2 默认使用 native tool calling；不同安装版本 CLI 参数可能会有轻微差异。([Mini Swe Agent](https://mini-swe-agent.com/latest/usage/mini/?utm_source=chatgpt.com))
-
-------
-
-## 13. Test Gate
-
-创建 `codeflow/test_gate.py`：
-
-```python
-import subprocess
-
-from codeflow.models import CheckResult
-
-
-def run_checks(repo: str, checks: list[str]) -> list[CheckResult]:
-    results: list[CheckResult] = []
-
-    for command in checks:
-        result = subprocess.run(
-            command,
-            cwd=repo,
-            shell=True,
-            text=True,
-            capture_output=True,
-        )
-        results.append(
-            CheckResult(
-                command=command,
-                success=result.returncode == 0,
-                returncode=result.returncode,
-                stdout=result.stdout[-8000:],
-                stderr=result.stderr[-8000:],
-            )
-        )
-
-    return results
-
-
-def all_checks_passed(results: list[CheckResult]) -> bool:
-    return all(r.success for r in results)
-
-
-def failed_checks(results: list[CheckResult]) -> list[CheckResult]:
-    return [r for r in results if not r.success]
-```
-
-------
-
-## 14. Diff Reviewer
-
-创建 `codeflow/diff_reviewer.py`。
-
-第一版先用规则打分，不依赖 LLM。
-
-```python
-from codeflow.models import CheckResult
-
-
-HIGH_RISK_PATTERNS = [
-    "auth",
-    "permission",
-    "migration",
-    ".env",
-    "secret",
-    "password",
-    "token",
-    "delete",
-    "drop",
-]
-
-MEDIUM_RISK_PATTERNS = [
-    "api",
-    "schema",
-    "model",
-    "database",
-    "config",
-]
-
-
-def score_risk(diff: str) -> tuple[str, list[str]]:
-    lower = diff.lower()
-    risks: list[str] = []
-
-    for pattern in HIGH_RISK_PATTERNS:
-        if pattern in lower:
-            risks.append(f"High-risk keyword found in diff: {pattern}")
-
-    if risks:
-        return "high", risks
-
-    for pattern in MEDIUM_RISK_PATTERNS:
-        if pattern in lower:
-            risks.append(f"Medium-risk keyword found in diff: {pattern}")
-
-    if risks:
-        return "medium", risks
-
-    return "low", ["No obvious high-risk pattern detected."]
-
-
-def build_review_report(
-    task: str,
-    branch: str,
-    diff: str,
-    check_results: list[CheckResult],
-) -> str:
-    risk_level, risks = score_risk(diff)
-    changed_lines = len(diff.splitlines())
-    check_summary = "\n".join(
-        f"- {r.command}: {'PASS' if r.success else 'FAIL'}"
-        for r in check_results
-    )
-    risk_text = "\n".join(f"- {x}" for x in risks)
-
-    return f"""
-# CodeFlow Review Report
-
-## Task
-{task}
-
-## Branch
-{branch}
-
-## Validation
-{check_summary}
-
-## Risk Level
-{risk_level}
-
-## Risk Notes
-{risk_text}
-
-## Diff Size
-{changed_lines} diff lines
-
-## Recommendation
-{"Commit is allowed after human review." if all(r.success for r in check_results) else "Do not commit until validation passes."}
-"""
-```
-
-------
-
-## 15. Runner 主流程
-
-创建 `codeflow/runner.py`：
-
-```python
-from rich.console import Console
-from rich.prompt import Prompt
-
-from codeflow.diff_reviewer import build_review_report
-from codeflow.git_guard import (
-    commit_changes,
-    create_ai_branch,
-    ensure_clean_worktree,
-    ensure_git_repo,
-    get_diff,
-    rollback,
-)
-from codeflow.mini_runner import run_mini_agent
-from codeflow.models import CodeFlowConfig, RunState
-from codeflow.prompt_builder import build_initial_prompt, build_repair_prompt
-from codeflow.spec_builder import build_spec
-from codeflow.test_gate import all_checks_passed, failed_checks, run_checks
-from codeflow.utils import read_project_rules
-
-console = Console()
-
-
-def run_codeflow(config: CodeFlowConfig) -> RunState:
-    ensure_git_repo(config.repo)
-    ensure_clean_worktree(config.repo)
-
-    branch = create_ai_branch(config.repo, config.task)
-    state = RunState(repo=config.repo, task=config.task, branch=branch)
-
-    console.print(f"[bold green]Created branch:[/bold green] {branch}")
-
-    rules = read_project_rules(config.repo)
-    spec = build_spec(config.task)
-
-    state.rules = rules
-    state.spec = spec
-
-    prompt = build_initial_prompt(
-        task=config.task,
-        spec=spec,
-        rules=rules,
-        checks=config.checks,
-    )
-
-    if config.dry_run:
-        state.report = prompt
-        state.status = "dry_run"
-        return state
-
-    console.print("[bold]Running mini-swe-agent...[/bold]")
-    log_path = run_mini_agent(
-        repo=config.repo,
-        prompt=prompt,
-        model=config.model,
-        mini_config=config.mini_config,
-    )
-    state.mini_runs.append(log_path)
-
-    for round_idx in range(config.max_repair_rounds + 1):
-        console.print(f"[bold]Running validation checks, round {round_idx}...[/bold]")
-        results = run_checks(config.repo, config.checks)
-        state.check_results = results
-
-        if all_checks_passed(results):
-            state.status = "checks_passed"
-            break
-
-        if round_idx >= config.max_repair_rounds:
-            state.status = "checks_failed"
-            break
-
-        failed = failed_checks(results)
-        repair_prompt = build_repair_prompt(
-            task=config.task,
-            spec=spec,
-            rules=rules,
-            failed_results=failed,
-            checks=config.checks,
-        )
-
-        console.print(f"[yellow]Checks failed. Repair round {round_idx + 1}...[/yellow]")
-        log_path = run_mini_agent(
-            repo=config.repo,
-            prompt=repair_prompt,
-            model=config.model,
-            mini_config=config.mini_config,
-        )
-        state.mini_runs.append(log_path)
-        state.repair_round = round_idx + 1
-
-    diff = get_diff(config.repo)
-    state.diff = diff
-    state.report = build_review_report(
-        task=config.task,
-        branch=branch,
-        diff=diff,
-        check_results=state.check_results,
-    )
-
-    console.print(state.report)
-
-    if config.no_commit:
-        state.status = "finished_no_commit"
-        return state
-
-    decision = Prompt.ask(
-        "Choose action",
-        choices=["commit", "rollback", "keep"],
-        default="keep",
-    )
-
-    if decision == "commit":
-        if not all_checks_passed(state.check_results):
-            console.print("[red]Refusing to commit because checks failed.[/red]")
-            state.status = "commit_refused_checks_failed"
-            return state
-        commit_changes(config.repo, f"codeflow: {config.task[:60]}")
-        state.status = "committed"
-    elif decision == "rollback":
-        rollback(config.repo)
-        state.status = "rolled_back"
-    else:
-        state.status = "kept_uncommitted"
-
-    return state
-```
-
-------
-
-## 16. 示例项目
-
-创建 `examples/todo_api/`，必须是一个完整 Git 仓库，包含：
+## 验收标准
 
 ```text
-examples/todo_api/
-├── app/
-│   ├── __init__.py
-│   └── todo.py
-├── tests/
-│   └── test_todo.py
-├── pyproject.toml
-└── README.md
+repair loop 由 sensor report 驱动
+pytest fail 可以 repair
+no-change 可以 repair
+forbidden path 不自动 blind repair，直接高风险
 ```
 
-`app/todo.py`：
-
-```python
-from dataclasses import dataclass
-
-
-@dataclass
-class Todo:
-    title: str
-    done: bool = False
-
-
-def create_todo(title: str) -> Todo:
-    if not title:
-        raise ValueError("title is required")
-    return Todo(title=title)
-
-
-def mark_done(todo: Todo) -> Todo:
-    todo.done = True
-    return todo
-```
-
-`tests/test_todo.py`：
-
-```python
-import pytest
-
-from app.todo import create_todo, mark_done
-
-
-def test_create_todo():
-    todo = create_todo("learn agent")
-    assert todo.title == "learn agent"
-    assert todo.done is False
-
-
-def test_create_todo_empty_title():
-    with pytest.raises(ValueError):
-        create_todo("")
-
-
-def test_mark_done():
-    todo = create_todo("learn agent")
-    mark_done(todo)
-    assert todo.done is True
-```
-
-------
-
-## 17. Benchmark
-
-创建 `benchmark/tasks.yaml`：
-
-```yaml
-tasks:
-  - repo: examples/todo_api
-    task: "给 Todo 增加 priority 字段，默认值为 medium，并补充测试"
-    checks:
-      - "pytest -q"
-
-  - repo: examples/todo_api
-    task: "给 create_todo 增加标题最大长度校验，超过 100 字符时报错，并补充测试"
-    checks:
-      - "pytest -q"
-
-  - repo: examples/todo_api
-    task: "给 Todo 增加 due_date 字段，允许为空，并补充测试"
-    checks:
-      - "pytest -q"
-```
-
-创建 `benchmark/run_benchmark.py`：
-
-```python
-import json
-from pathlib import Path
-
-import yaml
-
-from codeflow.models import CodeFlowConfig
-from codeflow.runner import run_codeflow
-
-
-def main():
-    tasks = yaml.safe_load(Path("benchmark/tasks.yaml").read_text(encoding="utf-8"))["tasks"]
-    results = []
-
-    for item in tasks:
-        config = CodeFlowConfig(
-            repo=item["repo"],
-            task=item["task"],
-            checks=item.get("checks", ["pytest -q"]),
-            no_commit=True,
-            max_repair_rounds=3,
-        )
-        try:
-            state = run_codeflow(config)
-            results.append(
-                {
-                    "task": item["task"],
-                    "status": state.status,
-                    "repair_round": state.repair_round,
-                    "checks_passed": all(r.success for r in state.check_results),
-                    "report": state.report,
-                }
-            )
-        except Exception as exc:
-            results.append(
-                {
-                    "task": item["task"],
-                    "status": "error",
-                    "error": str(exc),
-                }
-            )
-
-    Path("benchmark/results.json").write_text(
-        json.dumps(results, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-
-
-if __name__ == "__main__":
-    main()
-```
-
-------
-
-## 18. README 最小内容
-
-README 只写：
-
-~~~markdown
-# CodeFlow Agent
-
-A trusted workflow wrapper around mini-swe-agent v2 for Python projects.
-
-## Features
-
-- Git branch isolation
-- Structured task spec
-- Project rule injection
-- pytest / ruff validation gate
-- Repair loop using mini-swe-agent
-- Diff risk review
-- Human approval before commit
-
-## Install
-
-```bash
-pip install -e .
-pip install mini-swe-agent
-~~~
-
-## Usage
-
-```bash
-codeflow run \
-  --repo ./examples/todo_api \
-  --task "给 Todo 增加 due_date 字段，并补充测试" \
-  --checks "pytest -q" \
-  --no-commit
-```
-
-## Project Rules
-
-Create `.codeflow/project_rules.md` in target repo:
-
-~~~markdown
-- Do not delete existing tests.
-- Do not modify .env files.
-- Keep changes minimal.
-- Add tests for new behavior.
 ---
 
-## 19. 完成标准
+# 7. Phase 5：Governance 与 Commit Policy
 
-Codex 执行完成后，项目必须满足：
+## 目标
 
-```text
-1. pip install -e . 成功
-2. codeflow --help 可用
-3. codeflow run 能接收 repo/task/checks 参数
-4. 能检查 Git 仓库和干净工作区
-5. 能创建 ai/* 分支
-6. 能生成 Spec
-7. 能调用 mini-swe-agent
-8. 能运行 pytest / ruff checks
-9. 失败后能最多修复 3 轮
-10. 能生成 Diff Review Report
-11. 能人工选择 commit / rollback / keep
-12. benchmark/run_benchmark.py 能跑多个任务并输出 results.json
-~~~
+把 commit/rollback/keep 从简单交互升级成 governance policy。
 
-------
+你现在已经有人审 `commit / rollback / keep`，并且 checks 失败拒绝 commit。 下一步加二次检查和风险门禁。
 
-## 20. 给 Codex 的最终执行指令
+## 7.1 Commit 前二次 checks
 
-可以直接使用下面这段作为 Codex 任务：
+流程：
 
 ```text
-请在当前仓库中实现 CodeFlow Agent。
-
-目标：
-基于 mini-swe-agent v2 实现一个 Python 项目的可信 AI 编程工作流 wrapper。不要从零写 coding agent，只调用 mini-swe-agent 作为执行引擎；外层实现 Git Guard、Spec Builder、Prompt Builder、Test Gate、Repair Loop、Diff Reviewer、Human Approval 和 Benchmark。
-
-请按以下结构创建文件：
-- codeflow/cli.py
-- codeflow/runner.py
-- codeflow/config.py
-- codeflow/models.py
-- codeflow/mini_runner.py
-- codeflow/spec_builder.py
-- codeflow/prompt_builder.py
-- codeflow/git_guard.py
-- codeflow/test_gate.py
-- codeflow/diff_reviewer.py
-- codeflow/report_writer.py
-- codeflow/utils.py
-- examples/todo_api/
-- benchmark/tasks.yaml
-- benchmark/run_benchmark.py
-- pyproject.toml
-- README.md
-
-功能要求：
-1. 提供 CLI 命令：
-   codeflow run --repo <repo> --task <task> --checks "pytest -q" --max-repair-rounds 3 --no-commit
-
-2. Git Guard：
-   - 检查目标 repo 是 Git 仓库
-   - 检查工作区干净
-   - 创建 ai/{task_slug}-{timestamp} 分支
-   - 支持 git diff
-   - 支持 commit
-   - 支持 rollback
-
-3. Spec Builder：
-   - 把 task 转成结构化 Spec
-   - 包含 goal、acceptance_criteria、constraints
-
-4. Project Rules：
-   - 读取目标 repo 下 .codeflow/project_rules.md
-   - 如果不存在，使用默认规则
-
-5. Prompt Builder：
-   - 生成传给 mini-swe-agent 的 initial prompt
-   - 生成 repair prompt
-   - prompt 中必须包含 task、spec、project rules、required checks
-
-6. mini_runner：
-   - 使用 subprocess 调用 mini-swe-agent CLI
-   - 在目标 repo cwd 下运行
-   - 保存 stdout/stderr 到日志文件
-   - 如果当前 mini CLI 参数和方案不一致，请根据本地 mini --help 调整调用方式
-
-7. Test Gate：
-   - 运行用户传入的 checks
-   - 默认 pytest -q
-   - 保存 stdout/stderr
-   - 返回结构化 CheckResult
-
-8. Repair Loop：
-   - 初次调用 mini-swe-agent 后运行 checks
-   - 如果失败，将失败日志构造成 repair prompt，再调用 mini-swe-agent
-   - 最多 max_repair_rounds 轮
-   - 成功则停止
-   - 失败则生成失败报告，不允许 commit
-
-9. Diff Reviewer：
-   - 读取 git diff
-   - 生成 Markdown Review Report
-   - 包含 task、branch、validation result、risk level、risk notes、diff size、recommendation
-   - 风险评分先用规则实现：auth、permission、migration、.env、secret、password、token、delete、drop 为 high；api、schema、model、database、config 为 medium；否则 low
-
-10. Human Approval：
-   - checks 通过后，询问 commit / rollback / keep
-   - commit 前必须保证 checks 全部通过
-   - rollback 执行 git restore .
-   - keep 保留当前分支和修改
-
-11. 示例项目：
-   - 在 examples/todo_api 中创建一个最小 Python 项目
-   - 包含 app/todo.py 和 tests/test_todo.py
-   - pytest 能通过
-
-12. Benchmark：
-   - benchmark/tasks.yaml 包含至少 3 个 todo_api 任务
-   - benchmark/run_benchmark.py 能逐个调用 CodeFlow
-   - 输出 benchmark/results.json
-
-13. README：
-   - 写清楚安装方式、使用方式、项目规则、功能列表
-
-验收命令：
-- pip install -e .
-- codeflow --help
-- cd examples/todo_api && git init && git add . && git commit -m init
-- cd ../..
-- codeflow run --repo ./examples/todo_api --task "给 Todo 增加 priority 字段，默认值为 medium，并补充测试" --checks "pytest -q" --no-commit
-
-注意：
-- 不要实现复杂 Web 前端
-- 不要重写 mini-swe-agent
-- 不要引入 LangGraph
-- 不要引入数据库
-- 优先保证 CLI 闭环跑通
+用户选择 commit
+  ↓
+重新运行 required_checks
+  ↓
+重新运行关键 sensors
+  ↓
+通过才 commit
 ```
 
+防止中间文件被改。
+
+## 7.2 Commit Policy
+
+根据 sensor report 决策：
+
+```text
+checks failed → block commit
+forbidden path modified → block or require explicit override
+test deletion → block commit
+high risk → require human confirmation
+medium risk → allow commit after confirmation
+low risk → allow commit
+```
+
+## 7.3 CLI 增加 override
+
+```bash
+codeflow run --allow-high-risk-commit
+```
+
+默认不建议开。
+
+## 7.4 Approval 输出
+
+人审界面显示：
+
+```text
+Task
+Branch
+Checks
+Risk Level
+Blocking Sensors
+Warnings
+Options:
+- commit
+- rollback
+- keep
+- show-diff
+- show-report
+```
+
+## 验收标准
+
+```text
+commit 前会重新跑 checks
+高风险有明确提示
+失败 checks 不能 commit
+删除测试不能 commit
+```
+
+---
+
+# 8. Phase 6：Observability / Audit Trail
+
+## 目标
+
+让每次运行都可追溯、可复盘、可评测。
+
+你当前日志和 trajectory 放在目标仓库 `.git/codeflow/` 下，这个设计很好，因为不会污染工作区 diff。 下一步把它规范化。
+
+## 8.1 Run 目录结构
+
+```text
+.git/codeflow/
+└── runs/
+    └── 20260428-153012-add-priority/
+        ├── state.json
+        ├── policy.json
+        ├── spec.json
+        ├── initial_prompt.md
+        ├── mini_run_0.log
+        ├── mini_run_0.trajectory.json
+        ├── checks_round_0.json
+        ├── sensor_report_round_0.json
+        ├── repair_prompt_1.md
+        ├── mini_run_1.log
+        ├── checks_round_1.json
+        ├── sensor_report_round_1.json
+        ├── diff.patch
+        ├── risk_report.json
+        └── review_report.md
+```
+
+## 8.2 新命令
+
+### 查看最近运行
+
+```bash
+codeflow inspect --repo ./examples/todo_api
+```
+
+输出：
+
+```text
+Latest run:
+- run_id
+- task
+- branch
+- status
+- checks
+- risk level
+- report path
+```
+
+### 查看报告
+
+```bash
+codeflow report --repo ./examples/todo_api --latest
+```
+
+### 导出运行包
+
+```bash
+codeflow export --repo ./examples/todo_api --latest --out ./artifacts/run.zip
+```
+
+## 验收标准
+
+```text
+每次运行有独立 run_id
+所有 prompt / checks / sensors / diff / report 可追溯
+inspect/report 命令可用
+```
+
+---
+
+# 9. Phase 7：Harness Benchmark
+
+## 目标
+
+Benchmark 从“CodeFlow 是否能跑”升级为“不同 harness 配置带来的可靠性差异”。
+
+这点非常重要。Harness Engineering 的重点不是模型变聪明，而是在同一个模型、同一个 executor 下，通过规则、反馈和门禁提高可靠性。
+
+## 9.1 对比组
+
+至少做 4 组：
+
+```text
+A. Raw mini-swe-agent
+   直接调用 mini，不加 CodeFlow
+
+B. mini + checks only
+   执行后只跑 pytest/ruff，不 repair，不 risk review
+
+C. CodeFlow Harness basic
+   policy + checks + repair loop
+
+D. CodeFlow Harness full
+   policy + checks + repair + sensors + governance + risk review
+```
+
+## 9.2 数据集
+
+当前 benchmark 只有 3 个 todo_api 任务。 需要扩展到 20～30 个任务。
+
+新增 example：
+
+```text
+examples/todo_api
+examples/file_utils
+examples/student_manager
+```
+
+任务类型：
+
+```text
+feature：8 个
+bugfix：8 个
+test_only：4 个
+refactor：4 个
+quality：4 个
+```
+
+## 9.3 指标
+
+```text
+Task Success Rate
+Checks Pass Rate
+Repair Success Rate
+Average Repair Rounds
+Unsafe Diff Rate
+Forbidden Path Violation Rate
+Test Deletion Rate
+Missing Test Warning Rate
+No-change False Success Rate
+Average Runtime
+Human Review Required Rate
+```
+
+## 9.4 输出报告
+
+```text
+benchmark/results.json
+benchmark/report.md
+benchmark/report.csv
+```
+
+报告表格：
+
+```text
+Method                 Tasks  Pass  Unsafe  Avg Repair  No-change  Test Deleted
+Raw mini               30     18    5       -           3          1
+Checks only            30     19    5       -           2          1
+Harness basic          30     23    3       1.1         1          0
+Harness full           30     24    0       1.3         0          0
+```
+
+## 验收标准
+
+```text
+benchmark 能一键运行
+能对比 raw mini 和 CodeFlow Harness
+report.md 能解释 harness 带来的收益
+```
+
+---
+
+# 10. Phase 8：LLM Guidance 与 LLM Review
+
+## 目标
+
+在规则稳定基础上，加入 LLM 作为推理型 guidance 和推理型 sensor。
+
+注意：不要让 LLM 替代规则。规则是底线，LLM 是增强。
+
+## 10.1 LLM Spec Builder
+
+CLI：
+
+```bash
+codeflow run --spec-mode rule
+codeflow run --spec-mode llm
+codeflow run --spec-mode hybrid
+```
+
+推荐默认：
+
+```text
+hybrid 或 rule
+```
+
+LLM 输出：
+
+```json
+{
+  "task_type": "feature",
+  "goal": "...",
+  "acceptance_criteria": ["..."],
+  "constraints": ["..."],
+  "expected_files": ["..."],
+  "test_suggestions": ["..."],
+  "risk_hints": ["..."]
+}
+```
+
+要求：
+
+```text
+JSON parse 失败 → fallback 到 rule spec
+LLM spec 不能删除默认 constraints
+```
+
+## 10.2 LLM Review Sensor
+
+CLI：
+
+```bash
+codeflow run --review-mode rule
+codeflow run --review-mode llm
+codeflow run --review-mode hybrid
+```
+
+推荐默认：
+
+```text
+hybrid
+```
+
+LLM Review 输入：
+
+```text
+task
+spec
+policy
+git diff
+checks
+sensor report
+```
+
+输出：
+
+```json
+{
+  "summary": "...",
+  "changed_behavior": ["..."],
+  "potential_breakages": ["..."],
+  "test_coverage_gaps": ["..."],
+  "manual_review_focus": ["..."],
+  "risk_level": "medium",
+  "recommendation": "review_required"
+}
+```
+
+强规则：
+
+```text
+LLM 不允许降低 rule sensor 检出的 high risk
+LLM parse 失败 fallback rule report
+```
+
+## 验收标准
+
+```text
+LLM spec 可选
+LLM review 可选
+hybrid 模式稳定 fallback
+高风险规则不能被 LLM 洗白
+```
+
+---
+
+# 11. Phase 9：安全增强
+
+## 目标
+
+防止 coding agent 做危险修改。
+
+## 11.1 Secret / Env 保护
+
+检测：
+
+```text
+.env
+.env.*
+*.pem
+*.key
+id_rsa
+credentials.json
+```
+
+如果 diff 中新增类似：
+
+```text
+sk-
+api_key
+password=
+token=
+```
+
+直接 high risk。
+
+## 11.2 依赖安全
+
+检测新增依赖：
+
+```text
+requirements.txt
+pyproject.toml
+```
+
+提示：
+
+```text
+新增依赖需要人工确认
+```
+
+## 11.3 大 diff 限制
+
+如果：
+
+```text
+diff lines > max_diff_lines
+changed files > max_changed_files
+```
+
+标记 high risk。
+
+## 11.4 路径越界保护
+
+你当前 rollback 已经做了未跟踪文件删除的路径边界检查，这个很好。 后续可以把路径边界保护也纳入 `Governance` 文档。
+
+## 验收标准
+
+```text
+敏感文件修改被阻止
+疑似 secret 新增被提示
+大规模 diff 被标 high
+```
+
+---
+
+# 12. Phase 10：CLI 体验增强
+
+## 目标
+
+让项目更容易演示。
+
+## 12.1 新增命令
+
+```bash
+codeflow inspect --repo <repo>
+codeflow report --repo <repo> --latest
+codeflow policy --repo <repo>
+codeflow benchmark --config benchmark/tasks.yaml
+```
+
+## 12.2 Rich 输出分阶段
+
+```text
+[1/9] Git Guard
+[2/9] Load Harness Policy
+[3/9] Build Spec
+[4/9] Run mini-swe-agent
+[5/9] Run Checks
+[6/9] Run Sensors
+[7/9] Repair Loop
+[8/9] Risk Review
+[9/9] Governance Decision
+```
+
+## 12.3 支持非交互
+
+```bash
+codeflow run --yes keep
+codeflow run --yes rollback
+codeflow run --yes commit
+```
+
+用于 benchmark 和自动化测试。
+
+---
+
+# 13. Phase 11：测试补充
+
+## 新增测试文件
+
+```text
+tests/test_harness_policy.py
+tests/test_harness_sensors.py
+tests/test_control_loop.py
+tests/test_governance.py
+tests/test_observability.py
+tests/test_benchmark_harness.py
+tests/test_llm_spec_builder.py
+tests/test_llm_review_sensor.py
+```
+
+## 必测用例
+
+```text
+1. codeflow.yaml 不存在时 fallback
+2. CLI checks 覆盖 yaml checks
+3. forbidden path 命中 high
+4. 删除测试被标记 high
+5. 功能变更但无测试变更 warning
+6. no-change 被标为 fail
+7. max_diff_lines 超限 high
+8. checks fail 进入 repair
+9. forbidden path 不进入盲目 repair
+10. commit 前 checks 失败拒绝
+11. LLM JSON parse 失败 fallback
+12. LLM 不能降低 high risk
+```
+
+---
+
+# 14. Phase 12：最终展示材料
+
+## README 必须包含
+
+```text
+1. 项目定位：CodeFlow Harness
+2. Harness Engineering 背景
+3. 为什么基于 mini-swe-agent v2
+4. 架构图
+5. 快速开始
+6. codeflow.yaml 示例
+7. 一次完整运行示例
+8. sensor report 示例
+9. benchmark 结果
+10. 已知限制
+```
+
+## docs 目录
+
+```text
+docs/
+├── harness_design.md
+├── workflow.md
+├── policy.md
+├── sensors.md
+├── governance.md
+├── benchmark.md
+└── limitations.md
+```
+
+## Demo 准备
+
+准备 3 个 Demo：
+
+```text
+Demo 1：正常功能新增，checks 通过，low risk
+Demo 2：第一次失败，repair 后通过
+Demo 3：修改敏感文件或删除测试，被 sensor 标 high risk
+```
+
+---
+
+# 15. 推荐执行顺序
+
+## 第一优先级：Harness 化基础
+
+```text
+1. README 改成 CodeFlow Harness
+2. 新增 docs/harness_design.md
+3. 新增 HarnessPolicy 和 codeflow.yaml
+4. policy 合并逻辑：CLI > yaml > project_rules > default
+```
+
+## 第二优先级：Sensors
+
+```text
+5. SensorResult / SensorContext
+6. ForbiddenPathSensor
+7. TestDeletionSensor
+8. MissingTestChangeSensor
+9. NoChangeSensor
+10. MaxDiffSensor
+11. DependencyChangeSensor
+```
+
+## 第三优先级：Control Loop / Governance
+
+```text
+12. repair loop 改为 sensor-driven
+13. commit 前二次 checks
+14. high risk commit policy
+15. blocking sensor report
+```
+
+## 第四优先级：Observability
+
+```text
+16. .git/codeflow/runs/{run_id}/ 标准目录
+17. 保存 prompt / checks / sensors / diff / report / state
+18. codeflow inspect / report
+```
+
+## 第五优先级：Benchmark
+
+```text
+19. 新增 file_utils / student_manager
+20. 扩展 20～30 个任务
+21. raw mini vs CodeFlow Harness 对比
+22. 生成 benchmark/report.md
+```
+
+## 第六优先级：LLM 增强
+
+```text
+23. LLM Spec Builder
+24. LLM Review Sensor
+25. hybrid 模式和 fallback
+```
+
+## 第七优先级：展示
+
+```text
+26. README 完善
+27. docs 完善
+28. Demo 三套
+29. benchmark 表格
+```
+
+---
+
+# 16. 最终验收标准
+
+项目完成后应满足：
+
+```text
+1. codeflow run 能完整执行 harness 流程
+2. mini-swe-agent 仍作为 executor，不重写 agent
+3. codeflow.yaml 可配置 harness policy
+4. Sensors 能检测 checks、敏感路径、删除测试、无测试变更、无 diff、大 diff、依赖变更
+5. Repair Loop 由 sensor report 驱动
+6. Governance 能阻止失败 checks / 高危修改直接 commit
+7. 每次运行都有完整 audit trail
+8. benchmark 能对比 raw mini 与 CodeFlow Harness
+9. README 和 docs 能讲清楚 Harness Engineering 设计
+10. 至少 20 个 benchmark 任务，有量化结果
+```
+
+---
+
+## 一句话总结
+
+你现在已经有了一个可运行的 CodeFlow wrapper；加入 Harness Engineering 后，项目核心应该升级为：
+
+> **以 mini-swe-agent v2 为 Executor，围绕它构建 Guidance、Sensors、Control Loop、Governance、Observability 和 Benchmark，让 AI Coding Agent 的执行过程可约束、可验证、可修复、可审查、可量化。**
+
+[1]: https://www.langchain.com/blog/the-anatomy-of-an-agent-harness?utm_source=chatgpt.com "The Anatomy of an Agent Harness"
+[2]: https://martinfowler.com/articles/harness-engineering.html?utm_source=chatgpt.com "Harness engineering for coding agent users"
+[3]: https://www.softwareimprovementgroup.com/blog/what-is-harness-engineering/?utm_source=chatgpt.com "What is harness engineering? - SIG"

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 from codeflow.config import DEFAULT_CHECKS, DEFAULT_MAX_REPAIR_ROUNDS, MAX_REPAIR_ROUNDS
@@ -8,12 +10,31 @@ from codeflow.config import DEFAULT_CHECKS, DEFAULT_MAX_REPAIR_ROUNDS, MAX_REPAI
 class CodeFlowConfig(BaseModel):
     repo: str
     task: str
-    checks: list[str] = Field(default_factory=lambda: DEFAULT_CHECKS.copy())
-    max_repair_rounds: int = Field(default=DEFAULT_MAX_REPAIR_ROUNDS, ge=0, le=MAX_REPAIR_ROUNDS)
+    checks: list[str] | None = None
+    max_repair_rounds: int | None = Field(default=None, ge=0, le=MAX_REPAIR_ROUNDS)
     model: str | None = None
     mini_config: str | None = None
     no_commit: bool = False
     dry_run: bool = False
+    allow_high_risk_commit: bool = False
+
+
+class HarnessPolicy(BaseModel):
+    required_checks: list[str] = Field(default_factory=lambda: DEFAULT_CHECKS.copy())
+    max_repair_rounds: int = Field(default=DEFAULT_MAX_REPAIR_ROUNDS, ge=0, le=MAX_REPAIR_ROUNDS)
+    max_diff_lines: int = 500
+    allowed_paths: list[str] = Field(default_factory=list)
+    forbidden_paths: list[str] = Field(
+        default_factory=lambda: [".env", ".env.*", "secrets/", "credentials/", "*.pem", "*.key"]
+    )
+    high_risk_paths: list[str] = Field(default_factory=list)
+    require_test_change: bool = False
+    allow_dependency_change: bool = True
+    allow_delete_tests: bool = False
+    block_commit_on_failed_checks: bool = True
+    block_commit_on_high_risk: bool = False
+    require_human_approval: bool = True
+    rerun_checks_before_commit: bool = True
 
 
 class Spec(BaseModel):
@@ -31,14 +52,40 @@ class CheckResult(BaseModel):
     stderr: str
 
 
+class SensorResult(BaseModel):
+    name: str
+    passed: bool
+    severity: Literal["info", "low", "medium", "high"]
+    message: str
+    details: dict = Field(default_factory=dict)
+
+
+class SensorContext(BaseModel):
+    repo: str
+    task: str
+    diff: str
+    changed_files: list[str]
+    policy: HarnessPolicy
+    check_results: list[CheckResult] = Field(default_factory=list)
+
+
+class HarnessSensorReport(BaseModel):
+    results: list[SensorResult] = Field(default_factory=list)
+    overall_passed: bool = True
+    max_severity: Literal["info", "low", "medium", "high"] = "info"
+    blocking_reasons: list[str] = Field(default_factory=list)
+
+
 class RunState(BaseModel):
     repo: str
     task: str
     branch: str
     spec: Spec | None = None
+    policy: HarnessPolicy | None = None
     rules: str = ""
     mini_runs: list[str] = Field(default_factory=list)
     check_results: list[CheckResult] = Field(default_factory=list)
+    sensor_report: HarnessSensorReport | None = None
     repair_round: int = 0
     diff: str = ""
     report: str = ""
