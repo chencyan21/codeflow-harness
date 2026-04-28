@@ -1,0 +1,15 @@
+tasks:
+  - repo: examples/todo_api
+    task: "给 Todo 增加 priority 字段，默认值为 medium，并补充测试"
+    checks:
+      - "pytest -q"
+
+  - repo: examples/todo_api
+    task: "给 create_todo 增加标题最大长度校验，超过 100 字符时报错，并补充测试"
+    checks:
+      - "pytest -q"
+
+  - repo: examples/todo_api
+    task: "给 Todo 增加 due_date 字段，允许为空，并补充测试"
+    checks:
+      - "pytest -q"
