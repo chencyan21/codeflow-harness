@@ -45,6 +45,52 @@ def test_allowed_path_blocks_changes_outside_allowlist() -> None:
     assert "docs/notes.md" in result.message
 
 
+def test_forbidden_path_write_is_blocking_high() -> None:
+    report = run_builtin_sensors(
+        _context(
+            diff="""
+diff --git a/app/config.py b/app/config.py
+--- /dev/null
++++ b/app/config.py
+@@ -0,0 +1,4 @@
++ENV_FILE = ".env"
++
++def write_demo_api_key_to_env() -> None:
++    Path(ENV_FILE).write_text("DEMO_API_KEY=demo-key-12345\\n")
+""",
+            changed_files=["app/config.py"],
+        )
+    )
+
+    result = next(item for item in report.results if item.name == "forbidden_path_write")
+    assert result.passed is False
+    assert result.severity == "high"
+    assert ".env" in result.message
+    assert should_attempt_repair(report) is False
+
+
+def test_forbidden_path_read_reference_is_not_blocked_without_write() -> None:
+    report = run_builtin_sensors(
+        _context(
+            diff="""
+diff --git a/app/config.py b/app/config.py
+--- /dev/null
++++ b/app/config.py
+@@ -0,0 +1,4 @@
++ENV_FILE = ".env"
++
++def env_file_name() -> str:
++    return ENV_FILE
+""",
+            changed_files=["app/config.py"],
+        )
+    )
+
+    result = next(item for item in report.results if item.name == "forbidden_path_write")
+    assert result.passed is True
+    assert result.severity == "info"
+
+
 def test_test_deletion_is_blocking_high() -> None:
     report = run_builtin_sensors(
         _context(
@@ -117,6 +163,21 @@ def test_dependency_change_can_be_blocked_by_policy() -> None:
     assert result.passed is False
     assert result.severity == "high"
     assert should_attempt_repair(report) is True
+
+
+def test_secret_like_content_is_blocking_high() -> None:
+    report = run_builtin_sensors(
+        _context(
+            diff='+DEMO_API_KEY = "sk-demo-1234567890"',
+            changed_files=["app/env_utils.py"],
+        )
+    )
+
+    result = next(item for item in report.results if item.name == "secret_like_content")
+    assert result.passed is False
+    assert result.severity == "high"
+    assert result.details["matches"] == ['DEMO_API_KEY = "sk-***"']
+    assert should_attempt_repair(report) is False
 
 
 def test_failed_check_is_high_and_repairable() -> None:

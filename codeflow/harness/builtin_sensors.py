@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import fnmatch
+import re
 from dataclasses import dataclass
 
 from codeflow.harness.sensors import build_sensor_report
@@ -15,6 +16,12 @@ DEPENDENCY_FILES = {
 }
 
 TEST_DELETE_PATTERNS = ("def test_", "assert", "pytest.raises")
+SECRET_NAME_PATTERN = re.compile(r"(api[_-]?key|secret|token|password|credential)", re.IGNORECASE)
+SECRET_VALUE_PATTERN = re.compile(r"\bsk-[A-Za-z0-9][A-Za-z0-9_-]{6,}\b")
+FORBIDDEN_PATH_WRITE_PATTERN = re.compile(
+    r"\b(write|write_text|writelines|open|append|touch|set_key|dump|dumps)\b",
+    re.IGNORECASE,
+)
 
 REPAIRABLE_SENSOR_NAMES = {
     "check_commands",
@@ -48,6 +55,35 @@ def _business_code_changed(paths: list[str]) -> bool:
         and not path.endswith("_test.py")
         for path in paths
     )
+
+
+def _added_diff_lines(diff: str) -> list[str]:
+    return [
+        line[1:]
+        for line in diff.splitlines()
+        if line.startswith("+") and not line.startswith("+++")
+    ]
+
+
+def _forbidden_path_references(line: str, patterns: list[str]) -> list[str]:
+    lower = line.lower()
+    matches = []
+    for pattern in patterns:
+        normalized = pattern.strip("/").lower()
+        if not normalized:
+            continue
+        candidates = [normalized]
+        if "*" in normalized:
+            candidates.append(normalized.replace("*", ""))
+        if pattern.endswith("/"):
+            candidates.append(f"{normalized}/")
+        if any(candidate and candidate in lower for candidate in candidates):
+            matches.append(pattern)
+    return matches
+
+
+def _redact_secret_line(line: str) -> str:
+    return SECRET_VALUE_PATTERN.sub("sk-***", line)
 
 
 @dataclass
@@ -92,6 +128,53 @@ class ForbiddenPathSensor:
             passed=True,
             severity="info",
             message="No forbidden path modifications detected.",
+        )
+
+
+@dataclass
+class ForbiddenPathWriteSensor:
+    name: str = "forbidden_path_write"
+
+    def run(self, context: SensorContext) -> SensorResult:
+        added_lines = _added_diff_lines(context.diff)
+        forbidden_references = []
+        write_references = []
+        for line in added_lines:
+            matches = _forbidden_path_references(line, context.policy.forbidden_paths)
+            if matches:
+                forbidden_references.append(
+                    {"line": _redact_secret_line(line.strip()), "patterns": matches}
+                )
+            if FORBIDDEN_PATH_WRITE_PATTERN.search(line):
+                write_references.append(_redact_secret_line(line.strip()))
+
+        if forbidden_references and write_references:
+            matched_patterns = sorted(
+                {
+                    pattern
+                    for reference in forbidden_references
+                    for pattern in reference["patterns"]
+                }
+            )
+            return SensorResult(
+                name=self.name,
+                passed=False,
+                severity="high",
+                message=(
+                    "Code added write-capable behavior targeting forbidden paths: "
+                    f"{', '.join(matched_patterns)}"
+                ),
+                details={
+                    "forbidden_references": forbidden_references[:20],
+                    "write_references": write_references[:20],
+                },
+            )
+
+        return SensorResult(
+            name=self.name,
+            passed=True,
+            severity="info",
+            message="No write-capable forbidden path behavior detected.",
         )
 
 
@@ -244,6 +327,35 @@ class DependencyChangeSensor:
 
 
 @dataclass
+class SecretLikeContentSensor:
+    name: str = "secret_like_content"
+
+    def run(self, context: SensorContext) -> SensorResult:
+        matches = []
+        for line in context.diff.splitlines():
+            if not line.startswith("+") or line.startswith("+++"):
+                continue
+            content = line[1:]
+            if SECRET_VALUE_PATTERN.search(content) and SECRET_NAME_PATTERN.search(content):
+                matches.append(_redact_secret_line(content.strip()))
+
+        if matches:
+            return SensorResult(
+                name=self.name,
+                passed=False,
+                severity="high",
+                message="Secret-like content was added to the diff.",
+                details={"matches": matches[:20]},
+            )
+        return SensorResult(
+            name=self.name,
+            passed=True,
+            severity="info",
+            message="No secret-like content detected.",
+        )
+
+
+@dataclass
 class MaxDiffSensor:
     name: str = "max_diff"
 
@@ -290,11 +402,13 @@ class NoChangeSensor:
 BUILTIN_SENSORS = [
     CheckCommandSensor(),
     ForbiddenPathSensor(),
+    ForbiddenPathWriteSensor(),
     AllowedPathSensor(),
     HighRiskPathSensor(),
     TestDeletionSensor(),
     MissingTestChangeSensor(),
     DependencyChangeSensor(),
+    SecretLikeContentSensor(),
     MaxDiffSensor(),
     NoChangeSensor(),
 ]

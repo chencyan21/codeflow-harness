@@ -92,10 +92,12 @@ mini-swe-agent v2 Executor
 Harness Sensors
   ├─ check command sensor
   ├─ forbidden path sensor
+  ├─ forbidden path write sensor
   ├─ allowed path sensor
   ├─ test deletion sensor
   ├─ missing test change sensor
   ├─ dependency change sensor
+  ├─ secret-like content sensor
   ├─ max diff sensor
   └─ no change sensor
   ↓

@@ -1,0 +1,27 @@
+harness:
+  required_checks:
+    - pytest -q
+    - ruff check .
+  max_repair_rounds: 3
+  max_diff_lines: 400
+  allowed_paths:
+    - file_utils/
+    - tests/
+  forbidden_paths:
+    - .env
+    - .env.*
+    - secrets/
+    - credentials/
+    - "*.pem"
+    - "*.key"
+  high_risk_paths:
+    - config/
+    - scripts/deploy/
+  require_test_change: true
+  allow_dependency_change: false
+  allow_delete_tests: false
+  governance:
+    block_commit_on_failed_checks: true
+    block_commit_on_high_risk: false
+    require_human_approval: true
+    rerun_checks_before_commit: true

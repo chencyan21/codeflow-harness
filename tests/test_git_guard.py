@@ -54,6 +54,16 @@ def test_git_guard_branch_diff_and_rollback(tmp_path: Path) -> None:
     assert (tmp_path / "sample.txt").read_text(encoding="utf-8") == "hello\n"
 
 
+def test_get_diff_includes_untracked_files(tmp_path: Path) -> None:
+    _init_repo(tmp_path)
+    (tmp_path / "new_file.py").write_text("print('new')\n", encoding="utf-8")
+
+    diff = get_diff(str(tmp_path))
+
+    assert "new_file.py" in diff
+    assert "+print('new')" in diff
+
+
 def test_clean_worktree_rejects_dirty_repo(tmp_path: Path) -> None:
     _init_repo(tmp_path)
     (tmp_path / "sample.txt").write_text("dirty\n", encoding="utf-8")

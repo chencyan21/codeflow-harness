@@ -44,6 +44,16 @@ def get_diff(repo: str) -> str:
     result = run_cmd(["git", "diff"], repo)
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip() or "Failed to read git diff")
+    parts = [result.stdout]
+    for path in get_untracked_files(repo):
+        parts.append(_get_untracked_file_diff(repo, path))
+    return "\n".join(part for part in parts if part)
+
+
+def _get_untracked_file_diff(repo: str, path: str) -> str:
+    result = run_cmd(["git", "diff", "--no-index", "--", "/dev/null", path], repo)
+    if result.returncode not in {0, 1}:
+        raise RuntimeError(result.stderr.strip() or f"Failed to read untracked diff for {path}")
     return result.stdout
 
 

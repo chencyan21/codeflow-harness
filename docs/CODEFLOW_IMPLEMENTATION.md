@@ -204,15 +204,17 @@ base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
 
 - `check_commands`：汇总 required checks。
 - `forbidden_path`：检测 `.env`、secret、key 等敏感路径修改，命中为 high 且 blocking。
+- `forbidden_path_write`：检测新增代码中对 `.env`、secret、key 等禁改路径的写入能力，防止通过新增 helper 间接写 forbidden path。
 - `allowed_path`：配置 `allowed_paths` 时检测越界文件修改，命中为 high 且 blocking。
 - `high_risk_path`：检测 policy 配置的高风险路径；默认命中为 medium warning，启用 `block_commit_on_high_risk` 时升级为 high 并要求 `--allow-high-risk-commit` 才能提交。
 - `test_deletion`：检测删除测试函数、断言或 `pytest.raises`，命中为 high 且 blocking。
 - `missing_test_change`：`require_test_change=true` 时，业务代码变更但未改测试会标记 medium warning。
 - `dependency_change`：检测 `pyproject.toml`、`requirements.txt`、`poetry.lock`、`uv.lock` 等依赖文件变更。
+- `secret_like_content`：检测新增 API key、token、secret-like 字符串，命中为 high 且 blocking。
 - `max_diff`：diff 行数超过 policy 限制时 high 且 blocking。
 - `no_change`：没有 diff 且没有 changed files 时 fail，防止原测试通过被误判为成功。
 
-sensor report 会进入 repair prompt 和最终 review report。当前可自动 repair 的失败包括 checks、no-change、missing-test warning 和 dependency policy；forbidden path、test deletion、大 diff 不做盲目 repair，直接进入 review-required / blocked 状态。
+sensor report 会进入 repair prompt 和最终 review report。当前可自动 repair 的失败包括 checks、no-change、missing-test warning 和 dependency policy；forbidden path、forbidden path write、secret-like content、test deletion、大 diff 不做盲目 repair，直接进入 review-required / blocked 状态。
 
 ## Diff Reviewer
 

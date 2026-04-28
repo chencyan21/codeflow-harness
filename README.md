@@ -162,11 +162,13 @@ CLI 参数 > codeflow.yaml > project_rules.md > 默认值
 
 - `check_commands`：汇总 pytest / ruff 等 required checks。
 - `forbidden_path`：阻止 `.env`、secret、key 等敏感路径变更。
+- `forbidden_path_write`：阻止新增代码绕过路径变更、间接写入 `.env` 等禁改路径。
 - `allowed_path`：配置 `allowed_paths` 时阻止越界文件修改。
 - `high_risk_path`：标记高风险路径，需要人工重点审查。
 - `test_deletion`：检测删除测试断言或测试函数。
 - `missing_test_change`：功能代码变更但没有测试变更时给出 warning。
 - `dependency_change`：检测依赖文件变更，并可按 policy 阻断。
+- `secret_like_content`：检测新增的 API key / token / secret-like 内容。
 - `max_diff`：限制过大的 diff。
 - `no_change`：防止“未修改代码但原有测试通过”被误判为成功。
 
