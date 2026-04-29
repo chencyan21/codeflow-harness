@@ -9,28 +9,62 @@ description = "Trusted execution harness for mini-swe-agent v2"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "typer>=0.12.0",
-    "rich>=13.0.0",
+    "datasets",
+    "jinja2",
+    "litellm>=1.75.5,!=1.82.7,!=1.82.8",
+    "openai!=1.100.0,!=1.100.1",
+    "platformdirs",
+    "prompt_toolkit",
     "pydantic>=2.0.0",
-    "pyyaml>=6.0.0",
-    "mini-swe-agent>=2.0.0",
     "python-dotenv>=1.0.0",
+    "pyyaml>=6.0.0",
+    "requests",
+    "rich>=13.0.0",
+    "tenacity",
+    "textual",
+    "typer>=0.12.0",
+]
+
+[project.optional-dependencies]
+contree = [
+    "contree-sdk>=0.2.0",
+]
+modal = [
+    "boto3",
+    "modal",
+]
+full = [
+    "boto3",
+    "contree-sdk>=0.2.0",
+    "modal",
+    "swe-rex>=1.4.0",
 ]
 
 [dependency-groups]
 dev = [
+    "portkey-ai",
+    "pre-commit",
     "pytest>=8.0.0",
+    "pytest-asyncio",
+    "pytest-cov",
+    "pytest-xdist",
     "ruff>=0.8.0",
+    "swe-rex",
 ]
 
 [project.scripts]
 codeflow = "codeflow.cli:app"
+mini = "minisweagent.run.mini:app"
+mini-swe-agent = "minisweagent.run.mini:app"
+mini-extra = "minisweagent.run.utilities.mini_extra:main"
+mini-e = "minisweagent.run.utilities.mini_extra:main"
 
 [tool.setuptools.packages.find]
-include = ["codeflow*"]
+where = [".", "mini-swe-agent/src"]
+include = ["codeflow*", "minisweagent*"]
 
-[tool.uv.sources]
-mini-swe-agent = { path = "mini-swe-agent", editable = true }
+[tool.setuptools.package-data]
+minisweagent = ["config/**/*"]
 
 [tool.ruff]
 line-length = 100

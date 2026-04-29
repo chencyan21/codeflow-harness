@@ -38,10 +38,9 @@ uv sync
 
 ```bash
 pip install -e .
-pip install mini-swe-agent
 ```
 
-本仓库的 `pyproject.toml` 已配置 uv 从本地 `mini-swe-agent/` 克隆安装依赖。
+`mini-swe-agent` 源码已并入本仓库，由外层 `pyproject.toml` 一起安装。
 
 ## 使用
 
