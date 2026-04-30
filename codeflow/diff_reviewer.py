@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from codeflow.harness.sensors import SEVERITY_ORDER
 from codeflow.models import CheckResult, HarnessSensorReport
 
@@ -24,19 +26,25 @@ MEDIUM_RISK_PATTERNS = [
 ]
 
 
+def _contains_risk_pattern(diff: str, pattern: str) -> bool:
+    if any(not char.isalnum() for char in pattern):
+        return pattern in diff
+    return re.search(rf"(?<![a-z0-9]){re.escape(pattern)}(?![a-z0-9])", diff) is not None
+
+
 def score_risk(diff: str) -> tuple[str, list[str]]:
     lower = diff.lower()
     risks: list[str] = []
 
     for pattern in HIGH_RISK_PATTERNS:
-        if pattern in lower:
+        if _contains_risk_pattern(lower, pattern):
             risks.append(f"High-risk keyword found in diff: {pattern}")
 
     if risks:
         return "high", risks
 
     for pattern in MEDIUM_RISK_PATTERNS:
-        if pattern in lower:
+        if _contains_risk_pattern(lower, pattern):
             risks.append(f"Medium-risk keyword found in diff: {pattern}")
 
     if risks:

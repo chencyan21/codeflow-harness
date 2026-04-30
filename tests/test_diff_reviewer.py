@@ -11,6 +11,20 @@ def test_score_risk_detects_high_risk_keywords() -> None:
     assert any("password" in risk for risk in risks)
 
 
+def test_score_risk_matches_keywords_on_token_boundaries() -> None:
+    level, risks = score_risk("+ heapq.heapify(heap)\n+ value = api_key")
+
+    assert level == "medium"
+    assert risks == ["Medium-risk keyword found in diff: api"]
+
+
+def test_score_risk_does_not_match_keyword_inside_identifier() -> None:
+    level, risks = score_risk("+ heapq.heapify(heap)\n+ heapq.heappushpop(heap, x)")
+
+    assert level == "low"
+    assert risks == ["No obvious high-risk pattern detected."]
+
+
 def test_build_review_report_mentions_validation() -> None:
     result = CheckResult(command="pytest -q", success=True, returncode=0, stdout="", stderr="")
 

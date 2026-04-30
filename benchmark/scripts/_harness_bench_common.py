@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 from pathlib import Path
@@ -36,13 +37,29 @@ def run_command(cmd: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
     return result
 
 
-def load_tasks(path: Path) -> list[TaskItem]:
+def _load_jsonl_tasks(path: Path) -> list[TaskItem]:
+    tasks = []
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        item = json.loads(line)
+        if not isinstance(item, dict):
+            raise RuntimeError(f"Task item #{line_number} is not a mapping in {path}")
+        tasks.append(item)
+    return tasks
+
+
+def _load_yaml_tasks(path: Path) -> list[TaskItem]:
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or []
     if isinstance(data, dict):
         data = data.get("tasks", [])
     if not isinstance(data, list):
         raise RuntimeError(f"Task file must contain a YAML list: {path}")
+    return data
 
+
+def load_tasks(path: Path) -> list[TaskItem]:
+    data = _load_jsonl_tasks(path) if path.suffix == ".jsonl" else _load_yaml_tasks(path)
     tasks: list[TaskItem] = []
     for index, item in enumerate(data, start=1):
         if not isinstance(item, dict):

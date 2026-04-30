@@ -1,0 +1,130 @@
+- id: quixbugs_bitcount
+  dataset: quixbugs
+  source_repo: benchmark/generated/quixbugs/bitcount
+  task: 修复该 Python 程序中的 bug，使所有测试通过。不要删除测试。
+  checks:
+  - timeout 10s pytest -q
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    program: bitcount
+    case_file: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/quixbugs/json_testcases/bitcount.json
+    case_count: 9
+- id: quixbugs_bucketsort
+  dataset: quixbugs
+  source_repo: benchmark/generated/quixbugs/bucketsort
+  task: 修复该 Python 程序中的 bug，使所有测试通过。不要删除测试。
+  checks:
+  - timeout 10s pytest -q
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    program: bucketsort
+    case_file: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/quixbugs/json_testcases/bucketsort.json
+    case_count: 7
+- id: quixbugs_find_first_in_sorted
+  dataset: quixbugs
+  source_repo: benchmark/generated/quixbugs/find_first_in_sorted
+  task: 修复该 Python 程序中的 bug，使所有测试通过。不要删除测试。
+  checks:
+  - timeout 10s pytest -q
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    program: find_first_in_sorted
+    case_file: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/quixbugs/json_testcases/find_first_in_sorted.json
+    case_count: 7
+- id: quixbugs_find_in_sorted
+  dataset: quixbugs
+  source_repo: benchmark/generated/quixbugs/find_in_sorted
+  task: 修复该 Python 程序中的 bug，使所有测试通过。不要删除测试。
+  checks:
+  - timeout 10s pytest -q
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    program: find_in_sorted
+    case_file: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/quixbugs/json_testcases/find_in_sorted.json
+    case_count: 7
+- id: quixbugs_flatten
+  dataset: quixbugs
+  source_repo: benchmark/generated/quixbugs/flatten
+  task: 修复该 Python 程序中的 bug，使所有测试通过。不要删除测试。
+  checks:
+  - timeout 10s pytest -q
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    program: flatten
+    case_file: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/quixbugs/json_testcases/flatten.json
+    case_count: 7
+- id: quixbugs_gcd
+  dataset: quixbugs
+  source_repo: benchmark/generated/quixbugs/gcd
+  task: 修复该 Python 程序中的 bug，使所有测试通过。不要删除测试。
+  checks:
+  - timeout 10s pytest -q
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    program: gcd
+    case_file: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/quixbugs/json_testcases/gcd.json
+    case_count: 6
+- id: quixbugs_get_factors
+  dataset: quixbugs
+  source_repo: benchmark/generated/quixbugs/get_factors
+  task: 修复该 Python 程序中的 bug，使所有测试通过。不要删除测试。
+  checks:
+  - timeout 10s pytest -q
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    program: get_factors
+    case_file: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/quixbugs/json_testcases/get_factors.json
+    case_count: 11
+- id: quixbugs_hanoi
+  dataset: quixbugs
+  source_repo: benchmark/generated/quixbugs/hanoi
+  task: 修复该 Python 程序中的 bug，使所有测试通过。不要删除测试。
+  checks:
+  - timeout 10s pytest -q
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    program: hanoi
+    case_file: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/quixbugs/json_testcases/hanoi.json
+    case_count: 8
+- id: quixbugs_is_valid_parenthesization
+  dataset: quixbugs
+  source_repo: benchmark/generated/quixbugs/is_valid_parenthesization
+  task: 修复该 Python 程序中的 bug，使所有测试通过。不要删除测试。
+  checks:
+  - timeout 10s pytest -q
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    program: is_valid_parenthesization
+    case_file: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/quixbugs/json_testcases/is_valid_parenthesization.json
+    case_count: 3
+- id: quixbugs_kheapsort
+  dataset: quixbugs
+  source_repo: benchmark/generated/quixbugs/kheapsort
+  task: 修复该 Python 程序中的 bug，使所有测试通过。不要删除测试。
+  checks:
+  - timeout 10s pytest -q
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    program: kheapsort
+    case_file: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/quixbugs/json_testcases/kheapsort.json
+    case_count: 4

@@ -32,12 +32,12 @@ def reset_global_stats():
     """
     with _global_stats_lock:
         # Reset at start
-        GLOBAL_MODEL_STATS._cost = 0.0  # noqa: protected-access
-        GLOBAL_MODEL_STATS._n_calls = 0  # noqa: protected-access
+        GLOBAL_MODEL_STATS._cost = 0.0  # noqa: SLF001
+        GLOBAL_MODEL_STATS._n_calls = 0  # noqa: SLF001
         yield
         # Reset at end to clean up
-        GLOBAL_MODEL_STATS._cost = 0.0  # noqa: protected-access
-        GLOBAL_MODEL_STATS._n_calls = 0  # noqa: protected-access
+        GLOBAL_MODEL_STATS._cost = 0.0  # noqa: SLF001
+        GLOBAL_MODEL_STATS._n_calls = 0  # noqa: SLF001
 
 
 def _get_container_executable() -> str | None:
@@ -92,7 +92,7 @@ def normalize_outputs(s: str) -> str:
     # Remove everything between <args> and </args>, because this contains docker container ids
     s = re.sub(r"<args>(.*?)</args>", "", s, flags=re.DOTALL)
     # Replace all lines that have root in them because they tend to appear with times
-    s = "\n".join(l for l in s.split("\n") if "root root" not in l)
+    s = "\n".join(line for line in s.split("\n") if "root root" not in line)
     return "\n".join(line.rstrip() for line in s.strip().split("\n"))
 
 

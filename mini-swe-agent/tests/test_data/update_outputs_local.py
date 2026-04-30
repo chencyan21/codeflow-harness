@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import json
-import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -21,6 +20,7 @@ def update_trajectory():
     with patch("minisweagent.run.mini.get_model") as mock_get_model:
         mock_get_model.return_value = DeterministicModel(outputs=model_responses)
         main(model_name="tardis", config_spec=DEFAULT_CONFIG_FILE, output=traj_path, task=task, yolo=True, model_class=None)
+
 
 if __name__ == "__main__":
     update_trajectory()

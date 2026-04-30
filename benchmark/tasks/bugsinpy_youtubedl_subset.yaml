@@ -1,0 +1,20 @@
+- id: bugsinpy_youtube_dl_1
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_youtubedl/bugsinpy_youtube_dl_1
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q test.test_utils.TestUtil.test_match_str
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: youtube-dl
+    bug_id: '1'
+    python_version: 3.7.0
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/youtube-dl/bugs/1
+    bug_info:
+      python_version: 3.7.0
+      buggy_commit_id: 99036a1298089068dcf80c0985bfcc3f8c24f281
+      fixed_commit_id: 1cc47c667419e0eadc0a6989256ab7b276852adf
+      test_file:
+      - test/test_utils.py

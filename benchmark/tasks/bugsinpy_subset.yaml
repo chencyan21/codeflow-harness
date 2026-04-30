@@ -1,0 +1,422 @@
+- id: bugsinpy_pysnooper_1
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_pysnooper_1
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest -q -s tests/test_chinese.py::test_chinese
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: PySnooper
+    bug_id: '1'
+    python_version: 3.8.1
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/PySnooper/bugs/1
+    bug_info:
+      python_version: 3.8.1
+      buggy_commit_id: e21a31162f4c54be693d8ca8260e42393b39abd3
+      fixed_commit_id: 56f22f8ffe1c6b2be4d2cf3ad1987fdb66113da2
+      test_file:
+      - tests/test_chinese.py
+- id: bugsinpy_pysnooper_2
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_pysnooper_2
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest -q -s tests/test_pysnooper.py::test_custom_repr_single
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: PySnooper
+    bug_id: '2'
+    python_version: 3.8.1
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/PySnooper/bugs/2
+    bug_info:
+      python_version: 3.8.1
+      buggy_commit_id: e21a31162f4c54be693d8ca8260e42393b39abd3
+      fixed_commit_id: 814abc34a098c1b98cb327105ac396f985d2413e
+      test_file:
+      - tests/test_pysnooper.py
+- id: bugsinpy_pysnooper_3
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_pysnooper_3
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest -q -s tests/test_pysnooper.py::test_file_output
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: PySnooper
+    bug_id: '3'
+    python_version: 3.8.1
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/PySnooper/bugs/3
+    bug_info:
+      python_version: 3.8.1
+      buggy_commit_id: 6e3d797be3fa0a746fb5b1b7c7fea78eb926c208
+      fixed_commit_id: 15555ed760000b049aff8fecc79d29339c1224c3
+      test_file:
+      - tests/test_pysnooper.py
+- id: bugsinpy_ansible_1
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_1
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/galaxy/test_collection.py::test_verify_collections_no_version
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '1'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/1
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 25c5388fdec9e56517a93feb5e8d485680946c25
+      fixed_commit_id: 343ffaa18b63c92e182b16c3ad84b8d81ca4df69
+      test_file:
+      - test/units/galaxy/test_collection.py
+- id: bugsinpy_ansible_10
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_10
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/modules/system/test_pamd.py::PamdServiceTestCase::test_remove_first_rule
+  - pytest test/units/modules/system/test_pamd.py::PamdServiceTestCase::test_remove_last_rule
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '10'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/10
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: e368f788f71c338cd3f049d5d6bdc643a51c0514
+      fixed_commit_id: a4b59d021368285490f7cda50c11ac4f7a8030b5
+      test_file:
+      - test/units/modules/system/test_pamd.py
+- id: bugsinpy_ansible_11
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_11
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/modules/network/ios/test_ios_banner.py::TestIosBannerModule::test_ios_banner_nochange
+  - pytest test/units/modules/network/ios/test_ios_banner.py::TestIosBannerIos12Module::test_ios_banner_nochange
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '11'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/11
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: da07b98b7a433493728ddb7ac7efbd20b8988776
+      fixed_commit_id: 52f3ce8a808f943561803bd664e695fed1841fe8
+      test_file:
+      - test/units/modules/network/ios/test_ios_banner.py
+- id: bugsinpy_ansible_12
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_12
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/plugins/lookup/test_env.py
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '12'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/12
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 05e2e1806162393d76542a75c2520c7d61c2d855
+      fixed_commit_id: 2fa8f9cfd80daf32c7d222190edf7cfc7234582a
+      test_file:
+      - test/units/plugins/lookup/test_env.py
+- id: bugsinpy_ansible_13
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_13
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/cli/test_galaxy.py::test_collection_install_with_url
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '13'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/13
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 41472ee3878be215af8b933b2b04b4a72b9165ca
+      fixed_commit_id: 694ef5660d45fcb97c9beea5b2750f6eadcf5e93
+      test_file:
+      - test/units/cli/test_galaxy.py
+- id: bugsinpy_ansible_14
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_14
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/galaxy/test_api.py::test_get_role_versions_pagination
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '14'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/14
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: a1ab093ddbd32f1002cbf6d6f184c7d0041d890d
+      fixed_commit_id: 7acae62fa849481b2a5e2e2d56961c5e1dcea96c
+      test_file:
+      - test/units/galaxy/test_api.py
+- id: bugsinpy_ansible_15
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_15
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/modules/network/eos/test_eos_eapi.py::TestEosEapiModule::test_eos_eapi_vrf
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '15'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/15
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: b1e8a6c1cbd2a668b462995487b819ef7dd8ba4b
+      fixed_commit_id: 68de182555b185737353e780882159a3d213908c
+      test_file:
+      - test/units/modules/network/eos/test_eos_eapi.py
+- id: bugsinpy_ansible_16
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_16
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/module_utils/facts/hardware/test_linux_get_cpu_info.py::test_get_cpu_info_missing_arch
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '16'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/16
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 2a9964ede8b2b77a62a005f6f5abc964b2819b0e
+      fixed_commit_id: 93d9d640380252084855885ad27873b4377898ec
+      test_file:
+      - test/units/module_utils/facts/hardware/test_linux_get_cpu_info.py
+- id: bugsinpy_ansible_17
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_17
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/module_utils/facts/test_facts.py::TestFactsLinuxHardwareGetMountFacts::test_get_mount_facts
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '17'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/17
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 9cb47832d15c61884b30d70f9d4e0f816b064b05
+      fixed_commit_id: b38cb37728df76e0529243bdce694b18ca0e1163
+      test_file:
+      - test/units/module_utils/facts/test_facts.py
+- id: bugsinpy_ansible_18
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_18
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/cli/test_galaxy.py::test_collection_default
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '18'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/18
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: bb1256ca9aa4c22225dbeef0ef23a20fa9388b2f
+      fixed_commit_id: 056aac1e3012d0e65991b73f2478b844b7cbdfc8
+      test_file:
+      - test/units/cli/test_galaxy.py
+- id: bugsinpy_ansible_2
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_2
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/utils/test_version.py::test_alpha
+  - pytest test/units/utils/test_version.py::test_numeric
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '2'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/2
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: de59b17c7f69d5cfb72479b71776cc8b97e29a6b
+      fixed_commit_id: 5b9418c06ca6d51507468124250bb58046886be6
+      test_file:
+      - test/units/utils/test_version.py
+- id: bugsinpy_ansible_3
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_3
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/module_utils/test_distribution_version.py::test_distribution_version
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '3'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/3
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 70219df9056ffb1e2766f572fbe71f7a1800c9f5
+      fixed_commit_id: 9d48884e36fb4fd9551f000b87d264383de74e75
+      test_file:
+      - test/units/module_utils/test_distribution_version.py
+- id: bugsinpy_ansible_4
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_4
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/playbook/test_collectionsearch.py::test_collection_static_warning
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '4'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/4
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: d91658ec0c8434c82c3ef98bfe9eb4e1027a43a3
+      fixed_commit_id: 18a66e291dad71128a32d662aa808213acefe0e9
+      test_file:
+      - test/units/playbook/test_collectionsearch.py
+- id: bugsinpy_ansible_5
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_5
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/module_utils/common/validation/test_check_required_arguments.py::test_check_required_arguments_missing_multiple
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '5'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/5
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 2af76f16be8cf2239daaec4c2f31c3dcb4e3469e
+      fixed_commit_id: 3c3ffc09c203d1b2262f6a319cceadd727749761
+      test_file:
+      - test/units/module_utils/common/validation/test_check_required_arguments.py
+- id: bugsinpy_ansible_6
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_6
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/galaxy/test_collection_install.py::test_build_requirement_from_path_with_manifest
+  - pytest test/units/galaxy/test_collection_install.py::test_build_requirement_from_path_no_version
+  - pytest test/units/galaxy/test_collection_install.py::test_add_collection_requirement_to_unknown_installed_version
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '6'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/6
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 90898132e456ee1993db99a1531379f1b98ee915
+      fixed_commit_id: 4881af2e7e0506ada0225fd764e874e20569d5b2
+      test_file:
+      - test/units/galaxy/test_collection_install.py
+- id: bugsinpy_ansible_7
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_7
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/modules/network/eos/test_eos_vlans.py::TestEosVlansModule::test_eos_vlan_replaced
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '7'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/7
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: cd146b836e032df785ecd9eb711c6ef23c2228b8
+      fixed_commit_id: 4ec1437212b2fb3c313e44ed5a76b105f2151622
+      test_file:
+      - test/units/modules/network/eos/test_eos_vlans.py
+- id: bugsinpy_ansible_8
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy/bugsinpy_ansible_8
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - pytest test/units/plugins/shell/test_powershell.py::test_join_path_unc
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '8'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/8
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 81378b3e744cd0d13b33d18a4f8a38aeb8a6e97a
+      fixed_commit_id: fc7980af9a42676913b4054163570ee438b82e9c
+      test_file:
+      - test/units/plugins/shell/test_powershell.py

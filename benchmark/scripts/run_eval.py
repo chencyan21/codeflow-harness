@@ -22,12 +22,24 @@ from summarize_results import build_markdown_report
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from codeflow.diff_reviewer import score_risk  # noqa: E402
-from codeflow.git_guard import get_changed_files  # noqa: E402
+from codeflow.diff_reviewer import build_review_report, score_risk  # noqa: E402
+from codeflow.git_guard import (  # noqa: E402
+    create_ai_branch,
+    ensure_clean_worktree,
+    ensure_git_repo,
+    get_changed_files,
+    get_diff,
+)
+from codeflow.harness.policy import load_harness_policy  # noqa: E402
 from codeflow.harness.sensors import SEVERITY_ORDER  # noqa: E402
+from codeflow.mini_runner import run_mini_agent  # noqa: E402
 from codeflow.models import CodeFlowConfig, HarnessSensorReport, RunState  # noqa: E402
+from codeflow.prompt_builder import build_initial_prompt, build_repair_prompt  # noqa: E402
 from codeflow.runner import run_codeflow  # noqa: E402
+from codeflow.spec_builder import build_spec  # noqa: E402
 from codeflow.test_gate import all_checks_passed  # noqa: E402
+from codeflow.test_gate import failed_checks, run_checks  # noqa: E402
+from codeflow.utils import read_project_rules  # noqa: E402
 
 UNSAFE_SENSOR_NAMES = {
     "allowed_path",
@@ -38,6 +50,8 @@ UNSAFE_SENSOR_NAMES = {
     "secret_like_content",
     "test_deletion",
 }
+
+EVAL_METHODS = ("raw_mini", "checks_only", "codeflow_basic", "codeflow_full")
 
 
 def _sensor_by_name(report: HarnessSensorReport | None) -> dict[str, dict[str, Any]]:
@@ -164,10 +178,120 @@ def _restore_mini_command(old_command: str | None) -> None:
         os.environ["CODEFLOW_MINI_COMMAND"] = old_command
 
 
+def _direct_state(
+    *,
+    task: dict[str, Any],
+    workspace: Path,
+    method: str,
+    model: str | None,
+    max_repair_rounds: int | None,
+) -> RunState:
+    repo = str(workspace.resolve())
+    ensure_git_repo(repo)
+    ensure_clean_worktree(repo)
+
+    policy = load_harness_policy(
+        repo,
+        cli_checks=task.get("checks"),
+        cli_max_repair_rounds=max_repair_rounds,
+    )
+    rules = read_project_rules(repo)
+    spec = build_spec(task["task"])
+
+    if method == "checks_only":
+        state = RunState(repo=repo, task=task["task"], branch="baseline", rules=rules, spec=spec, policy=policy)
+        state.check_results = run_checks(repo, policy.required_checks)
+        state.diff = get_diff(repo)
+        state.status = "checks_passed" if all_checks_passed(state.check_results) else "checks_failed"
+        state.report = build_review_report(
+            task=task["task"],
+            branch=state.branch,
+            diff=state.diff,
+            check_results=state.check_results,
+            sensor_report=None,
+        )
+        state.commit_action = "skipped"
+        return state
+
+    branch = create_ai_branch(repo, task["task"])
+    state = RunState(repo=repo, task=task["task"], branch=branch, rules=rules, spec=spec, policy=policy)
+
+    if method == "raw_mini":
+        prompt = task["task"]
+        max_rounds = 0
+    else:
+        prompt = build_initial_prompt(
+            task=task["task"],
+            spec=spec,
+            rules=rules,
+            checks=policy.required_checks,
+            policy=None,
+        )
+        max_rounds = policy.max_repair_rounds if method == "codeflow_basic" else 0
+
+    state.mini_runs.append(run_mini_agent(repo=repo, prompt=prompt, model=model))
+
+    for round_idx in range(max_rounds + 1):
+        state.check_results = run_checks(repo, policy.required_checks)
+        state.diff = get_diff(repo)
+        state.status = "checks_passed" if all_checks_passed(state.check_results) else "checks_failed"
+        if state.status == "checks_passed" or round_idx >= max_rounds:
+            break
+
+        repair_prompt = build_repair_prompt(
+            task=task["task"],
+            spec=spec,
+            rules=rules,
+            failed_results=failed_checks(state.check_results),
+            checks=policy.required_checks,
+            policy=None,
+            sensor_report=None,
+        )
+        state.mini_runs.append(run_mini_agent(repo=repo, prompt=repair_prompt, model=model))
+        state.repair_round = round_idx + 1
+
+    state.report = build_review_report(
+        task=task["task"],
+        branch=branch,
+        diff=state.diff,
+        check_results=state.check_results,
+        sensor_report=None,
+    )
+    state.commit_action = "skipped"
+    return state
+
+
+def _run_task(
+    *,
+    task: dict[str, Any],
+    workspace: Path,
+    method: str,
+    model: str | None,
+    max_repair_rounds: int | None,
+) -> RunState:
+    if method == "codeflow_full":
+        config = CodeFlowConfig(
+            repo=str(workspace),
+            task=task["task"],
+            checks=task.get("checks"),
+            max_repair_rounds=max_repair_rounds,
+            model=model,
+            no_commit=True,
+        )
+        return run_codeflow(config)
+    return _direct_state(
+        task=task,
+        workspace=workspace,
+        method=method,
+        model=model,
+        max_repair_rounds=max_repair_rounds,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run CodeFlow-Harness-Bench.")
     parser.add_argument("--tasks", default=str(DEFAULT_TASKS_PATH), help="Task YAML path")
-    parser.add_argument("--method", default="codeflow_full", choices=["codeflow_full"])
+    parser.add_argument("--method", default="codeflow_full", choices=EVAL_METHODS)
     parser.add_argument("--task-id", action="append", help="Run only this task id")
     parser.add_argument("--limit", type=int, help="Run only the first N selected tasks")
     parser.add_argument("--model", help="Model name passed to mini-swe-agent")
@@ -209,14 +333,13 @@ def main() -> None:
                     workspaces_dir=workspaces_dir,
                     clean=not args.reuse_workspaces,
                 )
-                config = CodeFlowConfig(
-                    repo=str(workspace),
-                    task=task["task"],
-                    checks=task.get("checks"),
+                state = _run_task(
+                    task=task,
+                    workspace=workspace,
+                    method=args.method,
+                    model=args.model,
                     max_repair_rounds=args.max_repair_rounds,
-                    no_commit=True,
                 )
-                state = run_codeflow(config)
                 runtime = time.perf_counter() - start
                 record = _state_record(
                     task,
@@ -243,8 +366,9 @@ def main() -> None:
     finally:
         _restore_mini_command(old_mini_command)
 
-    results_path = out_dir / "harness_bench_results.json"
-    report_path = out_dir / "harness_bench_report.md"
+    result_prefix = tasks_path.stem
+    results_path = out_dir / f"{result_prefix}_results.json"
+    report_path = out_dir / f"{result_prefix}_report.md"
     results_path.write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
     report_path.write_text(build_markdown_report(results), encoding="utf-8")
     print(f"wrote {results_path}")
