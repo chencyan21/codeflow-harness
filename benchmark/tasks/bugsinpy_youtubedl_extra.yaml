@@ -1,0 +1,40 @@
+- id: bugsinpy_youtube_dl_10
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_youtubedl_extra/bugsinpy_youtube_dl_10
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q test.test_utils.TestUtil.test_js_to_json_realworld
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: youtube-dl
+    bug_id: '10'
+    python_version: 3.7.0
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/youtube-dl/bugs/10
+    bug_info:
+      python_version: 3.7.0
+      buggy_commit_id: 85d586617750d38d742a24f141b099f6b898d269
+      fixed_commit_id: d305dd73a3d6927f0a2c63d08662a183fa173833
+      test_file:
+      - test/test_utils.py
+- id: bugsinpy_youtube_dl_11
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_youtubedl_extra/bugsinpy_youtube_dl_11
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q test.test_utils.TestUtil.test_str_to_int
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: youtube-dl
+    bug_id: '11'
+    python_version: 3.7.4
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/youtube-dl/bugs/11
+    bug_info:
+      python_version: 3.7.4
+      buggy_commit_id: b568561eba6f4aceb87419e21aba11567c5de7da
+      fixed_commit_id: 348c6bf1c1a00eec323d6e21ff7b9b12699afe04
+      test_file:
+      - test/test_utils.py

@@ -12,6 +12,7 @@ from _harness_bench_common import (
     DEFAULT_TASKS_PATH,
     DEFAULT_WORKSPACES_DIR,
     ROOT,
+    benchmark_env,
     load_tasks,
     prepare_workspace,
     project_path,
@@ -312,6 +313,7 @@ def main() -> None:
         action="store_true",
         help="Reuse existing workspaces instead of recreating them",
     )
+    parser.add_argument("--proxy", help="Proxy URL for setup commands, for example http://127.0.0.1:10087")
     args = parser.parse_args()
 
     tasks_path = project_path(args.tasks)
@@ -321,6 +323,7 @@ def main() -> None:
 
     tasks = select_tasks(load_tasks(tasks_path), task_ids=args.task_id, limit=args.limit)
     old_mini_command = _set_mini_command(args.fake_mini, args.mini_command)
+    env = benchmark_env(proxy=args.proxy)
     results: list[dict[str, Any]] = []
 
     try:
@@ -332,6 +335,7 @@ def main() -> None:
                     task,
                     workspaces_dir=workspaces_dir,
                     clean=not args.reuse_workspaces,
+                    env=env,
                 )
                 state = _run_task(
                     task=task,

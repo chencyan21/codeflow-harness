@@ -8,7 +8,7 @@ from typing import Any
 
 import yaml
 
-from _harness_bench_common import ROOT, project_path, run_command
+from _harness_bench_common import ROOT, project_path, run_command, write_benchmark_git_exclude
 
 
 DEFAULT_SOURCE = ROOT / "benchmark" / "datasets" / "quixbugs"
@@ -172,6 +172,7 @@ def _init_git(target: Path) -> None:
         ],
         target,
     )
+    write_benchmark_git_exclude(target)
 
 
 def _task_source_repo(path: Path) -> str:

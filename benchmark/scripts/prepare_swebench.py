@@ -10,22 +10,34 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from _harness_bench_common import ROOT, project_path, run_command
+from _harness_bench_common import (
+    ROOT,
+    benchmark_env,
+    mark_setup_done,
+    project_path,
+    run_command,
+    run_shell_command,
+    write_benchmark_git_exclude,
+)
 
 
 DEFAULT_LITE_DATASET = "princeton-nlp/SWE-bench_Lite"
 DEFAULT_VERIFIED_DATASET = "SWE-bench/SWE-bench_Verified"
 DEFAULT_OUT = ROOT / "benchmark" / "generated" / "swebench_lite"
 DEFAULT_TASKS_OUT = ROOT / "benchmark" / "tasks" / "swebench_lite_subset.jsonl"
-PROXY_ENV_KEYS = ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy")
+ASTROPY_BUILD_EXT_COMMAND = (
+    "uv run --no-project --python 3.11 "
+    '--with "setuptools<70" --with setuptools-scm --with extension-helpers '
+    '--with cython --with "numpy<2" --with jinja2 '
+    "python setup.py build_ext --inplace"
+)
+SETUP_RECIPES = {
+    "astropy/astropy": [ASTROPY_BUILD_EXT_COMMAND],
+}
 
 
 def configure_proxy(proxy: str | None) -> dict[str, str]:
-    env = os.environ.copy()
-    if proxy:
-        for key in PROXY_ENV_KEYS:
-            env[key] = proxy
-    return env
+    return benchmark_env(proxy=proxy)
 
 
 def _safe_id(value: str) -> str:
@@ -69,20 +81,45 @@ def _checks_for_fail_to_pass(fail_to_pass: list[str], *, check_prefix: str | Non
     return [f"{check_prefix} {command}" if check_prefix else command]
 
 
+def setup_commands_for_record(
+    record: dict[str, Any],
+    *,
+    setup_recipe: str,
+    extra_setup_commands: list[str] | None = None,
+) -> list[str]:
+    commands: list[str] = []
+    repo = str(record.get("repo", ""))
+    if setup_recipe == "auto":
+        commands.extend(SETUP_RECIPES.get(repo, []))
+    elif setup_recipe == "astropy":
+        commands.extend(SETUP_RECIPES["astropy/astropy"])
+    elif setup_recipe != "none":
+        raise RuntimeError(f"Unknown setup recipe: {setup_recipe}")
+    commands.extend(extra_setup_commands or [])
+    return commands
+
+
 def task_from_record(
     record: dict[str, Any],
     *,
     dataset: str,
     workspace_root: Path,
     check_prefix: str | None = None,
+    setup_recipe: str = "auto",
+    extra_setup_commands: list[str] | None = None,
 ) -> dict[str, Any]:
     instance_id = str(record["instance_id"])
     task_id = f"{_dataset_label(dataset)}_{_safe_id(instance_id)}"
     fail_to_pass = _jsonish_list(record.get("FAIL_TO_PASS") or record.get("fail_to_pass"))
     pass_to_pass = _jsonish_list(record.get("PASS_TO_PASS") or record.get("pass_to_pass"))
     workspace = workspace_root / task_id
+    setup_commands = setup_commands_for_record(
+        record,
+        setup_recipe=setup_recipe,
+        extra_setup_commands=extra_setup_commands,
+    )
 
-    return {
+    task = {
         "id": task_id,
         "dataset": _dataset_label(dataset),
         "source_repo": _task_source_repo(workspace),
@@ -96,8 +133,12 @@ def task_from_record(
             "base_commit": record.get("base_commit"),
             "fail_to_pass": fail_to_pass,
             "pass_to_pass": pass_to_pass,
+            "setup_recipe": setup_recipe,
         },
     }
+    if setup_commands:
+        task["setup_commands"] = setup_commands
+    return task
 
 
 def _task_source_repo(path: Path) -> str:
@@ -122,7 +163,14 @@ def _load_hf_records(dataset: str, split: str, limit: int | None) -> list[dict[s
     return records
 
 
-def _clone_workspace(record: dict[str, Any], target: Path, *, env: dict[str, str], apply_test_patch: bool) -> None:
+def _clone_workspace(
+    record: dict[str, Any],
+    target: Path,
+    *,
+    env: dict[str, str],
+    apply_test_patch: bool,
+    setup_commands: list[str],
+) -> None:
     repo = str(record["repo"])
     base_commit = str(record["base_commit"])
     clone_url = f"https://github.com/{repo}.git"
@@ -148,6 +196,11 @@ def _clone_workspace(record: dict[str, Any], target: Path, *, env: dict[str, str
         finally:
             patch_path.unlink(missing_ok=True)
 
+    for command in setup_commands:
+        print(f"setup {target.name}: {command}")
+        run_shell_command(command, target, env=env)
+    mark_setup_done(target, setup_commands)
+
     shutil.rmtree(target / ".git", ignore_errors=True)
     run_command(["git", "init"], target)
     run_command(["git", "add", "."], target)
@@ -164,6 +217,7 @@ def _clone_workspace(record: dict[str, Any], target: Path, *, env: dict[str, str
         ],
         target,
     )
+    write_benchmark_git_exclude(target)
 
 
 def write_jsonl(path: Path, tasks: list[dict[str, Any]]) -> None:
@@ -186,6 +240,8 @@ def prepare_swebench(
     apply_test_patch: bool,
     clean: bool,
     check_prefix: str | None = None,
+    setup_recipe: str = "auto",
+    extra_setup_commands: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     env = configure_proxy(proxy)
     old_env = os.environ.copy()
@@ -197,7 +253,14 @@ def prepare_swebench(
         os.environ.update(old_env)
 
     tasks = [
-        task_from_record(record, dataset=dataset, workspace_root=out, check_prefix=check_prefix)
+        task_from_record(
+            record,
+            dataset=dataset,
+            workspace_root=out,
+            check_prefix=check_prefix,
+            setup_recipe=setup_recipe,
+            extra_setup_commands=extra_setup_commands,
+        )
         for record in records
     ]
     if prepare_workspaces:
@@ -207,7 +270,13 @@ def prepare_swebench(
                 print(f"reuse {task['id']}: {target}")
                 continue
             print(f"prepare {task['id']}: {record['repo']}@{record['base_commit']}")
-            _clone_workspace(record, target, env=env, apply_test_patch=apply_test_patch)
+            _clone_workspace(
+                record,
+                target,
+                env=env,
+                apply_test_patch=apply_test_patch,
+                setup_commands=[str(command) for command in task.get("setup_commands", [])],
+            )
 
     write_jsonl(tasks_out, tasks)
     return tasks
@@ -236,6 +305,18 @@ def main() -> None:
         "--check-prefix",
         help="Prefix every generated validation command, for example a uv run environment wrapper",
     )
+    parser.add_argument(
+        "--setup-recipe",
+        default="auto",
+        choices=("auto", "none", "astropy"),
+        help="Workspace setup recipe to run before the benchmark baseline commit",
+    )
+    parser.add_argument(
+        "--setup-command",
+        action="append",
+        default=[],
+        help="Extra shell command to run before the benchmark baseline commit",
+    )
     parser.add_argument("--clean", action="store_true", help="Recreate existing workspaces")
     args = parser.parse_args()
 
@@ -251,6 +332,8 @@ def main() -> None:
         apply_test_patch=not args.no_apply_test_patch,
         clean=args.clean,
         check_prefix=args.check_prefix,
+        setup_recipe=args.setup_recipe,
+        extra_setup_commands=args.setup_command,
     )
     print(f"wrote {len(tasks)} tasks to {project_path(args.tasks_out)}")
 

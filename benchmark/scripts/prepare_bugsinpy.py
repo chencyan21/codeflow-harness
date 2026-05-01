@@ -13,7 +13,13 @@ from typing import Any
 
 import yaml
 
-from _harness_bench_common import ROOT, project_path, run_command
+from _harness_bench_common import (
+    ROOT,
+    benchmark_env,
+    project_path,
+    run_command,
+    write_benchmark_git_exclude,
+)
 
 
 DEFAULT_SOURCE = ROOT / "benchmark" / "datasets" / "bugsinpy"
@@ -230,6 +236,7 @@ def _checkout_candidate(
     source: Path,
     target: Path,
     command_override: str | None,
+    env: dict[str, str],
 ) -> None:
     if target.exists():
         shutil.rmtree(target)
@@ -238,7 +245,7 @@ def _checkout_candidate(
     with tempfile.TemporaryDirectory(prefix=f"{candidate.task_id}-") as temp:
         temp_dir = Path(temp)
         command = _checkout_command(source, command_override)
-        env = os.environ.copy()
+        env = dict(env)
         framework_bin = source / "framework" / "bin"
         if framework_bin.exists():
             env["PATH"] = f"{framework_bin}{os.pathsep}{env.get('PATH', '')}"
@@ -276,6 +283,7 @@ def _checkout_candidate(
         ],
         target,
     )
+    write_benchmark_git_exclude(target)
 
 
 def _locate_checkout(temp_dir: Path, project: str) -> Path:
@@ -330,6 +338,7 @@ def prepare_bugsinpy(
     uv_python_checks: bool = False,
     python_version_override: str | None = None,
     uv_with: list[str] | None = None,
+    proxy: str | None = None,
 ) -> list[dict[str, Any]]:
     candidates = _select_candidates(discover_candidates(source), project=project, bug_id=bug_id, limit=limit)
     tasks = [
@@ -344,13 +353,20 @@ def prepare_bugsinpy(
     ]
 
     if prepare_workspaces:
+        env = benchmark_env(proxy=proxy)
         for candidate, task in zip(candidates, tasks):
             target = project_path(task["source_repo"])
             if target.exists() and not clean:
                 print(f"reuse {task['id']}: {target}")
                 continue
             print(f"prepare {task['id']}: {candidate.project} bug {candidate.bug_id}")
-            _checkout_candidate(candidate, source=source, target=target, command_override=checkout_command)
+            _checkout_candidate(
+                candidate,
+                source=source,
+                target=target,
+                command_override=checkout_command,
+                env=env,
+            )
 
     write_tasks(tasks_out, tasks)
     return tasks
@@ -405,6 +421,7 @@ def main() -> None:
         help="Use this Python version for --uv-python-checks, for example 3.8",
     )
     parser.add_argument("--uv-with", action="append", default=[], help="Extra package for uv-wrapped checks")
+    parser.add_argument("--proxy", help="Proxy URL for checkout, for example http://127.0.0.1:10087")
     parser.add_argument("--clean", action="store_true", help="Recreate existing generated workspaces")
     args = parser.parse_args()
 
@@ -437,6 +454,7 @@ def main() -> None:
         uv_python_checks=args.uv_python_checks,
         python_version_override=args.python_version_override,
         uv_with=args.uv_with,
+        proxy=args.proxy,
     )
     print(f"wrote {len(tasks)} tasks to {project_path(args.tasks_out)}")
 

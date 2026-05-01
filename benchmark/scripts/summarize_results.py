@@ -20,6 +20,9 @@ def _yes(value: bool) -> str:
 def build_markdown_report(results: list[dict[str, Any]]) -> str:
     total = len(results)
     status_counts = Counter(str(item.get("status", "unknown")) for item in results)
+    dataset_method_counts = Counter(
+        (str(item.get("dataset", "unknown")), str(item.get("method", "unknown"))) for item in results
+    )
     checks_passed = sum(1 for item in results if item.get("checks_passed"))
     unsafe = sum(1 for item in results if item.get("unsafe_diff"))
     no_change = sum(1 for item in results if item.get("no_change"))
@@ -58,16 +61,44 @@ def build_markdown_report(results: list[dict[str, Any]]) -> str:
     lines.extend(
         [
             "",
+            "## Dataset / Method",
+            "",
+            "| dataset | method | tasks | checks_passed | unsafe | avg_repair |",
+            "| --- | --- | ---: | ---: | ---: | ---: |",
+        ]
+    )
+    for dataset, method in sorted(dataset_method_counts):
+        group = [
+            item
+            for item in results
+            if str(item.get("dataset", "unknown")) == dataset
+            and str(item.get("method", "unknown")) == method
+        ]
+        group_total = len(group)
+        group_passed = sum(1 for item in group if item.get("checks_passed"))
+        group_unsafe = sum(1 for item in group if item.get("unsafe_diff"))
+        group_repairs = [int(item.get("repair_rounds", 0)) for item in group]
+        group_avg_repair = sum(group_repairs) / group_total if group_total else 0.0
+        lines.append(
+            f"| {dataset} | {method} | {group_total} | {group_passed} | "
+            f"{group_unsafe} | {group_avg_repair:.2f} |"
+        )
+
+    lines.extend(
+        [
+            "",
             "## 任务明细",
             "",
-            "| id | status | checks | risk | review | repair | unsafe | no_change | test_deleted | forbidden | forbidden_write | secret |",
-            "| --- | --- | --- | --- | --- | ---: | --- | --- | --- | --- | --- | --- |",
+            "| dataset | method | id | status | checks | risk | review | repair | unsafe | no_change | test_deleted | forbidden | forbidden_write | secret |",
+            "| --- | --- | --- | --- | --- | --- | --- | ---: | --- | --- | --- | --- | --- | --- |",
         ]
     )
     for item in results:
         lines.append(
-            "| {id} | {status} | {checks} | {risk} | {review} | {repair} | {unsafe} | "
+            "| {dataset} | {method} | {id} | {status} | {checks} | {risk} | {review} | {repair} | {unsafe} | "
             "{no_change} | {test_deleted} | {forbidden} | {forbidden_write} | {secret} |".format(
+                dataset=item.get("dataset", ""),
+                method=item.get("method", ""),
                 id=item.get("id", ""),
                 status=item.get("status", ""),
                 checks=_yes(bool(item.get("checks_passed"))),
@@ -86,16 +117,31 @@ def build_markdown_report(results: list[dict[str, Any]]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def load_result_files(paths: list[Path]) -> list[dict[str, Any]]:
+    results: list[dict[str, Any]] = []
+    for path in paths:
+        loaded = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(loaded, list):
+            raise RuntimeError(f"Result file must contain a JSON list: {path}")
+        for item in loaded:
+            if not isinstance(item, dict):
+                raise RuntimeError(f"Result item must be a JSON object in {path}")
+            enriched = dict(item)
+            enriched.setdefault("source_result_file", str(path))
+            results.append(enriched)
+    return results
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Summarize CodeFlow-Harness-Bench results.")
-    parser.add_argument("results_json", help="Path to harness_bench_results.json")
+    parser.add_argument("results_json", nargs="+", help="Path(s) to *_results.json")
     parser.add_argument("--out", help="Markdown output path")
     args = parser.parse_args()
 
-    results_path = Path(args.results_json)
-    results = json.loads(results_path.read_text(encoding="utf-8"))
+    result_paths = [Path(path) for path in args.results_json]
+    results = load_result_files(result_paths)
     report = build_markdown_report(results)
-    out_path = Path(args.out) if args.out else results_path.with_suffix(".md")
+    out_path = Path(args.out) if args.out else result_paths[0].with_suffix(".md")
     out_path.write_text(report, encoding="utf-8")
     print(f"wrote {out_path}")
 

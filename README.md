@@ -177,4 +177,6 @@ CLI 参数 > codeflow.yaml > project_rules.md > 默认值
 python benchmark/run_benchmark.py
 ```
 
-运行结果会写入 `benchmark/results.json`。每个任务会复制一份临时示例仓库，避免多个任务之间的 Git 状态互相污染。
+这是兼容入口，内部调用 `benchmark/scripts/run_eval.py` 和 `benchmark/tasks/harness_bench.yaml`。
+运行结果会写入 `benchmark/results/codeflow_full/`。每个任务会复制一份独立 workspace，
+避免多个任务之间的 Git 状态互相污染。

@@ -12,9 +12,11 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 from prepare_quixbugs import prepare_quixbugs  # noqa: E402
-from prepare_swebench import task_from_record, write_jsonl  # noqa: E402
+from prepare_swebench import ASTROPY_BUILD_EXT_COMMAND, task_from_record, write_jsonl  # noqa: E402
 from prepare_bugsinpy import discover_candidates, prepare_bugsinpy  # noqa: E402
 from _harness_bench_common import load_tasks, prepare_workspace  # noqa: E402
+from summarize_results import build_markdown_report, load_result_files  # noqa: E402
+from codeflow.git_guard import get_changed_files  # noqa: E402
 import run_eval  # noqa: E402
 
 
@@ -100,6 +102,26 @@ def test_swebench_task_can_prefix_checks(tmp_path: Path) -> None:
         "uv run --no-project --python 3.11 --with pytest "
         "python -m pytest tests/test_regression.py::test_case -q"
     ]
+
+
+def test_swebench_astropy_task_includes_setup_recipe(tmp_path: Path) -> None:
+    record = {
+        "instance_id": "astropy__astropy-12907",
+        "repo": "astropy/astropy",
+        "base_commit": "abc123",
+        "problem_statement": "Fix the regression.",
+        "FAIL_TO_PASS": [],
+        "PASS_TO_PASS": [],
+    }
+
+    task = task_from_record(
+        record,
+        dataset="princeton-nlp/SWE-bench_Lite",
+        workspace_root=tmp_path / "workspaces",
+    )
+
+    assert task["setup_commands"] == [ASTROPY_BUILD_EXT_COMMAND]
+    assert task["metadata"]["setup_recipe"] == "auto"
 
 
 def test_prepare_bugsinpy_generates_task_yaml(tmp_path: Path) -> None:
@@ -202,3 +224,45 @@ def test_checks_only_does_not_call_mini_agent(tmp_path: Path, monkeypatch) -> No
     assert state.mini_runs == []
     assert state.branch == "baseline"
     assert state.diff == ""
+
+
+def test_prepare_workspace_excludes_generated_artifacts(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / "buggy.py").write_text("VALUE = 1\n", encoding="utf-8")
+    task = {
+        "id": "artifact_filter_sample",
+        "source_repo": str(source),
+        "task": "Run validation only.",
+        "checks": [f"{sys.executable} -c \"print('ok')\""],
+    }
+
+    workspace = prepare_workspace(task, workspaces_dir=tmp_path / "workspaces", clean=True)
+    pycache = workspace / "__pycache__"
+    pycache.mkdir()
+    (pycache / "buggy.cpython-313.pyc").write_bytes(b"pyc")
+    (workspace / "uv.lock").write_text("version = 1\n", encoding="utf-8")
+
+    assert get_changed_files(str(workspace)) == []
+
+
+def test_summarize_results_can_merge_multiple_files(tmp_path: Path) -> None:
+    first = tmp_path / "first_results.json"
+    second = tmp_path / "second_results.json"
+    first.write_text(
+        '[{"id": "a", "dataset": "quixbugs", "method": "checks_only", '
+        '"status": "checks_failed", "checks_passed": false}]',
+        encoding="utf-8",
+    )
+    second.write_text(
+        '[{"id": "b", "dataset": "quixbugs", "method": "codeflow_full", '
+        '"status": "checks_passed", "checks_passed": true}]',
+        encoding="utf-8",
+    )
+
+    results = load_result_files([first, second])
+    report = build_markdown_report(results)
+
+    assert "quixbugs | checks_only" in report
+    assert "quixbugs | codeflow_full" in report
+    assert "Checks Pass Rate：1/2" in report

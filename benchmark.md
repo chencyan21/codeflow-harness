@@ -187,6 +187,9 @@ python benchmark/scripts/run_eval.py \
   --method codeflow_full
 ```
 
+兼容入口 `python benchmark/run_benchmark.py` 会转调上述新 runner，默认使用
+`benchmark/tasks/harness_bench.yaml`。
+
 ## 1.5 评估指标
 
 重点不是 pass rate，而是 harness 指标：

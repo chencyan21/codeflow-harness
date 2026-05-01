@@ -249,13 +249,14 @@ sensor report 会进入 repair prompt 和最终 review report。当前可自动 
 
 ## Benchmark
 
-`benchmark/tasks.yaml` 定义了 3 个 todo_api 任务。`benchmark/run_benchmark.py` 会：
+`benchmark/tasks/harness_bench.yaml` 定义了 Harness-Bench v0 任务。`benchmark/run_benchmark.py`
+是兼容入口，内部转调 `benchmark/scripts/run_eval.py`。新的 benchmark 流程会：
 
-1. 为每个任务复制一份临时 todo_api 仓库。
+1. 为每个任务复制一份独立 workspace。
 2. 初始化临时 Git 仓库并提交 baseline。
-3. 用 `no_commit=True` 调用 `run_codeflow()`。
-4. 汇总 status、repair_round、checks_passed 和 report。
-5. 输出 `benchmark/results.json`。
+3. 按 method 运行 `checks_only`、`raw_mini`、`codeflow_basic` 或 `codeflow_full`。
+4. 汇总 status、repair_round、checks_passed、sensors 和 risk review。
+5. 输出 `benchmark/results/{method}/{task_file_stem}_results.json` 和 Markdown 报告。
 
 ## 测试覆盖
 
