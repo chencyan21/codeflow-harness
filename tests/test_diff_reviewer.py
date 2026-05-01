@@ -11,6 +11,13 @@ def test_score_risk_detects_high_risk_keywords() -> None:
     assert any("password" in risk for risk in risks)
 
 
+def test_score_risk_detects_specific_token_names() -> None:
+    level, risks = score_risk("+ access_token = 'x'")
+
+    assert level == "high"
+    assert any("access_token" in risk for risk in risks)
+
+
 def test_score_risk_matches_keywords_on_token_boundaries() -> None:
     level, risks = score_risk("+ heapq.heapify(heap)\n+ value = api_key")
 
@@ -20,6 +27,13 @@ def test_score_risk_matches_keywords_on_token_boundaries() -> None:
 
 def test_score_risk_does_not_match_keyword_inside_identifier() -> None:
     level, risks = score_risk("+ heapq.heapify(heap)\n+ heapq.heappushpop(heap, x)")
+
+    assert level == "low"
+    assert risks == ["No obvious high-risk pattern detected."]
+
+
+def test_score_risk_does_not_treat_parser_token_as_secret() -> None:
+    level, risks = score_risk("+ opstack.append(token)\n+ token = tokens.pop()")
 
     assert level == "low"
     assert risks == ["No obvious high-risk pattern detected."]

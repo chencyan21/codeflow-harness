@@ -300,7 +300,7 @@ smoke task 使用：
   --proxy http://127.0.0.1:10087 \
   --out benchmark/generated/swebench_lite \
   --tasks-out benchmark/tasks/swebench_lite_subset.jsonl \
-  --check-prefix "uv run --no-project --python 3.11 --with pytest --with pytest-doctestplus --with hypothesis --with 'numpy<2' --with setuptools-scm --with packaging --with pyerfa --with pyyaml"
+  --check-prefix "uv run --no-project --python 3.11 --with pytest --with pytest-doctestplus --with pytest-astropy --with hypothesis --with 'numpy<2' --with setuptools-scm --with packaging --with pyerfa --with pyyaml"
 ```
 
 Astropy 这类 source checkout 还需要先在生成的 workspace 中构建扩展：
@@ -339,9 +339,13 @@ benchmark baseline；已完成 setup 的 generated workspace 会带 `.codeflow-b
 
 ```bash
 .venv/bin/python benchmark/scripts/summarize_results.py \
-  benchmark/results/quixbugs_checks_only_10/quixbugs_results.json \
-  benchmark/results/quixbugs_full_real_10/quixbugs_results.json \
-  benchmark/results/bugsinpy_youtubedl_checks_only/bugsinpy_youtubedl_subset_results.json \
-  benchmark/results/bugsinpy_youtubedl_full_real/bugsinpy_youtubedl_subset_results.json \
+  benchmark/results/quixbugs_extended_checks_only_current/quixbugs_extended_results.json \
+  benchmark/results/quixbugs_extended_full_real_current/quixbugs_extended_results.json \
+  benchmark/results/bugsinpy_youtubedl_5_checks_only_current/bugsinpy_youtubedl_5_results.json \
+  benchmark/results/bugsinpy_youtubedl_5_full_real_current/bugsinpy_youtubedl_5_results.json \
+  benchmark/results/swebench_lite_2_checks_only/swebench_lite_2_subset_results.json \
+  benchmark/results/swebench_lite_2_full_real_current/swebench_lite_2_subset_results.json \
+  benchmark/results/swebench_verified_2_checks_only/swebench_verified_2_subset_results.json \
+  benchmark/results/swebench_verified_2_full_real_current/swebench_verified_2_subset_results.json \
   --out benchmark/reports/current_real_results.md
 ```

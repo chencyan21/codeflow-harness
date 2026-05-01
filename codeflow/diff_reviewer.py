@@ -12,7 +12,10 @@ HIGH_RISK_PATTERNS = [
     ".env",
     "secret",
     "password",
-    "token",
+    "access_token",
+    "api_token",
+    "auth_token",
+    "refresh_token",
     "delete",
     "drop",
 ]

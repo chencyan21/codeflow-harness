@@ -44,7 +44,11 @@ def _matching_paths(paths: list[str], patterns: list[str]) -> list[str]:
 
 
 def _tests_changed(paths: list[str]) -> bool:
-    return any(path.startswith("tests/") or "/tests/" in path or path.endswith("_test.py") for path in paths)
+    return any(_is_test_path(path) for path in paths)
+
+
+def _is_test_path(path: str) -> bool:
+    return path.startswith("tests/") or "/tests/" in path or path.endswith("_test.py") or path.startswith("test_")
 
 
 def _business_code_changed(paths: list[str]) -> bool:
@@ -84,6 +88,55 @@ def _forbidden_path_references(line: str, patterns: list[str]) -> list[str]:
 
 def _redact_secret_line(line: str) -> str:
     return SECRET_VALUE_PATTERN.sub("sk-***", line)
+
+
+def _diff_path(line: str) -> str | None:
+    if line.startswith("+++ b/") or line.startswith("--- a/"):
+        return line[6:].strip()
+    return None
+
+
+def _test_deletion_lines(diff: str) -> list[str]:
+    deleted_lines: list[str] = []
+    current_path = ""
+    hunk_deleted: list[str] = []
+    hunk_added: list[str] = []
+
+    def flush_hunk() -> None:
+        if not current_path or not _is_test_path(current_path):
+            return
+        if any(any(pattern in line for pattern in TEST_DELETE_PATTERNS) for line in hunk_added):
+            return
+        for line in hunk_deleted:
+            if any(pattern in line for pattern in TEST_DELETE_PATTERNS):
+                deleted_lines.append(line.strip())
+
+    for raw_line in diff.splitlines():
+        if raw_line.startswith("diff --git "):
+            flush_hunk()
+            current_path = ""
+            hunk_deleted = []
+            hunk_added = []
+            continue
+
+        path = _diff_path(raw_line)
+        if path is not None and path != "/dev/null":
+            current_path = path
+            continue
+
+        if raw_line.startswith("@@"):
+            flush_hunk()
+            hunk_deleted = []
+            hunk_added = []
+            continue
+
+        if raw_line.startswith("-") and not raw_line.startswith("---"):
+            hunk_deleted.append(raw_line[1:])
+        elif raw_line.startswith("+") and not raw_line.startswith("+++"):
+            hunk_added.append(raw_line[1:])
+
+    flush_hunk()
+    return deleted_lines
 
 
 @dataclass
@@ -248,13 +301,7 @@ class TestDeletionSensor:
                 message="Test deletion is allowed by policy.",
             )
 
-        deleted_lines = []
-        for line in context.diff.splitlines():
-            if not line.startswith("-") or line.startswith("---"):
-                continue
-            if any(pattern in line for pattern in TEST_DELETE_PATTERNS):
-                deleted_lines.append(line[1:].strip())
-
+        deleted_lines = _test_deletion_lines(context.diff)
         if deleted_lines:
             return SensorResult(
                 name=self.name,

@@ -111,6 +111,44 @@ def test_test_deletion_is_blocking_high() -> None:
     assert should_attempt_repair(report) is False
 
 
+def test_test_assertion_rewrite_is_not_test_deletion() -> None:
+    report = run_builtin_sensors(
+        _context(
+            diff="""diff --git a/test_buggy.py b/test_buggy.py
+--- a/test_buggy.py
++++ b/test_buggy.py
+@@ -1,2 +1,2 @@
+ def test_flatten():
+-    assert buggy.flatten([1]) == [1]
++    assert list(buggy.flatten([1])) == [1]
+""",
+            changed_files=["test_buggy.py"],
+        )
+    )
+
+    result = next(item for item in report.results if item.name == "test_deletion")
+    assert result.passed is True
+    assert result.severity == "info"
+
+
+def test_source_assert_removal_is_not_test_deletion() -> None:
+    report = run_builtin_sensors(
+        _context(
+            diff="""diff --git a/app/service.py b/app/service.py
+--- a/app/service.py
++++ b/app/service.py
+@@ -1,2 +1 @@
+-assert DEBUG
+ print("ok")
+""",
+            changed_files=["app/service.py"],
+        )
+    )
+
+    result = next(item for item in report.results if item.name == "test_deletion")
+    assert result.passed is True
+
+
 def test_missing_test_change_is_warning_when_required() -> None:
     report = run_builtin_sensors(
         _context(
