@@ -104,7 +104,7 @@ def _make_model(outputs: list[tuple[str, list[dict]]], **kwargs) -> Deterministi
 @pytest.fixture
 def default_config():
     """Load default agent config from config/default.yaml"""
-    config_path = Path("src/minisweagent/config/default.yaml")
+    config_path = Path("minisweagent/config/default.yaml")
     with open(config_path) as f:
         config = yaml.safe_load(f)
     return config["agent"]
@@ -113,7 +113,7 @@ def default_config():
 @pytest.fixture
 def toolcall_config():
     """Load toolcall agent config from config/mini.yaml"""
-    config_path = Path("src/minisweagent/config/mini.yaml")
+    config_path = Path("minisweagent/config/mini.yaml")
     with open(config_path) as f:
         config = yaml.safe_load(f)
     return config["agent"]

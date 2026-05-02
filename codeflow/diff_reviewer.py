@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 from codeflow.harness.sensors import SEVERITY_ORDER
-from codeflow.models import CheckResult, HarnessSensorReport
+from codeflow.models import CheckResult, HarnessSensorReport, Spec
 
 HIGH_RISK_PATTERNS = [
     "auth",
@@ -56,28 +56,195 @@ def score_risk(diff: str) -> tuple[str, list[str]]:
     return "low", ["No obvious high-risk pattern detected."]
 
 
+def _escape_table(value: object) -> str:
+    return str(value).replace("|", "\\|").replace("\n", "<br>")
+
+
+def _check_status(result: CheckResult) -> str:
+    return "PASS" if result.success else "FAIL"
+
+
+def _sensor_status(passed: bool, severity: str) -> str:
+    if not passed:
+        return "FAIL"
+    if severity in {"medium", "high"}:
+        return "WARN"
+    return "PASS"
+
+
+def _is_test_file(path: str) -> bool:
+    return path.startswith("tests/") or "/tests/" in path or path.endswith("_test.py") or path.startswith("test_")
+
+
+def _is_config_file(path: str) -> bool:
+    return path in {
+        "pyproject.toml",
+        "requirements.txt",
+        "requirements-dev.txt",
+        "poetry.lock",
+        "uv.lock",
+    } or path.startswith(".codeflow/")
+
+
+def _changed_file_groups(changed_files: list[str]) -> dict[str, list[str]]:
+    groups = {"Source Files": [], "Test Files": [], "Config Files": [], "Unknown": []}
+    for path in changed_files:
+        if _is_test_file(path):
+            groups["Test Files"].append(path)
+        elif _is_config_file(path):
+            groups["Config Files"].append(path)
+        elif path.endswith(".py"):
+            groups["Source Files"].append(path)
+        else:
+            groups["Unknown"].append(path)
+    return groups
+
+
+def _list_or_none(items: list[str]) -> str:
+    return "\n".join(f"- {item}" for item in items) if items else "- none"
+
+
+def _spec_section(task: str, spec: Spec | None) -> list[str]:
+    if not spec:
+        return [
+            "## 1. Task Summary",
+            "",
+            f"Task: {task}",
+        ]
+    return [
+        "## 1. Task Summary",
+        "",
+        f"Task: {task}",
+        "",
+        f"Spec goal: {spec.goal}",
+        "",
+        "Acceptance criteria:",
+        _list_or_none(spec.acceptance_criteria),
+        "",
+        "Constraints:",
+        _list_or_none(spec.constraints),
+    ]
+
+
+def _checks_section(check_results: list[CheckResult]) -> list[str]:
+    lines = [
+        "## 3. Validation Results",
+        "",
+        "| Command | Result | Return Code |",
+        "| --- | --- | ---: |",
+    ]
+    if not check_results:
+        lines.append("| no checks configured | PASS | 0 |")
+        return lines
+    for result in check_results:
+        lines.append(
+            f"| {_escape_table(result.command)} | {_check_status(result)} | {result.returncode} |"
+        )
+    return lines
+
+
+def _sensors_section(sensor_report: HarnessSensorReport | None) -> list[str]:
+    lines = [
+        "## 4. Sensor Report",
+        "",
+        "| Sensor | Status | Severity | Message |",
+        "| --- | --- | --- | --- |",
+    ]
+    if not sensor_report:
+        lines.append("| no sensor report | PASS | info | - |")
+        return lines
+    for result in sensor_report.results:
+        lines.append(
+            "| {name} | {status} | {severity} | {message} |".format(
+                name=_escape_table(result.name),
+                status=_sensor_status(result.passed, result.severity),
+                severity=_escape_table(result.severity),
+                message=_escape_table(result.message),
+            )
+        )
+    return lines
+
+
+def _changed_files_section(changed_files: list[str]) -> list[str]:
+    lines = ["## 5. Changed Files", ""]
+    groups = _changed_file_groups(changed_files)
+    for group, files in groups.items():
+        lines.append(f"{group}:")
+        lines.append(_list_or_none(files))
+        lines.append("")
+    return lines
+
+
+def _repair_section(repair_history: list[dict[str, str | int]] | None) -> list[str]:
+    lines = [
+        "## 7. Repair History",
+        "",
+        "| Round | Reason | Result |",
+        "| ---: | --- | --- |",
+    ]
+    if not repair_history:
+        lines.append("| 0 | none | no repair needed |")
+        return lines
+    for item in repair_history:
+        lines.append(
+            "| {round} | {reason} | {result} |".format(
+                round=_escape_table(item.get("round", "")),
+                reason=_escape_table(item.get("reason", "")),
+                result=_escape_table(item.get("result", "")),
+            )
+        )
+    return lines
+
+
+def _checklist(sensor_report: HarnessSensorReport | None) -> list[str]:
+    items = [
+        "- [ ] 任务目标是否已满足？",
+        "- [ ] 是否新增或更新了必要测试？",
+        "- [ ] required checks 是否全部通过？",
+        "- [ ] 是否没有删除已有测试？",
+        "- [ ] 是否没有修改敏感路径？",
+        "- [ ] 是否没有引入不必要依赖？",
+        "- [ ] diff 范围是否足够小？",
+        "- [ ] 是否需要人工补充边界测试？",
+    ]
+    if not sensor_report:
+        return items
+    sensor_names = {
+        result.name
+        for result in sensor_report.results
+        if not result.passed or result.severity in {"medium", "high"}
+    }
+    if "dependency_change" in sensor_names:
+        items.append("- [ ] 检查依赖变更是否必要。")
+    if "high_risk_path" in sensor_names:
+        items.append("- [ ] 检查高风险路径变更是否合理。")
+    if "missing_test_change" in sensor_names:
+        items.append("- [ ] 检查测试覆盖不足问题。")
+    return items
+
+
 def build_review_report(
     task: str,
     branch: str,
     diff: str,
     check_results: list[CheckResult],
     sensor_report: HarnessSensorReport | None = None,
+    *,
+    spec: Spec | None = None,
+    status: str = "",
+    repair_round: int = 0,
+    mini_runs: list[str] | None = None,
+    run_dir: str | None = None,
+    changed_files: list[str] | None = None,
+    repair_history: list[dict[str, str | int]] | None = None,
 ) -> str:
     risk_level, risks = score_risk(diff)
     if sensor_report and SEVERITY_ORDER[sensor_report.max_severity] > SEVERITY_ORDER[risk_level]:
         risk_level = sensor_report.max_severity
     changed_lines = len(diff.splitlines())
-    check_summary = "\n".join(
-        f"- {result.command}: {'PASS' if result.success else 'FAIL'}" for result in check_results
-    ) or "- no checks configured"
     risk_text = "\n".join(f"- {item}" for item in risks)
-    sensor_text = "- no sensor report"
     blocking_text = "- none"
     if sensor_report:
-        sensor_text = "\n".join(
-            f"- {result.name}: {'PASS' if result.passed else 'FAIL'} / {result.severity} / {result.message}"
-            for result in sensor_report.results
-        )
         blocking_text = "\n".join(f"- {reason}" for reason in sensor_report.blocking_reasons) or "- none"
     recommendation = (
         "Commit is allowed after human review."
@@ -86,33 +253,41 @@ def build_review_report(
         else "Do not commit until validation passes."
     )
 
-    return f"""
-# CodeFlow Review Report
-
-## 任务
-{task}
-
-## 分支
-{branch}
-
-## 验证结果
-{check_summary}
-
-## 风险等级
-{risk_level}
-
-## 风险说明
-{risk_text}
-
-## Sensor Report
-{sensor_text}
-
-## Blocking Reasons
-{blocking_text}
-
-## Diff 大小
-{changed_lines} diff lines
-
-## 建议
-{recommendation}
-""".strip()
+    lines = [
+        "# CodeFlow Review Report",
+        "",
+        *_spec_section(task, spec),
+        "",
+        "## 2. Execution Summary",
+        "",
+        f"- Branch: {branch}",
+        f"- Status: {status or 'unknown'}",
+        f"- Repair rounds: {repair_round}",
+        f"- Mini runs: {len(mini_runs or [])}",
+        f"- Run directory: {run_dir or '(not recorded)'}",
+        "",
+        *_checks_section(check_results),
+        "",
+        *_sensors_section(sensor_report),
+        "",
+        *_changed_files_section(changed_files or []),
+        "## 6. Risk Assessment",
+        "",
+        f"- Risk Level: {risk_level}",
+        "- Risk Notes:",
+        risk_text,
+        "- Blocking Reasons:",
+        blocking_text,
+        f"- Diff Size: {changed_lines} diff lines",
+        "",
+        *_repair_section(repair_history),
+        "",
+        "## 8. Manual Review Checklist",
+        "",
+        *_checklist(sensor_report),
+        "",
+        "## 9. Recommendation",
+        "",
+        recommendation,
+    ]
+    return "\n".join(lines).strip()

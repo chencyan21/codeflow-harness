@@ -10,6 +10,8 @@ from uuid import uuid4
 
 from dotenv import dotenv_values
 
+from codeflow.models import MiniRunResult
+
 
 OPENAI_COMPAT_ENV_KEYS = {
     "api_key": "OPENAI_API_KEY",
@@ -73,6 +75,7 @@ def _mini_env(command_env: dict[str, str] | None, env_values: dict[str, str], mo
 
     return env
 
+
 def _artifact_dir(repo: str) -> Path:
     result = subprocess.run(
         ["git", "rev-parse", "--git-dir"],
@@ -99,14 +102,7 @@ def _mini_command() -> tuple[list[str], dict[str, str] | None]:
     if shutil.which("mini"):
         return ["mini"], None
 
-    project_root = Path(__file__).resolve().parents[1]
-    local_src = project_root / "mini-swe-agent" / "src"
-    if local_src.exists():
-        env = os.environ.copy()
-        env["PYTHONPATH"] = f"{local_src}{os.pathsep}{env.get('PYTHONPATH', '')}"
-        return [sys.executable, "-m", "minisweagent.run.mini"], env
-
-    return ["mini"], None
+    return [sys.executable, "-m", "minisweagent.run.mini"], None
 
 
 def _command_for_log(cmd: list[str], prompt_path: Path) -> str:
@@ -126,14 +122,19 @@ def _command_for_log(cmd: list[str], prompt_path: Path) -> str:
 def run_mini_agent(
     repo: str,
     prompt: str,
+    *,
+    run_dir: Path | None = None,
+    run_index: int | None = None,
     model: str | None = None,
     mini_config: str | None = None,
-) -> str:
+) -> MiniRunResult:
     run_id = str(uuid4())[:8]
-    artifacts = _artifact_dir(repo)
-    prompt_path = artifacts / f"prompt_{run_id}.txt"
-    log_path = artifacts / f"mini_run_{run_id}.log"
-    trajectory_path = artifacts / f"trajectory_{run_id}.json"
+    artifacts = run_dir or _artifact_dir(repo)
+    artifacts.mkdir(parents=True, exist_ok=True)
+    suffix = str(run_index) if run_index is not None else run_id
+    prompt_path = artifacts / f"prompt_{suffix}.txt"
+    log_path = artifacts / f"mini_run_{suffix}.log"
+    trajectory_path = artifacts / f"mini_run_{suffix}.trajectory.json"
     prompt_path.write_text(prompt, encoding="utf-8")
 
     env_values = _load_codeflow_env()
@@ -185,4 +186,8 @@ def run_mini_agent(
     if result.returncode != 0:
         raise RuntimeError(f"mini-swe-agent failed. See {log_path}")
 
-    return str(log_path)
+    return MiniRunResult(
+        log_path=str(log_path),
+        trajectory_path=str(trajectory_path),
+        returncode=result.returncode,
+    )

@@ -3,12 +3,13 @@ import shlex
 from unittest.mock import MagicMock, patch
 
 import pytest
-from contree_sdk.config import ContreeConfig
 
-from minisweagent.environments.extra.contree import (
-    ContreeEnvironment,
-)
 from minisweagent.exceptions import Submitted
+
+contree_config = pytest.importorskip("contree_sdk.config")
+contree_environment = pytest.importorskip("minisweagent.environments.extra.contree")
+ContreeConfig = contree_config.ContreeConfig
+ContreeEnvironment = contree_environment.ContreeEnvironment
 
 
 def _make_env(**kwargs) -> ContreeEnvironment:

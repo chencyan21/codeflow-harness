@@ -40,7 +40,7 @@ uv sync
 pip install -e .
 ```
 
-`mini-swe-agent` 源码已并入本仓库，由外层 `pyproject.toml` 一起安装。
+`mini-swe-agent` 源码已并入本仓库根目录的 `minisweagent/` 包，由外层 `pyproject.toml` 统一安装。
 
 ## 使用
 

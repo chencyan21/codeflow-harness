@@ -179,6 +179,10 @@ def _restore_mini_command(old_command: str | None) -> None:
         os.environ["CODEFLOW_MINI_COMMAND"] = old_command
 
 
+def _mini_log_path(result: object) -> str:
+    return str(getattr(result, "log_path", result))
+
+
 def _direct_state(
     *,
     task: dict[str, Any],
@@ -230,7 +234,7 @@ def _direct_state(
         )
         max_rounds = policy.max_repair_rounds if method == "codeflow_basic" else 0
 
-    state.mini_runs.append(run_mini_agent(repo=repo, prompt=prompt, model=model))
+    state.mini_runs.append(_mini_log_path(run_mini_agent(repo=repo, prompt=prompt, model=model)))
 
     for round_idx in range(max_rounds + 1):
         state.check_results = run_checks(repo, policy.required_checks)
@@ -248,7 +252,9 @@ def _direct_state(
             policy=None,
             sensor_report=None,
         )
-        state.mini_runs.append(run_mini_agent(repo=repo, prompt=repair_prompt, model=model))
+        state.mini_runs.append(
+            _mini_log_path(run_mini_agent(repo=repo, prompt=repair_prompt, model=model))
+        )
         state.repair_round = round_idx + 1
 
     state.report = build_review_report(

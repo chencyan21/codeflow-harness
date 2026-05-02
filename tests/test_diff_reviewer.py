@@ -45,5 +45,6 @@ def test_build_review_report_mentions_validation() -> None:
     report = build_review_report("task", "ai/task", "+ change", [result])
 
     assert "# CodeFlow Review Report" in report
-    assert "pytest -q: PASS" in report
+    assert "| pytest -q | PASS | 0 |" in report
     assert "ai/task" in report
+    assert "## 8. Manual Review Checklist" in report

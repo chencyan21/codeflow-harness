@@ -52,6 +52,12 @@ class CheckResult(BaseModel):
     stderr: str
 
 
+class MiniRunResult(BaseModel):
+    log_path: str
+    trajectory_path: str
+    returncode: int
+
+
 class SensorResult(BaseModel):
     name: str
     passed: bool
@@ -80,12 +86,17 @@ class RunState(BaseModel):
     repo: str
     task: str
     branch: str
+    run_id: str | None = None
+    run_dir: str | None = None
+    artifacts: dict[str, str] = Field(default_factory=dict)
     spec: Spec | None = None
     policy: HarnessPolicy | None = None
     rules: str = ""
     mini_runs: list[str] = Field(default_factory=list)
     check_results: list[CheckResult] = Field(default_factory=list)
     sensor_report: HarnessSensorReport | None = None
+    changed_files: list[str] = Field(default_factory=list)
+    repair_history: list[dict[str, str | int]] = Field(default_factory=list)
     repair_round: int = 0
     diff: str = ""
     report: str = ""

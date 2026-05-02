@@ -16,6 +16,8 @@ from codeflow.git_guard import (
     rollback,
 )
 from codeflow.harness.builtin_sensors import run_builtin_sensors, should_attempt_repair
+from codeflow.harness.governance import prompt_governance_action
+from codeflow.harness.observability import create_run_dir, write_json, write_text
 from codeflow.harness.policy import load_harness_policy
 from codeflow.mini_runner import run_mini_agent
 from codeflow.models import (
@@ -32,6 +34,35 @@ from codeflow.test_gate import all_checks_passed, failed_checks, run_checks
 from codeflow.utils import read_project_rules
 
 console = Console()
+
+
+def _artifact(state: RunState, name: str, path: Path) -> None:
+    state.artifacts[name] = str(path)
+
+
+def _record_mini_result(state: RunState, result: object, index: int) -> None:
+    log_path = getattr(result, "log_path", str(result))
+    trajectory_path = getattr(result, "trajectory_path", "")
+    state.mini_runs.append(str(log_path))
+    _artifact(state, f"mini_run_{index}_log", Path(str(log_path)))
+    if trajectory_path:
+        _artifact(state, f"mini_run_{index}_trajectory", Path(str(trajectory_path)))
+
+
+def _write_final_state(state: RunState) -> None:
+    if not state.run_dir:
+        return
+    run_dir = Path(state.run_dir)
+    write_json(
+        run_dir / "state.json",
+        {
+            **state.model_dump(),
+            "checks_passed": all_checks_passed(state.check_results),
+            "sensor_passed": state.sensor_report.overall_passed if state.sensor_report else None,
+            "risk_level": state.sensor_report.max_severity if state.sensor_report else "unknown",
+        },
+    )
+    _artifact(state, "state", run_dir / "state.json")
 
 
 def _verify(
@@ -102,6 +133,8 @@ def run_codeflow(config: CodeFlowConfig) -> RunState:
         cli_max_repair_rounds=config.max_repair_rounds,
     )
     spec = build_spec(config.task)
+    run_dir = create_run_dir(repo, config.task)
+    run_id = run_dir.name
 
     prompt = build_initial_prompt(
         task=config.task,
@@ -110,33 +143,74 @@ def run_codeflow(config: CodeFlowConfig) -> RunState:
         checks=policy.required_checks,
         policy=policy,
     )
+    write_json(run_dir / "policy.json", policy.model_dump())
+    write_json(run_dir / "spec.json", spec.model_dump())
+    write_text(run_dir / "initial_prompt.md", prompt)
 
     if config.dry_run:
-        state = RunState(repo=repo, task=config.task, branch="", rules=rules, spec=spec, policy=policy)
+        state = RunState(
+            repo=repo,
+            task=config.task,
+            branch="",
+            run_id=run_id,
+            run_dir=str(run_dir),
+            rules=rules,
+            spec=spec,
+            policy=policy,
+        )
         state.report = prompt
         state.status = "dry_run"
         state.commit_action = "not_requested"
+        _artifact(state, "policy", run_dir / "policy.json")
+        _artifact(state, "spec", run_dir / "spec.json")
+        _artifact(state, "initial_prompt", run_dir / "initial_prompt.md")
+        write_text(run_dir / "diff.patch", "")
+        write_text(run_dir / "review_report.md", prompt)
+        _artifact(state, "diff", run_dir / "diff.patch")
+        _artifact(state, "review_report", run_dir / "review_report.md")
+        _write_final_state(state)
         return state
 
     branch = create_ai_branch(repo, config.task)
-    state = RunState(repo=repo, task=config.task, branch=branch, rules=rules, spec=spec, policy=policy)
+    state = RunState(
+        repo=repo,
+        task=config.task,
+        branch=branch,
+        run_id=run_id,
+        run_dir=str(run_dir),
+        rules=rules,
+        spec=spec,
+        policy=policy,
+    )
+    _artifact(state, "policy", run_dir / "policy.json")
+    _artifact(state, "spec", run_dir / "spec.json")
+    _artifact(state, "initial_prompt", run_dir / "initial_prompt.md")
     console.print(f"[bold green]Created branch:[/bold green] {branch}")
 
     console.print("[bold]Running mini-swe-agent...[/bold]")
-    log_path = run_mini_agent(
+    mini_result = run_mini_agent(
         repo=repo,
         prompt=prompt,
+        run_dir=run_dir,
+        run_index=0,
         model=config.model,
         mini_config=config.mini_config,
     )
-    state.mini_runs.append(log_path)
+    _record_mini_result(state, mini_result, 0)
 
     for round_idx in range(policy.max_repair_rounds + 1):
         console.print(f"[bold]Running validation checks, round {round_idx}...[/bold]")
-        results, diff, _changed_files, sensor_report = _verify(repo, config.task, policy)
+        results, diff, changed_files, sensor_report = _verify(repo, config.task, policy)
         state.check_results = results
         state.diff = diff
+        state.changed_files = changed_files
         state.sensor_report = sensor_report
+        checks_path = run_dir / f"checks_round_{round_idx}.json"
+        sensors_path = run_dir / f"sensor_report_round_{round_idx}.json"
+        write_json(checks_path, [result.model_dump() for result in results])
+        write_json(sensors_path, sensor_report.model_dump())
+        _artifact(state, f"checks_round_{round_idx}", checks_path)
+        _artifact(state, f"sensor_report_round_{round_idx}", sensors_path)
 
         if all_checks_passed(results) and sensor_report.overall_passed:
             state.status = "checks_passed"
@@ -159,16 +233,29 @@ def run_codeflow(config: CodeFlowConfig) -> RunState:
             policy=policy,
             sensor_report=sensor_report,
         )
+        repair_round = round_idx + 1
+        repair_path = run_dir / f"repair_prompt_{repair_round}.md"
+        write_text(repair_path, repair_prompt)
+        _artifact(state, f"repair_prompt_{repair_round}", repair_path)
+        state.repair_history.append(
+            {
+                "round": repair_round,
+                "reason": state.status,
+                "result": "repair_prompt_created",
+            }
+        )
 
-        console.print(f"[yellow]Verification failed. Repair round {round_idx + 1}...[/yellow]")
-        log_path = run_mini_agent(
+        console.print(f"[yellow]Verification failed. Repair round {repair_round}...[/yellow]")
+        mini_result = run_mini_agent(
             repo=repo,
             prompt=repair_prompt,
+            run_dir=run_dir,
+            run_index=repair_round,
             model=config.model,
             mini_config=config.mini_config,
         )
-        state.mini_runs.append(log_path)
-        state.repair_round = round_idx + 1
+        _record_mini_result(state, mini_result, repair_round)
+        state.repair_round = repair_round
 
     state.report = build_review_report(
         task=config.task,
@@ -176,28 +263,50 @@ def run_codeflow(config: CodeFlowConfig) -> RunState:
         diff=state.diff,
         check_results=state.check_results,
         sensor_report=state.sensor_report,
+        spec=spec,
+        status=state.status,
+        repair_round=state.repair_round,
+        mini_runs=state.mini_runs,
+        run_dir=str(run_dir),
+        changed_files=state.changed_files,
+        repair_history=state.repair_history,
     )
+    write_text(run_dir / "diff.patch", state.diff)
+    write_text(run_dir / "review_report.md", state.report)
+    _artifact(state, "diff", run_dir / "diff.patch")
+    _artifact(state, "review_report", run_dir / "review_report.md")
 
     console.print(state.report)
 
     if config.no_commit:
         state.commit_action = "skipped"
+        _write_final_state(state)
         return state
 
-    decision = Prompt.ask(
-        "Choose action",
-        choices=["commit", "rollback", "keep"],
-        default="keep",
+    decision = prompt_governance_action(
+        state,
+        console=console,
+        prompt_ask=Prompt.ask,
     )
+    if decision == "refused":
+        _write_final_state(state)
+        return state
 
     if decision == "commit":
         if policy.rerun_checks_before_commit:
             console.print("[bold]Rerunning validation before commit...[/bold]")
-            results, diff, _changed_files, sensor_report = _verify(repo, config.task, policy)
+            results, diff, changed_files, sensor_report = _verify(repo, config.task, policy)
             state.check_results = results
             state.diff = diff
+            state.changed_files = changed_files
             state.sensor_report = sensor_report
             state.status = _status_for_verification(all_checks_passed(results), sensor_report)
+            checks_path = run_dir / "checks_round_commit.json"
+            sensors_path = run_dir / "sensor_report_round_commit.json"
+            write_json(checks_path, [result.model_dump() for result in results])
+            write_json(sensors_path, sensor_report.model_dump())
+            _artifact(state, "checks_round_commit", checks_path)
+            _artifact(state, "sensor_report_round_commit", sensors_path)
 
         block_reason = _commit_block_reason(
             state,
@@ -209,6 +318,7 @@ def run_codeflow(config: CodeFlowConfig) -> RunState:
             console.print(f"[red]Refusing to commit because {reason}.[/red]")
             state.status = status
             state.commit_action = "refused"
+            _write_final_state(state)
             return state
         commit_changes(repo, f"codeflow: {config.task[:60]}")
         state.status = "committed"
@@ -221,4 +331,5 @@ def run_codeflow(config: CodeFlowConfig) -> RunState:
         state.status = "kept_uncommitted"
         state.commit_action = "kept"
 
+    _write_final_state(state)
     return state

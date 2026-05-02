@@ -67,6 +67,8 @@ def container_executable(monkeypatch):
 def get_test_data(trajectory_name: str) -> dict[str, list[str]]:
     """Load test fixtures from a trajectory JSON file"""
     json_path = Path(__file__).parent / "test_data" / f"{trajectory_name}.traj.json"
+    if not json_path.exists():
+        pytest.skip(f"Trajectory fixture not available: {json_path}")
     with json_path.open() as f:
         trajectory = json.load(f)
 

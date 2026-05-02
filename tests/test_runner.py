@@ -75,7 +75,7 @@ def test_no_commit_preserves_failed_check_status(
     _init_repo(tmp_path)
     calls: list[str] = []
 
-    def fake_mini(repo: str, prompt: str, model: str | None = None, mini_config: str | None = None) -> str:
+    def fake_mini(repo: str, prompt: str, **_kwargs: object) -> str:
         calls.append(prompt)
         return str(Path(repo) / ".git" / "fake.log")
 
@@ -96,6 +96,9 @@ def test_no_commit_preserves_failed_check_status(
     assert state.repair_round == 1
     assert len(calls) == 2
     assert state.check_results[0].returncode == 7
+    assert state.run_dir is not None
+    assert (Path(state.run_dir) / "state.json").exists()
+    assert (Path(state.run_dir) / "repair_prompt_1.md").exists()
 
 
 @pytest.mark.parametrize(
@@ -118,7 +121,7 @@ def test_human_approval_paths(
 ) -> None:
     _init_repo(tmp_path)
 
-    def fake_mini(repo: str, prompt: str, model: str | None = None, mini_config: str | None = None) -> str:
+    def fake_mini(repo: str, prompt: str, **_kwargs: object) -> str:
         root = Path(repo)
         (root / "README.md").write_text("hello\nchanged\n", encoding="utf-8")
         (root / "new_file.txt").write_text("new\n", encoding="utf-8")
@@ -149,7 +152,7 @@ def test_commit_is_refused_when_checks_fail(
     _init_repo(tmp_path)
     before = _head(tmp_path)
 
-    def fake_mini(repo: str, prompt: str, model: str | None = None, mini_config: str | None = None) -> str:
+    def fake_mini(repo: str, prompt: str, **_kwargs: object) -> str:
         Path(repo, "README.md").write_text("changed\n", encoding="utf-8")
         return str(Path(repo) / ".git" / "fake.log")
 
@@ -169,6 +172,32 @@ def test_commit_is_refused_when_checks_fail(
     assert state.commit_action == "refused"
     assert _head(tmp_path) == before
     assert bool(_status(tmp_path)) is True
+
+
+def test_governance_show_actions_then_keep(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _init_repo(tmp_path)
+    actions = iter(["show-diff", "show-checks", "show-sensors", "show-files", "show-report", "keep"])
+
+    def fake_mini(repo: str, prompt: str, **_kwargs: object) -> str:
+        Path(repo, "README.md").write_text("changed\n", encoding="utf-8")
+        return str(Path(repo) / ".git" / "fake.log")
+
+    monkeypatch.setattr("codeflow.runner.run_mini_agent", fake_mini)
+    monkeypatch.setattr("codeflow.runner.Prompt.ask", lambda *_args, **_kwargs: next(actions))
+
+    state = run_codeflow(
+        CodeFlowConfig(
+            repo=str(tmp_path),
+            task="show governance",
+            checks=[f'{sys.executable} -c "print(1)"'],
+        )
+    )
+
+    assert state.status == "kept_uncommitted"
+    assert state.commit_action == "kept"
 
 
 def test_high_risk_commit_requires_override(
@@ -207,7 +236,7 @@ harness:
     )
     before = _head(tmp_path)
 
-    def fake_mini(repo: str, prompt: str, model: str | None = None, mini_config: str | None = None) -> str:
+    def fake_mini(repo: str, prompt: str, **_kwargs: object) -> str:
         auth_dir = Path(repo) / "app" / "auth"
         auth_dir.mkdir(parents=True)
         (auth_dir / "service.py").write_text("TOKEN = 'placeholder'\n", encoding="utf-8")

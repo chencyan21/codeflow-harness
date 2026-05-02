@@ -2,11 +2,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from minisweagent.environments.extra.swerex_modal import (
-    SwerexModalEnvironment,
-    SwerexModalEnvironmentConfig,
-)
 from minisweagent.exceptions import Submitted
+
+swerex_modal = pytest.importorskip("minisweagent.environments.extra.swerex_modal")
+SwerexModalEnvironment = swerex_modal.SwerexModalEnvironment
+SwerexModalEnvironmentConfig = swerex_modal.SwerexModalEnvironmentConfig
 
 
 def _make_env(**kwargs):

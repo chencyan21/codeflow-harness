@@ -2,7 +2,8 @@ import subprocess
 
 import pytest
 
-from minisweagent.environments.extra.swerex_docker import SwerexDockerEnvironment
+swerex_docker = pytest.importorskip("minisweagent.environments.extra.swerex_docker")
+SwerexDockerEnvironment = swerex_docker.SwerexDockerEnvironment
 
 
 def _is_docker_available():

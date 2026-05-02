@@ -166,7 +166,7 @@ mini --task "<prompt>" --yolo --exit-immediately --output <trajectory.json>
 
 - 日志和 trajectory 写入目标仓库的 `.git/codeflow/` 下，避免污染工作区 diff。
 - 支持 `CODEFLOW_MINI_COMMAND` 覆盖 mini 命令，便于测试或调试。
-- 如果 PATH 中没有 `mini`，且当前仓库存在本地 `mini-swe-agent/src`，会回退到 `python -m minisweagent.run.mini`。
+- 如果 PATH 中没有 `mini`，会回退到当前环境中的 `python -m minisweagent.run.mini`。
 - mini 返回非零退出码时抛出 `RuntimeError`，并指向日志文件。
 
 ### 模型配置
@@ -286,6 +286,6 @@ cd examples/todo_api && pytest -q
 
 ## 当前注意事项
 
-- 根仓库提交时不要纳入 `.env`、`.venv/`、`mini-swe-agent/`、缓存目录和 benchmark 结果；这些已在 `.gitignore` 中忽略。
+- 根仓库提交时不要纳入 `.env`、`.venv/`、缓存目录和 benchmark 结果；这些已在 `.gitignore` 中忽略。
 - `examples/todo_api` 是嵌套 Git 仓库。根仓库如果直接 `git add .`，Git 会把它作为嵌入仓库处理；如需根仓库完整追踪示例项目源码，需要先决定是否移除示例项目内部 `.git`，或接受 gitlink 形式。
 - 真实 LLM 调用依赖外部模型服务和网络代理；当前环境已通过 `127.0.0.1:10087` 验证可用。

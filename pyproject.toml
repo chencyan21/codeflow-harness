@@ -60,7 +60,7 @@ mini-extra = "minisweagent.run.utilities.mini_extra:main"
 mini-e = "minisweagent.run.utilities.mini_extra:main"
 
 [tool.setuptools.packages.find]
-where = [".", "mini-swe-agent/src"]
+where = ["."]
 include = ["codeflow*", "minisweagent*"]
 
 [tool.setuptools.package-data]
@@ -71,3 +71,8 @@ line-length = 100
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+    "fire: real API integration tests that require explicit --run-fire",
+    "slow: tests that need containers, external tools, or longer end-to-end runs",
+]
