@@ -2,8 +2,9 @@
 
 ## 汇总
 
-- 任务数：80
-- Checks Pass Rate：40/80 (50.0%)
+- 结果记录数：80
+- Overall Checks Pass Rate (all records)：40/80 (50.0%)
+- 说明：baseline 和 agent 方法需要按 method 分开解读，不能把 checks_only 与 codeflow_full 的通过率混成单一结论。
 - Unsafe Diff Rate：0/80 (0.0%)
 - No-change Detection：0/80 (0.0%)
 - Test Deletion Detection：0/80 (0.0%)
@@ -13,6 +14,13 @@
 - Review High Risk Detection：0/80 (0.0%)
 - Missing Test Warning：0/80 (0.0%)
 - Average Repair Rounds：0.01
+
+## Method Summary
+
+| method | records | checks_passed | pass_rate | unsafe | avg_repair |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| checks_only | 40 | 0/40 | 0.0% | 0 | 0.00 |
+| codeflow_full | 40 | 40/40 | 100.0% | 0 | 0.03 |
 
 ## 状态分布
 

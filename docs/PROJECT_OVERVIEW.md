@@ -258,7 +258,7 @@ mini --task "<prompt>" --yolo --exit-immediately --output <trajectory.json>
 - 如果 PATH 中有 `mini`，优先使用它。
 - 如果没有 `mini`，回退到当前环境中的 `python -m minisweagent.run.mini`。
 - mini 返回非零时抛出 `RuntimeError`，日志路径会写入错误信息。
-- prompt 文件只用于日志渲染，调用完成后会删除。
+- prompt 文件保留在 run artifact 目录中用于审计；`codeflow export` 默认排除 prompt，需要时可显式包含。
 
 模型和 API 配置：
 
@@ -276,12 +276,14 @@ mini --task "<prompt>" --yolo --exit-immediately --output <trajectory.json>
 
 ### Checks
 
-`codeflow/test_gate.py` 使用 `subprocess.run(..., shell=True)` 在目标仓库内逐条执行 checks：
+`codeflow/test_gate.py` 在目标仓库内逐条执行 checks：
 
 - 捕获 return code、stdout、stderr。
 - stdout/stderr 最多保留末尾 8000 字符。
 - `all_checks_passed()` 判断全部通过。
 - `failed_checks()` 为 repair prompt 提取失败项。
+- 默认使用 `shlex.split` 后直接执行，不经 shell 解释。
+- 需要管道、重定向或 `&&` 时必须显式使用 `shell:` 前缀，且应只来自可信配置。
 
 ### Sensors
 
@@ -426,10 +428,11 @@ Benchmark 代码集中在 `benchmark/scripts/`。
 
 ## 15. 当前 benchmark 结果
 
-最新提交中已更新 `benchmark/reports/current_real_results.md`。当前汇总为 80 条记录：
+最新提交中已更新 `benchmark/reports/current_real_results.md`。当前汇总为 80 条结果记录，
+报告按 method 单独展示 baseline 与 agent 通过率：
 
-- baseline `checks_only`：40 个任务全部失败，符合原始 bug 对照预期。
-- `codeflow_full`：40 个任务全部通过。
+- baseline `checks_only`：40 个任务全部失败，符合原始 bug 对照预期，method pass rate 为 0/40。
+- `codeflow_full`：40 个任务全部通过，method pass rate 为 40/40。
 - unsafe diff：0。
 - review high risk：0。
 - no-change/test-deletion/forbidden/secret 等风险检测误报：0。
@@ -447,7 +450,9 @@ Benchmark 代码集中在 `benchmark/scripts/`。
 | SWE-bench Verified 2 | checks_only | 2 | 0 |
 | SWE-bench Verified 2 | codeflow_full | 2 | 2 |
 
-注意：`benchmark/results/` 和 `benchmark/generated/` 是忽略目录。当前入库的是任务文件、脚本和汇总报告；如果需要复核原始 JSON 结果，需要在本机保留生成目录或重新运行 benchmark。
+注意：`benchmark/results/`、`benchmark/generated/` 和 workspace 仍是忽略目录。当前入库的是任务文件、
+脚本、汇总报告和合并后的 `benchmark/reports/current_real_results.json`；如果需要复核完整 workspace
+状态，仍需要在本机保留生成目录或重新运行 benchmark。
 
 ## 16. 测试覆盖
 
@@ -489,30 +494,30 @@ git diff --check
 - built-in sensors。
 - repair loop。
 - Markdown review report。
+- `codeflow inspect` / `report` / `export` 运行结果查看与导出。
 - commit / rollback / keep 人工治理。
 - commit 前二次验证。
 - Harness-Bench、自建示例项目、QuixBugs、BugsInPy、SWE-bench mini subset。
 - fake mini 离线验证能力。
-- 当前真实 LLM benchmark 汇总报告。
+- 当前真实 LLM benchmark 汇总报告，报告已按 method 拆分 baseline 与 full run。
 
 ## 18. 当前边界和后续改进点
 
 当前仍然是规则版 Harness，不是完整产品化平台。主要边界：
 
 - Spec 生成和 diff review 都是规则实现，没有 LLM 级语义审查。
-- Observability 只有日志、trajectory、review report 和 benchmark report，还没有统一 run index / inspect / export 命令。
+- Observability 已有 run 目录、inspect、report 和 export；还没有跨 run 搜索、Web UI 或长期趋势仪表盘。
 - `benchmark/generated/` 和 `benchmark/results/` 不入库，fresh clone 需要重新准备 runnable workspaces 才能跑 SWE-bench / BugsInPy 真实任务。
 - SWE-bench 当前只验证了很小的 Astropy mini subset，还不是全量 SWE-bench 结论。
 - BugsInPy 当前重点验证 youtube-dl 5 个任务，还没有大规模跨项目覆盖。
-- benchmark 中真实 LLM 结果受模型、网络、代理和依赖缓存影响，长期回归需要更强的结果归档和重试记录。
-- `test_gate.py` 允许 shell checks，这是 benchmark 和用户自定义 checks 所需能力，但也意味着 checks 本身要来自可信项目配置。
+- benchmark 中真实 LLM 结果受模型、网络、代理和依赖缓存影响，长期回归仍需要把 raw artifact 按策略归档。
+- `test_gate.py` 默认不经 shell 解释 checks；需要 shell 语法时必须写 `shell:` 前缀，仍要求这类配置来自可信项目。
 - `mini_runner.py` 通过 subprocess 调 mini，不直接控制 mini 内部动作；安全边界主要由 prompt、policy、sensors、Git 隔离和人工治理提供。
+- 完整测试中会按条件跳过 Docker/Podman、Singularity、Contree/Modal 和真实 API provider 相关用例；这些依赖需要本机环境提供。
 
 建议后续优先级：
 
-1. 增加 `codeflow report` / `codeflow inspect`，统一查看 `.git/codeflow/` 下的日志和 trajectory。
-2. 改进 benchmark 报告模板，把 baseline pass rate 和 full pass rate 分开显示，避免 `40/80` 被误读。
-3. 增加可选 raw JSON 结果归档策略，至少归档关键 summary 和失败样本。
-4. 扩大 BugsInPy 和 SWE-bench runnable 子集。
-5. 引入更精细的 semantic diff reviewer，降低规则关键字误判和漏判。
-6. 为 real benchmark 增加 per-task retry manifest，记录每次尝试的模型、耗时、失败原因和最终采纳结果。
+1. 增加可选 raw JSON / workspace artifact 归档策略，至少归档关键 summary 和失败样本。
+2. 扩大 BugsInPy 和 SWE-bench runnable 子集。
+3. 引入更精细的 semantic diff reviewer，降低规则关键字误判和漏判。
+4. 为 real benchmark 增加长期回归脚本和趋势对比，基于现有 per-task retry manifest 做稳定性统计。

@@ -11,6 +11,7 @@ from pathlib import Path
 from dotenv import dotenv_values
 
 from codeflow.harness.policy import load_harness_policy
+from codeflow.test_gate import check_command_executable_exists, run_check
 
 
 def _result(name: str, ok: bool, message: str = "", suggestion: str = "") -> dict[str, object]:
@@ -27,11 +28,7 @@ def _run(cmd: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
 
 
 def _command_exists(command: str) -> bool:
-    try:
-        parts = shlex.split(command)
-    except ValueError:
-        return False
-    return bool(parts and shutil.which(parts[0]))
+    return check_command_executable_exists(command)
 
 
 def _python_command_target_error(parts: list[str]) -> str:
@@ -59,6 +56,31 @@ def _python_command_target_error(parts: list[str]) -> str:
     return ""
 
 
+def _probe_mini_command(parts: list[str]) -> tuple[bool, str]:
+    if not parts:
+        return False, "Empty command."
+    env = os.environ.copy()
+    env.setdefault("MSWEA_SILENT_STARTUP", "1")
+    try:
+        result = subprocess.run(
+            [*parts, "--help"],
+            text=True,
+            capture_output=True,
+            timeout=10,
+            env=env,
+        )
+    except FileNotFoundError:
+        return False, f"Command executable not found: {parts[0]}"
+    except subprocess.TimeoutExpired:
+        return False, "Command probe timed out while running --help."
+    except OSError as exc:
+        return False, str(exc)
+    if result.returncode == 0:
+        return True, "command probe passed"
+    output = (result.stderr.strip() or result.stdout.strip() or f"exit code {result.returncode}")
+    return False, output
+
+
 def _mini_available() -> tuple[bool, str, str]:
     configured = os.environ.get("CODEFLOW_MINI_COMMAND")
     if configured:
@@ -70,7 +92,10 @@ def _mini_available() -> tuple[bool, str, str]:
         if target_error:
             return False, target_error, "Fix CODEFLOW_MINI_COMMAND."
         if parts and (shutil.which(parts[0]) or Path(parts[0]).exists()):
-            return True, f"CODEFLOW_MINI_COMMAND={configured}", ""
+            probe_ok, probe_message = _probe_mini_command(parts)
+            if probe_ok:
+                return True, f"CODEFLOW_MINI_COMMAND={configured}; {probe_message}", ""
+            return False, probe_message, "Fix CODEFLOW_MINI_COMMAND so it can run with --help."
         return False, f"Command not found: {configured}", "Install mini-swe-agent or fix CODEFLOW_MINI_COMMAND."
     if shutil.which("mini"):
         return True, "mini found on PATH", ""
@@ -181,8 +206,8 @@ def run_doctor(repo: str, *, skip_checks: bool = False, skip_llm: bool = False) 
                 message = "command executable not found"
                 suggestion = "Install the command or update required_checks."
             elif not skip_checks:
-                check = subprocess.run(command, cwd=root, shell=True, text=True, capture_output=True)
-                ok = check.returncode == 0
+                check = run_check(str(root), command)
+                ok = check.success
                 message = "OK" if ok else (check.stderr.strip() or check.stdout.strip() or "check failed")
                 suggestion = "Fix project checks before running CodeFlow." if not ok else ""
             results.append(_result(f"Required check: {command}", ok, message, suggestion))

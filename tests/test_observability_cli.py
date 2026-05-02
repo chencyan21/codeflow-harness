@@ -33,6 +33,8 @@ def _write_run(repo: Path, task: str = "task") -> Path:
     write_text(run_dir / "review_report.md", "# Report\n")
     write_text(run_dir / "diff.patch", "+ changed\n")
     write_text(run_dir / "initial_prompt.md", "prompt\n")
+    write_text(run_dir / "repair_prompt_1.md", "repair\n")
+    write_text(run_dir / "prompt_0.txt", "mini prompt\n")
     write_json(run_dir / "checks_round_0.json", [])
     write_json(run_dir / "sensor_report_round_0.json", {})
     write_text(run_dir / "mini_run_0.log", "log\n")
@@ -52,8 +54,18 @@ def test_observability_creates_and_exports_run(tmp_path: Path) -> None:
         names = set(archive.namelist())
     assert "state.json" in names
     assert "review_report.md" in names
+    assert "initial_prompt.md" not in names
+    assert "repair_prompt_1.md" not in names
+    assert "prompt_0.txt" not in names
     assert "mini_run_0.log" not in names
     assert "mini_run_0.trajectory.json" not in names
+
+    with_prompts = export_run_dir(run_dir, tmp_path / "run-with-prompts.zip", include_prompts=True)
+    with zipfile.ZipFile(with_prompts) as archive:
+        prompt_names = set(archive.namelist())
+    assert "initial_prompt.md" in prompt_names
+    assert "repair_prompt_1.md" in prompt_names
+    assert "prompt_0.txt" in prompt_names
 
 
 def test_export_rejects_output_inside_run_dir(tmp_path: Path) -> None:
@@ -85,6 +97,25 @@ def test_inspect_report_export_cli(tmp_path: Path) -> None:
     )
     assert exported.exit_code == 0, exported.output
     assert out.exists()
+    with zipfile.ZipFile(out) as archive:
+        assert "initial_prompt.md" not in set(archive.namelist())
+
+    out_with_prompts = tmp_path / "artifact-with-prompts.zip"
+    exported_with_prompts = runner.invoke(
+        app,
+        [
+            "export",
+            "--repo",
+            str(tmp_path),
+            "--latest",
+            "--out",
+            str(out_with_prompts),
+            "--include-prompts",
+        ],
+    )
+    assert exported_with_prompts.exit_code == 0, exported_with_prompts.output
+    with zipfile.ZipFile(out_with_prompts) as archive:
+        assert "initial_prompt.md" in set(archive.namelist())
 
 
 def test_inspect_no_run_is_clear(tmp_path: Path) -> None:

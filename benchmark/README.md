@@ -325,7 +325,11 @@ uv run --no-project --python 3.11 \
 
 任务文件可包含 `setup_commands`。`run_eval.py` 创建评测 workspace 时会先执行这些命令，再提交
 benchmark baseline；已完成 setup 的 generated workspace 会带 `.codeflow-benchmark-setup-done` 标记，
-避免重复执行重型构建。
+避免重复执行重型构建。`setup_commands` 面向可信 benchmark 任务文件，仍按 shell 命令执行。
+
+真实 LLM 评测可以加 `--max-task-attempts 10`。runner 会为每个任务写入
+`*_retry_manifest.json`，记录每次 attempt 的模型、workspace、状态、耗时、错误和是否继续重试。
+`checks_only` 作为 baseline 不会因为预期失败而重复执行。
 
 ## 单独生成汇总报告
 
@@ -347,5 +351,9 @@ benchmark baseline；已完成 setup 的 generated workspace 会带 `.codeflow-b
   benchmark/results/swebench_lite_2_full_real_current/swebench_lite_2_subset_results.json \
   benchmark/results/swebench_verified_2_checks_only/swebench_verified_2_subset_results.json \
   benchmark/results/swebench_verified_2_full_real_current/swebench_verified_2_subset_results.json \
-  --out benchmark/reports/current_real_results.md
+  --out benchmark/reports/current_real_results.md \
+  --raw-out benchmark/reports/current_real_results.json
 ```
+
+合并报告会先给出 overall records，再按 `method` 拆分通过率。`checks_only` baseline 和
+`codeflow_full` 结果不要用单个总通过率混读。

@@ -15,8 +15,6 @@ from typing import Any, Protocol
 
 from platformdirs import user_config_dir
 
-from minisweagent.utils.log import logger
-
 __version__ = "2.2.8"
 
 package_dir = Path(__file__).resolve().parent
@@ -40,6 +38,9 @@ def load_global_config(*, verbose: bool = False, override: bool = False) -> Path
     points call this function explicitly before reading model settings.
     """
     global _global_config_loaded
+    from minisweagent.utils.log import configure_logging
+
+    configure_logging()
     ensure_global_config_dir()
     if verbose and not os.getenv("MSWEA_SILENT_STARTUP"):
         from rich.console import Console
@@ -59,6 +60,14 @@ def load_global_config(*, verbose: bool = False, override: bool = False) -> Path
     if stats is not None and hasattr(stats, "reload_limits_from_env"):
         stats.reload_limits_from_env()
     return global_config_file
+
+
+def __getattr__(name: str) -> Any:
+    if name == "logger":
+        from minisweagent.utils.log import configure_logging
+
+        return configure_logging()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 # === Protocols ===

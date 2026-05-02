@@ -191,12 +191,14 @@ base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
 
 ## Test Gate
 
-`codeflow/test_gate.py` 使用 `subprocess.run(..., shell=True)` 在目标仓库内逐条运行 checks：
+`codeflow/test_gate.py` 在目标仓库内逐条运行 checks：
 
 - 保存命令、return code、stdout、stderr。
 - stdout/stderr 最多保留末尾 8000 字符。
 - `all_checks_passed()` 判断全部通过。
 - `failed_checks()` 提取失败项用于 repair prompt。
+- 默认使用 `shlex.split` 后直接执行命令，不经 shell 解释。
+- 如果必须使用管道、重定向、`&&` 等 shell 语法，需要显式写 `shell:` 前缀；这类配置应来自可信项目。
 
 ## Harness Sensors
 
@@ -257,6 +259,19 @@ sensor report 会进入 repair prompt 和最终 review report。当前可自动 
 3. 按 method 运行 `checks_only`、`raw_mini`、`codeflow_basic` 或 `codeflow_full`。
 4. 汇总 status、repair_round、checks_passed、sensors 和 risk review。
 5. 输出 `benchmark/results/{method}/{task_file_stem}_results.json` 和 Markdown 报告。
+
+真实 LLM 评测支持 `--max-task-attempts`。每个 attempt 会追加到
+`{task_file_stem}_retry_manifest.json`，记录模型、workspace、状态、耗时、错误和是否继续重试。
+汇总报告会按 method 拆分 pass rate，避免把 `checks_only` baseline 和 `codeflow_full` 混成一个结论。
+
+## Observability
+
+一次运行的 artifact 写入目标仓库 `.git/codeflow/runs/{run_id}/`。CLI 支持：
+
+- `codeflow inspect`：查看最新或指定 run 的状态摘要，支持 `--json` 和 recent list。
+- `codeflow report`：输出 `review_report.md` 或只打印路径。
+- `codeflow export`：导出 zip。默认排除 prompt、mini 日志和 trajectory，避免无意泄露任务上下文；
+  需要排查时可用 `--include-prompts`、`--include-logs`、`--include-trajectory` 显式包含。
 
 ## 测试覆盖
 

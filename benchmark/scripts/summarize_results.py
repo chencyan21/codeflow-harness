@@ -20,6 +20,7 @@ def _yes(value: bool) -> str:
 def build_markdown_report(results: list[dict[str, Any]]) -> str:
     total = len(results)
     status_counts = Counter(str(item.get("status", "unknown")) for item in results)
+    method_counts = Counter(str(item.get("method", "unknown")) for item in results)
     dataset_method_counts = Counter(
         (str(item.get("dataset", "unknown")), str(item.get("method", "unknown"))) for item in results
     )
@@ -40,8 +41,15 @@ def build_markdown_report(results: list[dict[str, Any]]) -> str:
         "",
         "## 汇总",
         "",
-        f"- 任务数：{total}",
-        f"- Checks Pass Rate：{checks_passed}/{total} ({_percent(checks_passed, total)})",
+        f"- 结果记录数：{total}",
+        (
+            "- Overall Checks Pass Rate (all records)："
+            f"{checks_passed}/{total} ({_percent(checks_passed, total)})"
+        ),
+        (
+            "- 说明：baseline 和 agent 方法需要按 method 分开解读，"
+            "不能把 checks_only 与 codeflow_full 的通过率混成单一结论。"
+        ),
         f"- Unsafe Diff Rate：{unsafe}/{total} ({_percent(unsafe, total)})",
         f"- No-change Detection：{no_change}/{total} ({_percent(no_change, total)})",
         f"- Test Deletion Detection：{test_deleted}/{total} ({_percent(test_deleted, total)})",
@@ -52,9 +60,30 @@ def build_markdown_report(results: list[dict[str, Any]]) -> str:
         f"- Missing Test Warning：{missing_test}/{total} ({_percent(missing_test, total)})",
         f"- Average Repair Rounds：{avg_repair:.2f}",
         "",
-        "## 状态分布",
+        "## Method Summary",
         "",
+        "| method | records | checks_passed | pass_rate | unsafe | avg_repair |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
     ]
+    for method in sorted(method_counts):
+        group = [item for item in results if str(item.get("method", "unknown")) == method]
+        group_total = len(group)
+        group_passed = sum(1 for item in group if item.get("checks_passed"))
+        group_unsafe = sum(1 for item in group if item.get("unsafe_diff"))
+        group_repairs = [int(item.get("repair_rounds", 0)) for item in group]
+        group_avg_repair = sum(group_repairs) / group_total if group_total else 0.0
+        lines.append(
+            f"| {method} | {group_total} | {group_passed}/{group_total} | "
+            f"{_percent(group_passed, group_total)} | {group_unsafe} | {group_avg_repair:.2f} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## 状态分布",
+            "",
+        ]
+    )
     for status, count in sorted(status_counts.items()):
         lines.append(f"- {status}: {count}")
 
@@ -132,18 +161,51 @@ def load_result_files(paths: list[Path]) -> list[dict[str, Any]]:
     return results
 
 
+def _portable_path(value: object, *, root: Path) -> object:
+    if not isinstance(value, str):
+        return value
+    path = Path(value)
+    if not path.is_absolute():
+        return value
+    try:
+        return str(path.resolve().relative_to(root))
+    except ValueError:
+        return path.name
+
+
+def make_portable_records(results: list[dict[str, Any]], *, root: Path | None = None) -> list[dict[str, Any]]:
+    root = (root or Path.cwd()).resolve()
+    portable: list[dict[str, Any]] = []
+    for item in results:
+        copied = dict(item)
+        copied["workspace"] = _portable_path(copied.get("workspace"), root=root)
+        portable.append(copied)
+    return portable
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Summarize CodeFlow-Harness-Bench results.")
     parser.add_argument("results_json", nargs="+", help="Path(s) to *_results.json")
     parser.add_argument("--out", help="Markdown output path")
+    parser.add_argument("--raw-out", help="Optional combined raw JSON output path")
     args = parser.parse_args()
 
     result_paths = [Path(path) for path in args.results_json]
     results = load_result_files(result_paths)
     report = build_markdown_report(results)
     out_path = Path(args.out) if args.out else result_paths[0].with_suffix(".md")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(report, encoding="utf-8")
     print(f"wrote {out_path}")
+    if args.raw_out:
+        raw_out_path = Path(args.raw_out)
+        raw_out_path.parent.mkdir(parents=True, exist_ok=True)
+        portable_results = make_portable_records(results)
+        raw_out_path.write_text(
+            json.dumps(portable_results, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        print(f"wrote {raw_out_path}")
 
 
 if __name__ == "__main__":

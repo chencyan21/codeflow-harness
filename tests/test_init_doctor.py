@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -93,6 +94,37 @@ def test_doctor_rejects_missing_python_script_command(tmp_path: Path, monkeypatc
     mini = next(item for item in results if item["name"] == "mini CLI")
     assert not mini["ok"]
     assert "Python script not found" in str(mini["message"])
+
+
+def test_doctor_probes_configured_mini_command(tmp_path: Path, monkeypatch) -> None:
+    _init_repo(tmp_path)
+    script = tmp_path / "mini_probe.py"
+    script.write_text("import sys\nraise SystemExit(3 if '--help' in sys.argv else 0)\n", encoding="utf-8")
+    monkeypatch.setenv("CODEFLOW_MINI_COMMAND", f"{sys.executable} {script}")
+
+    results = run_doctor(str(tmp_path), skip_checks=True, skip_llm=True)
+
+    mini = next(item for item in results if item["name"] == "mini CLI")
+    assert not mini["ok"]
+    assert "exit code 3" in str(mini["message"])
+
+
+def test_doctor_probes_env_wrapped_mini_command(tmp_path: Path, monkeypatch) -> None:
+    _init_repo(tmp_path)
+    script = tmp_path / "mini_probe.py"
+    script.write_text(
+        "import os, sys\n"
+        "ok = '--help' in sys.argv and os.environ.get('MINI_PROBE') == '1'\n"
+        "raise SystemExit(0 if ok else 5)\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("CODEFLOW_MINI_COMMAND", f"env MINI_PROBE=1 {sys.executable} {script}")
+
+    results = run_doctor(str(tmp_path), skip_checks=True, skip_llm=True)
+
+    mini = next(item for item in results if item["name"] == "mini CLI")
+    assert mini["ok"]
+    assert "command probe passed" in str(mini["message"])
 
 
 def test_doctor_cli_json(tmp_path: Path) -> None:

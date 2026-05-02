@@ -150,6 +150,7 @@ def export_command(
     run_id: Annotated[str | None, typer.Option(help="Specific run id")] = None,
     include_logs: Annotated[bool, typer.Option(help="Include mini run logs")] = False,
     include_trajectory: Annotated[bool, typer.Option(help="Include mini trajectory files")] = False,
+    include_prompts: Annotated[bool, typer.Option(help="Include generated prompt artifacts")] = False,
 ) -> None:
     try:
         run_dir = get_run_dir(repo, run_id, latest=latest or run_id is None)
@@ -158,6 +159,7 @@ def export_command(
             Path(out),
             include_logs=include_logs,
             include_trajectory=include_trajectory,
+            include_prompts=include_prompts,
         )
     except Exception as exc:
         console.print(f"[bold red]CodeFlow export failed:[/bold red] {exc}")

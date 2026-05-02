@@ -4,22 +4,28 @@ from pathlib import Path
 from rich.logging import RichHandler
 
 
-def _setup_root_logger() -> None:
-    logger = logging.getLogger("minisweagent")
+logger = logging.getLogger("minisweagent")
+
+
+def configure_logging() -> logging.Logger:
+    """Configure the default mini-swe-agent console logger on demand."""
     logger.setLevel(logging.DEBUG)
-    _handler = RichHandler(
-        show_path=False,
-        show_time=False,
-        show_level=False,
-        markup=True,
-    )
-    _formatter = logging.Formatter("%(name)s: %(levelname)s: %(message)s")
-    _handler.setFormatter(_formatter)
-    logger.addHandler(_handler)
+    if not any(getattr(handler, "_minisweagent_console_handler", False) for handler in logger.handlers):
+        handler = RichHandler(
+            show_path=False,
+            show_time=False,
+            show_level=False,
+            markup=True,
+        )
+        formatter = logging.Formatter("%(name)s: %(levelname)s: %(message)s")
+        handler.setFormatter(formatter)
+        handler._minisweagent_console_handler = True  # type: ignore[attr-defined]
+        logger.addHandler(handler)
+    return logger
 
 
 def add_file_handler(path: Path | str, level: int = logging.DEBUG, *, print_path: bool = True) -> None:
-    logger = logging.getLogger("minisweagent")
+    configure_logging()
     handler = logging.FileHandler(path)
     handler.setLevel(level)
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -29,8 +35,4 @@ def add_file_handler(path: Path | str, level: int = logging.DEBUG, *, print_path
         print(f"Logging to '{path}'")
 
 
-_setup_root_logger()
-logger = logging.getLogger("minisweagent")
-
-
-__all__ = ["logger"]
+__all__ = ["add_file_handler", "configure_logging", "logger"]

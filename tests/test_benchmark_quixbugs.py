@@ -15,7 +15,7 @@ from prepare_quixbugs import prepare_quixbugs  # noqa: E402
 from prepare_swebench import ASTROPY_BUILD_EXT_COMMAND, task_from_record, write_jsonl  # noqa: E402
 from prepare_bugsinpy import discover_candidates, prepare_bugsinpy  # noqa: E402
 from _harness_bench_common import load_tasks, prepare_workspace  # noqa: E402
-from summarize_results import build_markdown_report, load_result_files  # noqa: E402
+from summarize_results import build_markdown_report, load_result_files, make_portable_records  # noqa: E402
 from codeflow.git_guard import get_changed_files  # noqa: E402
 import run_eval  # noqa: E402
 
@@ -265,4 +265,72 @@ def test_summarize_results_can_merge_multiple_files(tmp_path: Path) -> None:
 
     assert "quixbugs | checks_only" in report
     assert "quixbugs | codeflow_full" in report
-    assert "Checks Pass Rate：1/2" in report
+    assert "Overall Checks Pass Rate (all records)：1/2" in report
+    assert "| checks_only | 1 | 0/1 | 0.0% | 0 | 0.00 |" in report
+    assert "| codeflow_full | 1 | 1/1 | 100.0% | 0 | 0.00 |" in report
+
+
+def test_summarize_results_can_make_raw_records_portable(tmp_path: Path) -> None:
+    workspace = tmp_path / "benchmark" / "workspaces" / "task"
+    records = [{"id": "task", "workspace": str(workspace)}]
+
+    portable = make_portable_records(records, root=tmp_path)
+
+    assert portable[0]["workspace"] == "benchmark/workspaces/task"
+
+
+def test_retry_manifest_records_attempt_decisions(tmp_path: Path) -> None:
+    task = {"id": "task-1", "dataset": "quixbugs"}
+    failed_record = {
+        "status": "checks_failed",
+        "checks_passed": False,
+        "runtime_seconds": 1.25,
+        "error_type": None,
+        "error": None,
+    }
+
+    assert (
+        run_eval._should_retry_record(
+            failed_record,
+            method="codeflow_full",
+            attempt=1,
+            max_attempts=3,
+        )
+        is True
+    )
+    assert (
+        run_eval._should_retry_record(
+            failed_record,
+            method="checks_only",
+            attempt=1,
+            max_attempts=3,
+        )
+        is False
+    )
+    assert (
+        run_eval._should_retry_record(
+            {"status": "review_required", "checks_passed": True, "unsafe_diff": True},
+            method="codeflow_full",
+            attempt=1,
+            max_attempts=3,
+        )
+        is True
+    )
+
+    manifest = run_eval._retry_manifest_record(
+        task=task,
+        method="codeflow_full",
+        attempt=1,
+        max_attempts=3,
+        record=failed_record,
+        will_retry=True,
+        model="deepseekv4",
+        workspace=tmp_path,
+    )
+
+    assert manifest["id"] == "task-1"
+    assert manifest["attempt"] == 1
+    assert manifest["max_attempts"] == 3
+    assert manifest["will_retry"] is True
+    assert manifest["model"] == "deepseekv4"
+    assert manifest["workspace"] == str(tmp_path)

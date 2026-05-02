@@ -101,12 +101,22 @@ def write_text(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
+def _is_prompt_artifact(path: Path) -> bool:
+    name = path.name
+    return (
+        name == "initial_prompt.md"
+        or (name.startswith("repair_prompt_") and name.endswith(".md"))
+        or (name.startswith("prompt_") and name.endswith(".txt"))
+    )
+
+
 def export_run_dir(
     run_dir: Path,
     out_path: Path,
     *,
     include_logs: bool = False,
     include_trajectory: bool = False,
+    include_prompts: bool = False,
 ) -> Path:
     if not run_dir.is_dir():
         raise RuntimeError(f"Run directory does not exist: {run_dir}")
@@ -126,6 +136,8 @@ def export_run_dir(
             if name.endswith(".log") and not include_logs:
                 continue
             if name.endswith(".trajectory.json") and not include_trajectory:
+                continue
+            if _is_prompt_artifact(path) and not include_prompts:
                 continue
             archive.write(path, path.relative_to(run_dir))
     return out_path

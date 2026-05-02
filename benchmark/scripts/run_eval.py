@@ -55,6 +55,46 @@ UNSAFE_SENSOR_NAMES = {
 EVAL_METHODS = ("raw_mini", "checks_only", "codeflow_basic", "codeflow_full")
 
 
+def _should_retry_record(record: dict[str, Any], *, method: str, attempt: int, max_attempts: int) -> bool:
+    if attempt >= max_attempts or method == "checks_only":
+        return False
+    successful_statuses = {"checks_passed", "committed", "kept_uncommitted"}
+    return (
+        record.get("status") == "error"
+        or record.get("status") not in successful_statuses
+        or not record.get("checks_passed", False)
+        or bool(record.get("unsafe_diff"))
+    )
+
+
+def _retry_manifest_record(
+    *,
+    task: dict[str, Any],
+    method: str,
+    attempt: int,
+    max_attempts: int,
+    record: dict[str, Any],
+    will_retry: bool,
+    model: str | None,
+    workspace: Path | None,
+) -> dict[str, Any]:
+    return {
+        "id": task.get("id", "unknown"),
+        "dataset": task.get("dataset", "harness_bench"),
+        "method": method,
+        "attempt": attempt,
+        "max_attempts": max_attempts,
+        "will_retry": will_retry,
+        "status": record.get("status"),
+        "checks_passed": record.get("checks_passed", False),
+        "runtime_seconds": record.get("runtime_seconds"),
+        "error_type": record.get("error_type"),
+        "error": record.get("error"),
+        "model": model,
+        "workspace": str(workspace) if workspace else record.get("workspace"),
+    }
+
+
 def _sensor_by_name(report: HarnessSensorReport | None) -> dict[str, dict[str, Any]]:
     if not report:
         return {}
@@ -303,6 +343,12 @@ def main() -> None:
     parser.add_argument("--limit", type=int, help="Run only the first N selected tasks")
     parser.add_argument("--model", help="Model name passed to mini-swe-agent")
     parser.add_argument("--max-repair-rounds", type=int, help="Override repair rounds")
+    parser.add_argument(
+        "--max-task-attempts",
+        type=int,
+        default=1,
+        help="Maximum attempts per task; failed real-agent runs can be retried.",
+    )
     parser.add_argument("--mini-command", help="Override CODEFLOW_MINI_COMMAND")
     parser.add_argument("--fake-mini", action="store_true", help="Use deterministic fake mini")
     parser.add_argument(
@@ -321,6 +367,8 @@ def main() -> None:
     )
     parser.add_argument("--proxy", help="Proxy URL for setup commands, for example http://127.0.0.1:10087")
     args = parser.parse_args()
+    if args.max_task_attempts < 1:
+        parser.error("--max-task-attempts must be >= 1")
 
     tasks_path = project_path(args.tasks)
     workspaces_dir = project_path(args.workspaces_dir)
@@ -331,58 +379,100 @@ def main() -> None:
     old_mini_command = _set_mini_command(args.fake_mini, args.mini_command)
     env = benchmark_env(proxy=args.proxy)
     results: list[dict[str, Any]] = []
+    retry_manifest: list[dict[str, Any]] = []
+    result_prefix = tasks_path.stem
+    retry_manifest_path = out_dir / f"{result_prefix}_retry_manifest.json"
 
     try:
         for task in tasks:
-            start = time.perf_counter()
-            workspace: Path | None = None
-            try:
-                workspace = prepare_workspace(
-                    task,
-                    workspaces_dir=workspaces_dir,
-                    clean=not args.reuse_workspaces,
-                    env=env,
-                )
-                state = _run_task(
-                    task=task,
-                    workspace=workspace,
+            final_record: dict[str, Any] | None = None
+            for attempt in range(1, args.max_task_attempts + 1):
+                start = time.perf_counter()
+                workspace: Path | None = None
+                try:
+                    workspace = prepare_workspace(
+                        task,
+                        workspaces_dir=workspaces_dir,
+                        clean=not args.reuse_workspaces or attempt > 1,
+                        env=env,
+                    )
+                    state = _run_task(
+                        task=task,
+                        workspace=workspace,
+                        method=args.method,
+                        model=args.model,
+                        max_repair_rounds=args.max_repair_rounds,
+                    )
+                    runtime = time.perf_counter() - start
+                    record = _state_record(
+                        task,
+                        method=args.method,
+                        workspace=workspace,
+                        state=state,
+                        runtime_seconds=runtime,
+                    )
+                    (out_dir / f"{task['id']}_review.md").write_text(
+                        state.report,
+                        encoding="utf-8",
+                    )
+                except Exception as exc:
+                    runtime = time.perf_counter() - start
+                    record = _error_record(
+                        task,
+                        method=args.method,
+                        workspace=workspace,
+                        exc=exc,
+                        runtime_seconds=runtime,
+                    )
+                record["attempts"] = attempt
+                will_retry = _should_retry_record(
+                    record,
                     method=args.method,
-                    model=args.model,
-                    max_repair_rounds=args.max_repair_rounds,
+                    attempt=attempt,
+                    max_attempts=args.max_task_attempts,
                 )
-                runtime = time.perf_counter() - start
-                record = _state_record(
-                    task,
-                    method=args.method,
-                    workspace=workspace,
-                    state=state,
-                    runtime_seconds=runtime,
+                retry_manifest.append(
+                    _retry_manifest_record(
+                        task=task,
+                        method=args.method,
+                        attempt=attempt,
+                        max_attempts=args.max_task_attempts,
+                        record=record,
+                        will_retry=will_retry,
+                        model=args.model,
+                        workspace=workspace,
+                    )
                 )
-                (out_dir / f"{task['id']}_review.md").write_text(
-                    state.report,
+                retry_manifest_path.write_text(
+                    json.dumps(retry_manifest, ensure_ascii=False, indent=2),
                     encoding="utf-8",
                 )
-            except Exception as exc:
-                runtime = time.perf_counter() - start
-                record = _error_record(
+                print(
+                    f"{record['id']}: {record['status']} "
+                    f"attempt {attempt}/{args.max_task_attempts} ({record['runtime_seconds']}s)"
+                )
+                final_record = record
+                if not will_retry:
+                    break
+            if final_record is None:
+                final_record = _error_record(
                     task,
                     method=args.method,
                     workspace=workspace,
-                    exc=exc,
-                    runtime_seconds=runtime,
+                    exc=RuntimeError("Task did not produce a result record."),
+                    runtime_seconds=0.0,
                 )
-            results.append(record)
-            print(f"{record['id']}: {record['status']} ({record['runtime_seconds']}s)")
+            results.append(final_record)
     finally:
         _restore_mini_command(old_mini_command)
 
-    result_prefix = tasks_path.stem
     results_path = out_dir / f"{result_prefix}_results.json"
     report_path = out_dir / f"{result_prefix}_report.md"
     results_path.write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
     report_path.write_text(build_markdown_report(results), encoding="utf-8")
     print(f"wrote {results_path}")
     print(f"wrote {report_path}")
+    print(f"wrote {retry_manifest_path}")
 
 
 if __name__ == "__main__":
