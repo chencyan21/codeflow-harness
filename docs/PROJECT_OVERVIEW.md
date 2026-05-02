@@ -253,10 +253,10 @@ harness:
 
 ## 10. mini-swe-agent 集成
 
-`codeflow/mini_runner.py` 通过 subprocess 调用 mini-swe-agent：
+`codeflow/mini_runner.py` 通过 `MiniExecutor` 协议调用 mini-swe-agent。默认是 subprocess CLI：
 
 ```bash
-mini --task "<prompt>" --yolo --exit-immediately --output <trajectory.json>
+mini --task-file <prompt.txt> --yolo --exit-immediately --output <trajectory.json>
 ```
 
 实现细节：
@@ -266,9 +266,12 @@ mini --task "<prompt>" --yolo --exit-immediately --output <trajectory.json>
 - 支持 `CODEFLOW_MINI_COMMAND` 覆盖 mini 命令，benchmark 的 fake mini 也通过这个变量接入。
 - 如果 PATH 中有 `mini`，优先使用它。
 - 如果没有 `mini`，回退到当前环境中的 `python -m minisweagent.run.mini`。
-- mini 返回非零时抛出 `RuntimeError`，日志路径会写入错误信息。
+- 支持 `CODEFLOW_MINI_EXECUTOR=subprocess|inprocess`；in-process 路径调用
+  `minisweagent.run.mini.run_mini_in_process()`，绕过 CLI subprocess 边界。
+- mini 返回非零时抛出 `MiniExecutionError`，日志路径会写入错误信息和 `ERROR_TYPE`。
 - prompt 文件保留在 run artifact 目录中用于审计；`codeflow export` 默认排除 prompt，需要时可显式包含。
 - mini 子进程默认 3600 秒超时，可通过 `CODEFLOW_MINI_TIMEOUT_SECONDS` 覆盖；超时时会终止子进程组并写入 log 后失败。
+- 每次调用会写入 `mini_run_N.events.jsonl`，记录 prompt/log 写入和 executor command 前后事件。
 
 模型和 API 配置：
 
@@ -535,13 +538,16 @@ git diff --check
 
 - 语义 Spec / Diff 审查依赖 OpenAI-compatible 模型配置；强制策略已能阻断不可用场景，但模型质量仍需要人工评估。
 - diff review 已有结构化 findings、规则、sensors 和可选语义审查，但高风险变更仍需要人工确认业务语义。
-- Observability 已有 run 索引、inspect、search、summary、dashboard、serve、cleanup、report 和 export；serve 是轻量本地 HTTP 服务，还不是多用户长期运行平台。
+- Observability 已有 run 索引、inspect、search、summary、dashboard、serve、cleanup、report 和 export；
+  `serve` 已支持多仓库、token、`/api/runs`、`/api/findings`、`/api/trends`、`/api/failures`
+  和可选 SQLite 索引，仍未引入独立用户/权限/部署控制面。
 - `benchmark/generated/` 和 `benchmark/results/` 不入库，fresh clone 需要重新准备 runnable workspaces 才能跑 SWE-bench / BugsInPy 真实任务。
 - SWE-bench 当前只验证了很小的 Astropy mini subset，还不是全量 SWE-bench 结论。
 - BugsInPy 当前重点验证 youtube-dl 5 个任务，还没有大规模跨项目覆盖。
 - benchmark 中真实 LLM 结果受模型、网络、代理和依赖缓存影响，长期回归仍需要把 raw artifact 按策略归档。
 - `test_gate.py` 默认不经 shell 解释 checks；允许 shell 后已有风险扫描，但仍要求这类配置来自可信项目。
-- `mini_runner.py` 已有 executor 抽象和错误分类，默认仍通过 subprocess 调 mini；还没有稳定接入 mini 内部 API 做实时拦截。
+- `mini_runner.py` 已有 executor 抽象、错误分类、events artifact 和 in-process adapter；
+  仍需要继续把更细的 mini 工具调用/文件写入事件接入实时 policy hook。
 - 完整测试中会按条件跳过 Docker/Podman、Singularity、Contree/Modal 和真实 API provider 相关用例；这些依赖需要本机环境提供。
 
 建议后续优先级：

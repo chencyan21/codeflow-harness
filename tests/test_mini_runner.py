@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from codeflow.mini_runner import MiniExecutionError, run_mini_agent
+from minisweagent.run import mini as mini_module
 
 
 def _init_repo(path: Path) -> None:
@@ -206,3 +207,78 @@ def test_run_mini_agent_reports_missing_trajectory_status(tmp_path: Path, monkey
 
     assert result.status == "trajectory_missing"
     assert result.error_type == "trajectory_missing"
+
+
+def test_run_mini_agent_writes_executor_events(tmp_path: Path, monkeypatch) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_repo(repo)
+    script = tmp_path / "ok.py"
+    script.write_text("print('ok')\n", encoding="utf-8")
+
+    monkeypatch.setenv("CODEFLOW_MINI_COMMAND", f"{sys.executable} {script}")
+
+    result = run_mini_agent(str(repo), "prompt")
+
+    assert result.events_path is not None
+    events = [
+        json.loads(line)
+        for line in Path(result.events_path).read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert [event["event"] for event in events] == [
+        "before_file_write",
+        "before_command",
+        "after_command",
+        "before_file_write",
+    ]
+    assert events[2]["returncode"] == 0
+
+
+def test_run_mini_agent_can_use_inprocess_executor(tmp_path: Path, monkeypatch) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_repo(repo)
+    calls: dict[str, object] = {}
+
+    def fake_run_mini_in_process(**kwargs: object) -> object:
+        task_file = Path(str(kwargs["task_file"]))
+        calls["task"] = task_file.read_text(encoding="utf-8")
+        calls["model_name"] = kwargs["model_name"]
+        calls["config_spec"] = kwargs["config_spec"]
+        calls["yolo"] = kwargs["yolo"]
+        output = Path(str(kwargs["output"]))
+        output.write_text("{}", encoding="utf-8")
+        return object()
+
+    monkeypatch.setattr(mini_module, "run_mini_in_process", fake_run_mini_in_process)
+    monkeypatch.setenv("CODEFLOW_MINI_EXECUTOR", "inprocess")
+
+    result = run_mini_agent(
+        str(repo),
+        "prompt",
+        model="openai/test-model",
+        mini_config="mini.yaml",
+    )
+
+    assert result.status == "completed"
+    assert calls == {
+        "task": "prompt",
+        "model_name": "openai/test-model",
+        "config_spec": ["mini.yaml"],
+        "yolo": True,
+    }
+    assert result.events_path is not None
+    assert Path(result.events_path).exists()
+
+
+def test_invalid_executor_name_is_clear(tmp_path: Path, monkeypatch) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_repo(repo)
+    monkeypatch.setenv("CODEFLOW_MINI_EXECUTOR", "unknown")
+
+    with pytest.raises(MiniExecutionError) as exc_info:
+        run_mini_agent(str(repo), "prompt")
+
+    assert exc_info.value.error_type == "invalid_executor"

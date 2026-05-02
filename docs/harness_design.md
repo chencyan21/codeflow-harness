@@ -34,7 +34,10 @@ mini-swe-agent v2 负责：
 - 根据 repair prompt 修复问题。
 - 产出 trajectory。
 
-CodeFlow 不重写这些能力，默认通过 `SubprocessMiniExecutor` 调用本地 `mini` CLI，并保留 executor 抽象以便后续接入更细粒度执行器。
+CodeFlow 不重写这些能力，默认通过 `SubprocessMiniExecutor` 调用本地 `mini` CLI。
+需要更紧密集成时，可用 `CODEFLOW_MINI_EXECUTOR=inprocess` 直接调用
+`minisweagent.run.mini.run_mini_in_process()`；executor hook 已记录基础 events，
+后续可继续扩展到更细粒度的工具调用和文件写入拦截。
 
 ## 4. CodeFlow Harness 负责什么
 
@@ -121,4 +124,6 @@ Run Report + Benchmark Result
 `inspect` / `search` / `summary` / `dashboard` / `serve` / `cleanup` / `report` / `export` 命令、
 mini executor 抽象、子进程超时保护、GitHub Actions CI、raw mini 对比 benchmark
 和真实 LLM 小子集评测。
-仍属于后续阶段的是更大规模 benchmark 覆盖、可复现 raw artifact 归档、多用户服务化平台和 in-process executor。
+Observability 已拆出 `codeflow/storage/` 与 `codeflow/server/`，支持多仓库服务、
+token、SQLite 索引和 runs/findings/trends/failures API。
+仍属于后续阶段的是更大规模 benchmark 覆盖、可复现 raw artifact 归档和完整多用户权限/部署平台。

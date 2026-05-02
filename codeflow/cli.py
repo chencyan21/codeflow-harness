@@ -16,12 +16,12 @@ from codeflow.harness.observability import (
     list_run_dirs,
     load_run_state,
     search_run_states,
-    serve_observability,
     summarize_run_states,
 )
 from codeflow.init_project import init_project
 from codeflow.models import CodeFlowConfig
 from codeflow.runner import run_codeflow
+from codeflow.server import serve_codeflow
 
 app = typer.Typer(help="CodeFlow Harness: trusted execution harness for mini-swe-agent v2")
 console = Console()
@@ -207,13 +207,24 @@ def dashboard_command(
 
 @app.command("serve")
 def serve_command(
-    repo: Annotated[str, typer.Option(help="Path to target Git repository")],
+    repo: Annotated[
+        list[str],
+        typer.Option(help="Path to target Git repository. Repeat for multiple repositories."),
+    ],
     host: Annotated[str, typer.Option(help="Bind host")] = "127.0.0.1",
     port: Annotated[int, typer.Option(help="Bind port")] = 8765,
+    token: Annotated[
+        str | None,
+        typer.Option(help="Bearer token for dashboard/API access"),
+    ] = None,
+    sqlite_db: Annotated[
+        str | None,
+        typer.Option(help="Optional SQLite database path for indexed service storage"),
+    ] = None,
 ) -> None:
     try:
         console.print(f"Serving CodeFlow dashboard on http://{host}:{port}")
-        serve_observability(repo, host=host, port=port)
+        serve_codeflow(repo, host=host, port=port, token=token, sqlite_db=sqlite_db)
     except KeyboardInterrupt:
         return
     except Exception as exc:

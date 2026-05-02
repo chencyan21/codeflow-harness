@@ -386,9 +386,32 @@ def handle_observability_request(repo: str, raw_path: str) -> tuple[int, str, by
         return 200, "text/html; charset=utf-8", build_runs_dashboard_html(repo, limit=limit).encode()
     if path == "/api/runs":
         limit = int(query.get("limit", ["100"])[0])
-        return _json_response(search_run_states(repo, limit=limit))
+        return _json_response(
+            search_run_states(
+                repo,
+                query=_query_value(query, "q") or _query_value(query, "query"),
+                status=_query_value(query, "status"),
+                risk_level=_query_value(query, "risk") or _query_value(query, "risk_level"),
+                limit=limit,
+            )
+        )
     if path == "/api/summary":
         return _json_response(summarize_run_states(repo))
+    if path == "/api/findings":
+        limit = int(query.get("limit", ["100"])[0])
+        return _json_response(
+            _list_findings(
+                repo,
+                category=_query_value(query, "category"),
+                severity=_query_value(query, "severity"),
+                limit=limit,
+            )
+        )
+    if path == "/api/trends":
+        return _json_response({"daily": summarize_run_states(repo).get("daily_counts", {})})
+    if path == "/api/failures":
+        limit = int(query.get("limit", ["100"])[0])
+        return _json_response(summarize_run_states(repo).get("failed_runs", [])[:limit])
     if path.startswith("/api/runs/"):
         run_id = unquote(path.removeprefix("/api/runs/"))
         return _json_response(_run_record(get_run_dir(repo, run_id)))
@@ -404,6 +427,51 @@ def handle_observability_request(repo: str, raw_path: str) -> tuple[int, str, by
         artifacts = [str(path.relative_to(run_dir)) for path in sorted(run_dir.rglob("*")) if path.is_file()]
         return _json_response({"run_id": run_id, "artifacts": artifacts})
     return 404, "text/plain; charset=utf-8", b"not found"
+
+
+def _query_value(query: dict[str, list[str]], key: str) -> str | None:
+    values = query.get(key)
+    if not values:
+        return None
+    value = values[0].strip()
+    return value or None
+
+
+def _list_findings(
+    repo: str,
+    *,
+    category: str | None = None,
+    severity: str | None = None,
+    limit: int = 100,
+) -> list[dict[str, Any]]:
+    findings: list[dict[str, Any]] = []
+    for record in search_run_states(repo, limit=max(limit, 1000)):
+        run_dir = Path(str(record.get("run_dir", "")))
+        if not run_dir.is_dir():
+            continue
+        summary = load_review_summary(run_dir)
+        for item in summary.get("findings", []):
+            if not isinstance(item, dict):
+                continue
+            if category and item.get("category") != category:
+                continue
+            if severity and item.get("severity") != severity:
+                continue
+            findings.append(
+                {
+                    "run_id": record.get("run_id"),
+                    "task": record.get("task"),
+                    "source": item.get("source"),
+                    "severity": item.get("severity"),
+                    "category": item.get("category"),
+                    "file": item.get("file"),
+                    "message": item.get("message"),
+                    "recommendation": item.get("recommendation"),
+                }
+            )
+            if len(findings) >= limit:
+                return findings
+    return findings
 
 
 def _json_response(data: Any) -> tuple[int, str, bytes]:

@@ -173,10 +173,11 @@ CLI 参数 > codeflow.yaml > project_rules.md > 默认值
 
 ## mini-swe-agent 调用
 
-`codeflow/mini_runner.py` 默认使用 `SubprocessMiniExecutor` 调用本地 `mini` CLI。当前本地 mini-swe-agent v2.2.8 使用参数：
+`codeflow/mini_runner.py` 通过 `MiniExecutor` 协议调用 mini-swe-agent。默认仍使用
+`SubprocessMiniExecutor` 调用本地 `mini` CLI：
 
 ```bash
-mini --task "<prompt>" --yolo --exit-immediately --output <trajectory.json>
+mini --task-file <prompt.txt> --yolo --exit-immediately --output <trajectory.json>
 ```
 
 实现细节：
@@ -185,9 +186,13 @@ mini --task "<prompt>" --yolo --exit-immediately --output <trajectory.json>
 - prompt、日志和 trajectory 写入前后会做常见 secret-like 内容脱敏。
 - 支持 `CODEFLOW_MINI_COMMAND` 覆盖 mini 命令，便于测试或调试。
 - 如果 PATH 中没有 `mini`，会回退到当前环境中的 `python -m minisweagent.run.mini`。
+- 支持 `CODEFLOW_MINI_EXECUTOR=subprocess|inprocess`；in-process 路径直接调用
+  `minisweagent.run.mini.run_mini_in_process()`，用于更细粒度集成和后续 hook 扩展。
 - mini 返回非零退出码时抛出 `MiniExecutionError`，并在日志中记录 `ERROR_TYPE`。
 - 默认 mini 子进程超时为 3600 秒，可用 `CODEFLOW_MINI_TIMEOUT_SECONDS` 覆盖；超时时会终止子进程组并写入 mini log。
-- `MiniRunResult` 记录 `status`、`error_type` 和可选 `events_path`，当前可区分 `timeout`、
+- 每次 mini 调用都会写入 `mini_run_N.events.jsonl`，记录 executor 边界事件，例如 prompt/log 写入和 command 前后事件。
+- `MiniRunRequest` 记录 repo、prompt path、trajectory path、model、mini config、env、timeout 和 command。
+- `MiniRunResult` 记录 `status`、`error_type` 和 `events_path`，当前可区分 `timeout`、
   `command_not_found`、`nonzero_exit`、`invalid_timeout` 和 `trajectory_missing`。
 
 ### 模型配置
@@ -313,7 +318,9 @@ OpenAI-compatible 模型，要求返回严格 JSON。语义风险会并入 Markd
 - `codeflow search`：按 run id、task、branch、status、risk level 搜索历史 run，支持 `--json`。
 - `codeflow summary`：汇总 status、risk、每日 run 数、失败 run、checks/sensors pass rate 和平均 repair 轮数。
 - `codeflow dashboard`：生成静态 HTML dashboard，展示汇总指标、每日趋势、finding category 和最近失败任务，并支持前端筛选。
-- `codeflow serve`：用标准库 HTTP server 提供本地 dashboard 和 `/api/*` JSON endpoint。
+- `codeflow serve`：用标准库 HTTP server 提供 dashboard 和 `/api/*` JSON endpoint；支持重复
+  `--repo` 服务多个仓库、bearer token、可选 SQLite 索引，以及 `/api/runs`、`/api/findings`、
+  `/api/trends`、`/api/failures` 等接口。
 - `codeflow cleanup`：按 `--keep` 保留最近 run，支持 `--dry-run`。
 - `codeflow report`：输出 `review_report.md` 或只打印路径。
 - `codeflow export`：导出 zip。默认排除 prompt、mini 日志和 trajectory，避免无意泄露任务上下文；
@@ -323,6 +330,11 @@ OpenAI-compatible 模型，要求返回严格 JSON。语义风险会并入 Markd
 API key / token / private key 模式脱敏。脱敏是防护层，不替代 policy 中对 `.env`、secret path
 和 secret-like content 的阻断。
 每次 final state 写入后还会更新 `.git/codeflow/index.jsonl`，用于加速搜索、汇总和 dashboard。
+服务化实现拆为 `codeflow/storage/` 和 `codeflow/server/`：
+
+- `JsonlRunStore` 读取各仓库 `.git/codeflow/index.jsonl` 和 run artifact。
+- `SQLiteRunStore` 可把多仓库 run / finding 同步到 SQLite，便于长期查询。
+- `ObservabilityServerConfig` 组合 repos、token 和 sqlite db，并由 `handle_server_request()` 驱动可测试的 HTTP handler。
 
 ## 测试覆盖
 

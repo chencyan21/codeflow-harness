@@ -49,10 +49,13 @@ def _artifact(state: RunState, name: str, path: Path) -> None:
 def _record_mini_result(state: RunState, result: object, index: int) -> None:
     log_path = getattr(result, "log_path", str(result))
     trajectory_path = getattr(result, "trajectory_path", "")
+    events_path = getattr(result, "events_path", "")
     state.mini_runs.append(str(log_path))
     _artifact(state, f"mini_run_{index}_log", Path(str(log_path)))
     if trajectory_path:
         _artifact(state, f"mini_run_{index}_trajectory", Path(str(trajectory_path)))
+    if events_path:
+        _artifact(state, f"mini_run_{index}_events", Path(str(events_path)))
 
 
 def _write_final_state(state: RunState) -> None:

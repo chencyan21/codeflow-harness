@@ -70,6 +70,21 @@ class ExecutorResult(BaseModel):
     events_path: str | None = None
 
 
+class MiniRunRequest(BaseModel):
+    repo: str
+    prompt: str
+    prompt_path: str
+    log_path: str
+    trajectory_path: str
+    command: list[str] = Field(default_factory=list)
+    model: str | None = None
+    mini_config: str | None = None
+    env: dict[str, str] = Field(default_factory=dict)
+    timeout_seconds: float = Field(gt=0)
+    executor_name: str = "subprocess"
+    events_path: str | None = None
+
+
 class MiniRunResult(ExecutorResult):
     pass
 

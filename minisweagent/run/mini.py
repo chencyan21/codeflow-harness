@@ -65,36 +65,36 @@ def _multiline_prompt() -> str:
     return prompt()
 
 
-# fmt: off
-@app.command(help=_HELP_TEXT)
-def main(
-    model_name: str | None = typer.Option(None, "-m", "--model", help="Model to use",),
-    model_class: str | None = typer.Option(None, "--model-class", help="Model class to use (e.g., 'litellm' or 'minisweagent.models.litellm_model.LitellmModel')", rich_help_panel="Advanced"),
-    agent_class: str | None = typer.Option(None, "--agent-class", help="Agent class to use (e.g., 'interactive' or 'minisweagent.agents.interactive.InteractiveAgent')", rich_help_panel="Advanced"),
-    environment_class: str | None = typer.Option(None, "--environment-class", help="Environment class to use (e.g., 'local' or 'minisweagent.environments.local.LocalEnvironment')", rich_help_panel="Advanced"),
-    task: str | None = typer.Option(None, "-t", "--task", help="Task/problem statement", show_default=False),
-    task_file: Path | None = typer.Option(None, "--task-file", help="Read task/problem statement from a file", show_default=False),
-    yolo: bool = typer.Option(False, "-y", "--yolo", help="Run without confirmation"),
-    cost_limit: float | None = typer.Option(None, "-l", "--cost-limit", help="Cost limit. Set to 0 to disable."),
-    config_spec: list[str] = typer.Option([str(DEFAULT_CONFIG_FILE)], "-c", "--config", help=_CONFIG_SPEC_HELP_TEXT),
-    output: Path | None = typer.Option(DEFAULT_OUTPUT_FILE, "-o", "--output", help="Output trajectory file"),
-    exit_immediately: bool = typer.Option(False, "--exit-immediately", help="Exit immediately when the agent wants to finish instead of prompting.", rich_help_panel="Advanced"),
+def run_mini_in_process(
+    *,
+    model_name: str | None = None,
+    model_class: str | None = None,
+    agent_class: str | None = None,
+    environment_class: str | None = None,
+    task: str | None = None,
+    task_file: Path | None = None,
+    yolo: bool = False,
+    cost_limit: float | None = None,
+    config_spec: list[str] | None = None,
+    output: Path | None = DEFAULT_OUTPUT_FILE,
+    exit_immediately: bool = False,
+    load_config: bool = True,
+    configure: bool = True,
 ) -> Any:
-    # fmt: on
-    load_global_config(verbose=True)
-    configure_if_first_time()
-    if isinstance(task_file, OptionInfo):
-        task_file = None
-    if isinstance(exit_immediately, OptionInfo):
-        exit_immediately = False
+    """Run mini-SWE-agent through its Python API instead of the Typer CLI boundary."""
+    if load_config:
+        load_global_config(verbose=True)
+    if configure:
+        configure_if_first_time()
+
     if task_file is not None:
         if task is not None:
             raise typer.BadParameter("Use either --task or --task-file, not both.")
         task = task_file.read_text(encoding="utf-8")
 
-    # Build the config from the command line arguments
-    console.print(f"Building agent config from specs: [bold green]{config_spec}[/bold green]")
-    configs = [get_config_from_spec(spec) for spec in config_spec]
+    effective_config_spec = config_spec or [str(DEFAULT_CONFIG_FILE)]
+    console.print(f"Building agent config from specs: [bold green]{effective_config_spec}[/bold green]")
+    configs = [get_config_from_spec(spec) for spec in effective_config_spec]
     configs.append({
         "run": {
             "task": task or UNSET,
@@ -102,7 +102,7 @@ def main(
         "agent": {
             "agent_class": agent_class or UNSET,
             "mode": "yolo" if yolo else UNSET,
-            "cost_limit": cost_limit or UNSET,
+            "cost_limit": cost_limit if cost_limit is not None else UNSET,
             "confirm_exit": False if exit_immediately else UNSET,
             "output_path": output or UNSET,
         },
@@ -128,6 +128,41 @@ def main(
     if (output_path := config.get("agent", {}).get("output_path")):
         console.print(f"Saved trajectory to [bold green]'{output_path}'[/bold green]")
     return agent
+
+
+# fmt: off
+@app.command(help=_HELP_TEXT)
+def main(
+    model_name: str | None = typer.Option(None, "-m", "--model", help="Model to use",),
+    model_class: str | None = typer.Option(None, "--model-class", help="Model class to use (e.g., 'litellm' or 'minisweagent.models.litellm_model.LitellmModel')", rich_help_panel="Advanced"),
+    agent_class: str | None = typer.Option(None, "--agent-class", help="Agent class to use (e.g., 'interactive' or 'minisweagent.agents.interactive.InteractiveAgent')", rich_help_panel="Advanced"),
+    environment_class: str | None = typer.Option(None, "--environment-class", help="Environment class to use (e.g., 'local' or 'minisweagent.environments.local.LocalEnvironment')", rich_help_panel="Advanced"),
+    task: str | None = typer.Option(None, "-t", "--task", help="Task/problem statement", show_default=False),
+    task_file: Path | None = typer.Option(None, "--task-file", help="Read task/problem statement from a file", show_default=False),
+    yolo: bool = typer.Option(False, "-y", "--yolo", help="Run without confirmation"),
+    cost_limit: float | None = typer.Option(None, "-l", "--cost-limit", help="Cost limit. Set to 0 to disable."),
+    config_spec: list[str] = typer.Option([str(DEFAULT_CONFIG_FILE)], "-c", "--config", help=_CONFIG_SPEC_HELP_TEXT),
+    output: Path | None = typer.Option(DEFAULT_OUTPUT_FILE, "-o", "--output", help="Output trajectory file"),
+    exit_immediately: bool = typer.Option(False, "--exit-immediately", help="Exit immediately when the agent wants to finish instead of prompting.", rich_help_panel="Advanced"),
+) -> Any:
+    # fmt: on
+    if isinstance(task_file, OptionInfo):
+        task_file = None
+    if isinstance(exit_immediately, OptionInfo):
+        exit_immediately = False
+    return run_mini_in_process(
+        model_name=model_name,
+        model_class=model_class,
+        agent_class=agent_class,
+        environment_class=environment_class,
+        task=task,
+        task_file=task_file,
+        yolo=yolo,
+        cost_limit=cost_limit,
+        config_spec=config_spec,
+        output=output,
+        exit_immediately=exit_immediately,
+    )
 
 
 if __name__ == "__main__":

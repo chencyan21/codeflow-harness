@@ -85,7 +85,14 @@ codeflow run \
 export CODEFLOW_MINI_COMMAND="python -m minisweagent.run.mini"
 ```
 
-mini 子进程默认最多运行 3600 秒；可以用 `CODEFLOW_MINI_TIMEOUT_SECONDS` 调整，防止真实模型或外部工具长时间挂起：
+默认执行器仍是稳定的 subprocess CLI 路径；也可以启用 in-process adapter，直接调用本仓库内
+`minisweagent.run.mini.run_mini_in_process()`：
+
+```bash
+export CODEFLOW_MINI_EXECUTOR=inprocess
+```
+
+mini 默认最多运行 3600 秒；可以用 `CODEFLOW_MINI_TIMEOUT_SECONDS` 调整，防止真实模型或外部工具长时间挂起：
 
 ```bash
 export CODEFLOW_MINI_TIMEOUT_SECONDS=1800
@@ -99,6 +106,7 @@ codeflow search --repo ./examples/todo_api --status checks_failed
 codeflow summary --repo ./examples/todo_api
 codeflow dashboard --repo ./examples/todo_api --out ./codeflow-dashboard.html
 codeflow serve --repo ./examples/todo_api --host 127.0.0.1 --port 8765
+codeflow serve --repo ./repo1 --repo ./repo2 --token "$CODEFLOW_DASHBOARD_TOKEN"
 codeflow cleanup --repo ./examples/todo_api --keep 100 --dry-run
 codeflow report --repo ./examples/todo_api --latest
 codeflow export --repo ./examples/todo_api --latest --out ./codeflow-run.zip
@@ -108,6 +116,13 @@ codeflow export --repo ./examples/todo_api --latest --out ./codeflow-run.zip
 `--include-prompts`、`--include-logs` 或 `--include-trajectory`。
 CodeFlow 写入 prompt、mini 日志、trajectory、diff、state 和 check 输出前会做常见
 API key / token / secret-like 内容脱敏。
+
+`codeflow serve` 支持多仓库、本地 bearer token、`/api/runs`、`/api/findings`、
+`/api/trends`、`/api/failures` 和可选 SQLite 索引：
+
+```bash
+codeflow serve --repo ./repo1 --repo ./repo2 --sqlite-db ~/.codeflow/runs.db
+```
 
 ## 模型配置
 
