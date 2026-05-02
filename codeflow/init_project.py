@@ -45,6 +45,12 @@ DEFAULT_CODEFLOW_YAML = """harness:
   semantic_spec: true
   semantic_review: true
   require_semantic_review: false
+  semantic_timeout_seconds: 60
+  semantic_max_diff_chars: 20000
+  semantic_fail_open: true
+  semantic_required_for_paths:
+    - app/auth/
+    - migrations/
 
   governance:
     block_commit_on_failed_checks: true

@@ -507,18 +507,21 @@ git diff --check
 - 默认 project rules 和 `.codeflow/project_rules.md` 读取。
 - `.codeflow/codeflow.yaml` policy 读取、governance flatten、CLI 覆盖。
 - 规则版 Spec 生成。
-- 可选 LLM 语义 Spec 增强和 Diff 审查。
+- 可选 LLM 语义 Spec 增强和 Diff 审查，支持失败原因记录、路径强制审查和 fail-closed policy。
 - 初始 prompt 与 repair prompt。
 - mini-swe-agent 非交互调用。
+- mini executor 抽象、错误分类和 trajectory missing 状态记录。
 - `.env` 到 OpenAI-compatible 环境变量映射。
 - mini 子进程超时和子进程组终止保护。
 - checks 执行和失败日志裁剪。
 - shell checks 默认禁用，需 policy 显式允许。
+- shell checks 风险扫描，doctor 和 sensor report 会提示高风险 shell 片段。
 - built-in sensors。
 - repair loop。
 - prompt、mini 日志、trajectory、diff、state 和 check 输出脱敏。
-- Markdown review report。
-- `codeflow inspect` / `search` / `summary` / `dashboard` / `report` / `export` 运行结果查看、汇总、静态 dashboard 和导出。
+- Markdown review report 和结构化 `review_summary.json`。
+- `codeflow inspect` / `search` / `summary` / `dashboard` / `serve` / `cleanup` / `report` / `export` 运行结果查看、汇总、本地服务、清理和导出。
+- `.git/codeflow/index.jsonl` run 索引，支持 finding counts/category 聚合。
 - commit / rollback / keep 人工治理。
 - commit 前二次验证。
 - GitHub Actions CI，覆盖 ruff、mypy、稳定单元测试子集和覆盖率门槛。
@@ -530,20 +533,20 @@ git diff --check
 
 当前仍不是完整产品化平台。主要边界：
 
-- 语义 Spec / Diff 审查是可选能力，依赖 OpenAI-compatible 模型配置；未配置时默认回退到规则版。
-- diff review 已结合规则、changed files、破坏性代码模式和可选语义审查，但仍需要人工审查高风险变更。
-- Observability 已有 run 目录、inspect、search、summary、dashboard、report 和 export；dashboard 是本地静态 HTML，还不是长期服务化 Web 平台。
+- 语义 Spec / Diff 审查依赖 OpenAI-compatible 模型配置；强制策略已能阻断不可用场景，但模型质量仍需要人工评估。
+- diff review 已有结构化 findings、规则、sensors 和可选语义审查，但高风险变更仍需要人工确认业务语义。
+- Observability 已有 run 索引、inspect、search、summary、dashboard、serve、cleanup、report 和 export；serve 是轻量本地 HTTP 服务，还不是多用户长期运行平台。
 - `benchmark/generated/` 和 `benchmark/results/` 不入库，fresh clone 需要重新准备 runnable workspaces 才能跑 SWE-bench / BugsInPy 真实任务。
 - SWE-bench 当前只验证了很小的 Astropy mini subset，还不是全量 SWE-bench 结论。
 - BugsInPy 当前重点验证 youtube-dl 5 个任务，还没有大规模跨项目覆盖。
 - benchmark 中真实 LLM 结果受模型、网络、代理和依赖缓存影响，长期回归仍需要把 raw artifact 按策略归档。
-- `test_gate.py` 默认不经 shell 解释 checks；需要 shell 语法时必须设置 `allow_shell_checks: true` 并写 `shell:` 前缀，仍要求这类配置来自可信项目。
-- `mini_runner.py` 通过 subprocess 调 mini，不直接控制 mini 内部动作；安全边界主要由 prompt、policy、sensors、Git 隔离和人工治理提供。
+- `test_gate.py` 默认不经 shell 解释 checks；允许 shell 后已有风险扫描，但仍要求这类配置来自可信项目。
+- `mini_runner.py` 已有 executor 抽象和错误分类，默认仍通过 subprocess 调 mini；还没有稳定接入 mini 内部 API 做实时拦截。
 - 完整测试中会按条件跳过 Docker/Podman、Singularity、Contree/Modal 和真实 API provider 相关用例；这些依赖需要本机环境提供。
 
 建议后续优先级：
 
 1. 增加可选 raw JSON / workspace artifact 归档策略，至少归档关键 summary 和失败样本。
 2. 扩大 BugsInPy 和 SWE-bench runnable 子集。
-3. 扩展语义审查 schema 和历史结果对比，继续降低误判和漏判。
-4. 为 real benchmark 增加长期回归脚本和趋势对比，基于现有 per-task retry manifest 做稳定性统计。
+3. 为 real benchmark 增加长期回归脚本和趋势对比，基于现有 per-task retry manifest 做稳定性统计。
+4. 在 mini 内部 API 稳定后，增加 in-process executor 和实时 policy hook。

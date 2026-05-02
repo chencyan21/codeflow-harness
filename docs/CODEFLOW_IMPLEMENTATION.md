@@ -113,6 +113,7 @@ prompt 中包含任务、结构化 Spec、项目规则和 required checks。
 
 如果 `semantic_spec: true` 且存在 OpenAI-compatible 模型配置，`codeflow/semantic.py`
 会在规则 Spec 基础上补充语义验收条件、约束和审查备注。语义增强失败或未配置模型时不会阻断默认流程。
+语义 diff review 会记录 `missing_config`、`timeout`、`api_error`、`invalid_json` 等结构化失败原因。
 
 ## Harness Policy
 
@@ -146,6 +147,12 @@ harness:
   semantic_spec: true
   semantic_review: true
   require_semantic_review: false
+  semantic_timeout_seconds: 60
+  semantic_max_diff_chars: 20000
+  semantic_fail_open: true
+  semantic_required_for_paths:
+    - app/auth/
+    - migrations/
   governance:
     block_commit_on_failed_checks: true
     block_commit_on_high_risk: false
@@ -161,11 +168,12 @@ CLI 参数 > codeflow.yaml > project_rules.md > 默认值
 
 当前实现中，`project_rules.md` 作为文本 guidance 注入 prompt；`codeflow.yaml` 作为可执行 policy 驱动 checks、sensors、repair loop 和 governance。
 `allow_shell_checks` 默认关闭；`semantic_spec` / `semantic_review` 默认在新初始化项目中开启但不强制，
-`require_semantic_review` 开启后如果语义审查没有完成，会进入 `review_required` 并拒绝提交。
+`require_semantic_review`、`semantic_fail_open: false` 或 `semantic_required_for_paths` 命中后，
+如果语义审查没有完成，会进入 `review_required` 并拒绝提交。
 
 ## mini-swe-agent 调用
 
-`codeflow/mini_runner.py` 使用 subprocess 调用本地 `mini` CLI。当前本地 mini-swe-agent v2.2.8 使用参数：
+`codeflow/mini_runner.py` 默认使用 `SubprocessMiniExecutor` 调用本地 `mini` CLI。当前本地 mini-swe-agent v2.2.8 使用参数：
 
 ```bash
 mini --task "<prompt>" --yolo --exit-immediately --output <trajectory.json>
@@ -177,8 +185,10 @@ mini --task "<prompt>" --yolo --exit-immediately --output <trajectory.json>
 - prompt、日志和 trajectory 写入前后会做常见 secret-like 内容脱敏。
 - 支持 `CODEFLOW_MINI_COMMAND` 覆盖 mini 命令，便于测试或调试。
 - 如果 PATH 中没有 `mini`，会回退到当前环境中的 `python -m minisweagent.run.mini`。
-- mini 返回非零退出码时抛出 `RuntimeError`，并指向日志文件。
+- mini 返回非零退出码时抛出 `MiniExecutionError`，并在日志中记录 `ERROR_TYPE`。
 - 默认 mini 子进程超时为 3600 秒，可用 `CODEFLOW_MINI_TIMEOUT_SECONDS` 覆盖；超时时会终止子进程组并写入 mini log。
+- `MiniRunResult` 记录 `status`、`error_type` 和可选 `events_path`，当前可区分 `timeout`、
+  `command_not_found`、`nonzero_exit`、`invalid_timeout` 和 `trajectory_missing`。
 
 ### 模型配置
 
@@ -214,12 +224,15 @@ base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
 - stdout/stderr 会裁剪并脱敏后进入 artifact、repair prompt 和 report。
 - 如果必须使用管道、重定向、`&&` 等 shell 语法，需要同时设置
   `allow_shell_checks: true` 并显式写 `shell:` 前缀；这类配置应来自可信项目。
+  允许 shell 后，CodeFlow 会扫描 `rm -rf`、`curl | sh`、`wget | sh`、写 `.env`、
+  `chmod 777`、`sudo`、`docker run --privileged` 等高风险片段，并在 doctor 和 sensor report 中提示。
 
 ## Harness Sensors
 
 `codeflow/harness/builtin_sensors.py` 提供第一批可组合 sensor：
 
 - `check_commands`：汇总 required checks。
+- `shell_check_risk`：允许 shell checks 时提示高风险 shell 片段。
 - `forbidden_path`：检测 `.env`、secret、key 等敏感路径修改，命中为 high 且 blocking。
 - `forbidden_path_write`：检测新增代码中对 `.env`、secret、key 等禁改路径的写入能力，防止通过新增 helper 间接写 forbidden path。
 - `allowed_path`：配置 `allowed_paths` 时检测越界文件修改，命中为 high 且 blocking。
@@ -235,7 +248,7 @@ sensor report 会进入 repair prompt 和最终 review report。当前可自动 
 
 ## Diff Reviewer
 
-`codeflow/diff_reviewer.py` 生成 Markdown 审查报告，包含：
+`codeflow/diff_reviewer.py` 生成结构化 `ReviewSummary` 和 Markdown 审查报告，包含：
 
 - Task
 - Branch
@@ -246,6 +259,10 @@ sensor report 会进入 repair prompt 和最终 review report。当前可自动 
 - Sensor Report
 - Blocking Reasons
 - Recommendation
+
+Runner 会写入 `review_summary.json`，其中包含统一的 `ReviewFinding` 列表。每条 finding 记录
+`source`、`severity`、`category`、`file`、`message` 和 `recommendation`，来源可以是
+`rules`、`sensor` 或 `semantic`。
 
 风险评分是规则版：
 
@@ -259,8 +276,8 @@ sensor report 会进入 repair prompt 和最终 review report。当前可自动 
 如果 `semantic_review: true` 或 `require_semantic_review: true` 且模型配置可用，
 `codeflow/semantic.py` 会把脱敏后的 diff、changed files、checks 和 sensor report 发送给
 OpenAI-compatible 模型，要求返回严格 JSON。语义风险会并入 Markdown report，并可在
-`block_commit_on_high_risk` 时阻断提交。`require_semantic_review` 开启但模型不可用时，
-runner 会生成 high-risk 的 `semantic_review.json` 并把状态置为 `review_required`。
+`block_commit_on_high_risk` 时阻断提交。强制语义审查、路径强制语义审查或 fail-closed 策略下，
+模型不可用会生成 high-risk 的 `semantic_review.json` 并把状态置为 `review_required`。
 
 ## 示例项目
 
@@ -295,7 +312,9 @@ runner 会生成 high-risk 的 `semantic_review.json` 并把状态置为 `review
 - `codeflow inspect`：查看最新或指定 run 的状态摘要，支持 `--json` 和 recent list。
 - `codeflow search`：按 run id、task、branch、status、risk level 搜索历史 run，支持 `--json`。
 - `codeflow summary`：汇总 status、risk、每日 run 数、失败 run、checks/sensors pass rate 和平均 repair 轮数。
-- `codeflow dashboard`：生成静态 HTML dashboard，展示汇总指标、每日趋势和最近失败任务。
+- `codeflow dashboard`：生成静态 HTML dashboard，展示汇总指标、每日趋势、finding category 和最近失败任务，并支持前端筛选。
+- `codeflow serve`：用标准库 HTTP server 提供本地 dashboard 和 `/api/*` JSON endpoint。
+- `codeflow cleanup`：按 `--keep` 保留最近 run，支持 `--dry-run`。
 - `codeflow report`：输出 `review_report.md` 或只打印路径。
 - `codeflow export`：导出 zip。默认排除 prompt、mini 日志和 trajectory，避免无意泄露任务上下文；
   需要排查时可用 `--include-prompts`、`--include-logs`、`--include-trajectory` 显式包含。
@@ -303,6 +322,7 @@ runner 会生成 high-risk 的 `semantic_review.json` 并把状态置为 `review
 写入 artifact 时会对 prompt、mini 日志、trajectory、diff、state 和 check 输出做常见
 API key / token / private key 模式脱敏。脱敏是防护层，不替代 policy 中对 `.env`、secret path
 和 secret-like content 的阻断。
+每次 final state 写入后还会更新 `.git/codeflow/index.jsonl`，用于加速搜索、汇总和 dashboard。
 
 ## 测试覆盖
 
@@ -310,15 +330,15 @@ API key / token / private key 模式脱敏。脱敏是防护层，不替代 poli
 
 - `tests/test_spec_builder.py`：Spec 生成。
 - `tests/test_prompt_builder.py`：initial / repair prompt 内容。
-- `tests/test_diff_reviewer.py`：风险评分和报告。
+- `tests/test_diff_reviewer.py`：风险评分、结构化 review summary 和报告。
 - `tests/test_git_guard.py`：Git 仓库检查、干净工作区、分支、diff、rollback。
 - `tests/test_test_gate.py`：checks 成功/失败结果收集、shell check policy、输出脱敏。
 - `tests/test_runner.py`：dry-run 不切分支、no-commit 状态语义、人审 keep/rollback/commit、失败 commit 拒绝、语义审查强制阻断、diff 脱敏。
-- `tests/test_mini_runner.py`：mini 调用环境映射、显式 model 优先级、已有标准环境变量保留、超时和日志脱敏。
+- `tests/test_mini_runner.py`：mini 调用环境映射、显式 model 优先级、已有标准环境变量保留、超时、错误分类和日志脱敏。
 - `tests/test_harness_policy.py`：policy fallback、yaml 解析、CLI 覆盖、prompt 注入。
 - `tests/test_harness_sensors.py`：forbidden path、删除测试、无测试变更、无 diff、大 diff、依赖变更、checks fail。
-- `tests/test_semantic.py`：语义 Spec 增强和 Diff 审查 JSON 适配。
-- `tests/test_observability_cli.py`：inspect/report/export/search/summary/dashboard CLI。
+- `tests/test_semantic.py`：语义 Spec 增强、扩展 Diff 审查 schema 和失败原因记录。
+- `tests/test_observability_cli.py`：inspect/report/export/search/summary/dashboard/serve response/cleanup。
 
 已验证命令：
 

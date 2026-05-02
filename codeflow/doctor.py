@@ -11,13 +11,21 @@ from pathlib import Path
 from dotenv import dotenv_values
 
 from codeflow.harness.policy import load_harness_policy
-from codeflow.test_gate import check_command_executable_exists, run_check
+from codeflow.test_gate import check_command_executable_exists, run_check, scan_shell_check_risk
 
 
-def _result(name: str, ok: bool, message: str = "", suggestion: str = "") -> dict[str, object]:
+def _result(
+    name: str,
+    ok: bool,
+    message: str = "",
+    suggestion: str = "",
+    *,
+    level: str | None = None,
+) -> dict[str, object]:
     return {
         "name": name,
         "ok": ok,
+        "level": level or ("ok" if ok else "error"),
         "message": message,
         "suggestion": suggestion,
     }
@@ -211,6 +219,17 @@ def run_doctor(repo: str, *, skip_checks: bool = False, skip_llm: bool = False) 
                 message = "OK" if ok else (check.stderr.strip() or check.stdout.strip() or "check failed")
                 suggestion = "Fix project checks before running CodeFlow." if not ok else ""
             results.append(_result(f"Required check: {command}", ok, message, suggestion))
+            shell_risks = scan_shell_check_risk(command)
+            if exists and shell_risks:
+                results.append(
+                    _result(
+                        f"Shell check risk: {command}",
+                        True,
+                        f"Shell check contains high-risk pattern(s): {', '.join(shell_risks)}",
+                        "Review the shell check and keep allow_shell_checks enabled only for trusted projects.",
+                        level="warning",
+                    )
+                )
 
     mini_ok, mini_message, mini_suggestion = _mini_available()
     results.append(_result("mini CLI", mini_ok, mini_message, mini_suggestion))

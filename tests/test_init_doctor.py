@@ -149,6 +149,29 @@ harness:
     assert "shell check disabled" in str(shell_check["message"])
 
 
+def test_doctor_reports_shell_check_risk_warning(tmp_path: Path, monkeypatch) -> None:
+    _init_repo(tmp_path)
+    init_project(str(tmp_path))
+    policy_path = tmp_path / ".codeflow" / "codeflow.yaml"
+    policy_path.write_text(
+        """
+harness:
+  required_checks:
+    - "shell: rm -rf build"
+  allow_shell_checks: true
+""",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("CODEFLOW_MINI_COMMAND", f"{sys.executable} -m minisweagent.run.mini")
+
+    results = run_doctor(str(tmp_path), skip_checks=True, skip_llm=True)
+
+    warning = next(item for item in results if str(item["name"]).startswith("Shell check risk:"))
+    assert warning["ok"] is True
+    assert warning["level"] == "warning"
+    assert "rm -rf" in str(warning["message"])
+
+
 def test_doctor_cli_json(tmp_path: Path) -> None:
     _init_repo(tmp_path)
     init_project(str(tmp_path))

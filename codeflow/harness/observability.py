@@ -7,8 +7,10 @@ import zipfile
 from collections import Counter
 from datetime import datetime
 from html import escape
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
+from urllib.parse import parse_qs, unquote, urlparse
 
 from pydantic import BaseModel
 
@@ -38,6 +40,10 @@ def get_runs_dir(repo: str) -> Path:
     path = get_codeflow_dir(repo) / "runs"
     path.mkdir(parents=True, exist_ok=True)
     return path
+
+
+def get_run_index_path(repo: str) -> Path:
+    return get_codeflow_dir(repo) / "index.jsonl"
 
 
 def create_run_dir(repo: str, task: str) -> Path:
@@ -88,6 +94,116 @@ def load_run_state(run_dir: Path) -> dict[str, Any]:
     return loaded if isinstance(loaded, dict) else {"run_id": run_dir.name, "run_dir": str(run_dir)}
 
 
+def load_review_summary(run_dir: Path) -> dict[str, Any]:
+    summary_path = run_dir / "review_summary.json"
+    if not summary_path.exists():
+        return {}
+    loaded = json.loads(summary_path.read_text(encoding="utf-8"))
+    return loaded if isinstance(loaded, dict) else {}
+
+
+def _run_record(run_dir: Path) -> dict[str, Any]:
+    state = load_run_state(run_dir)
+    state.setdefault("run_id", run_dir.name)
+    state["run_dir"] = str(run_dir)
+    review_summary = load_review_summary(run_dir)
+    if review_summary:
+        state["review_summary"] = review_summary
+        state["finding_counts"] = _finding_counts(review_summary)
+        state["finding_categories"] = _finding_categories(review_summary)
+        state["high_risk_files"] = _high_risk_files(review_summary)
+    return state
+
+
+def _finding_counts(review_summary: dict[str, Any]) -> dict[str, int]:
+    counter = Counter(
+        str(item.get("severity", "unknown"))
+        for item in review_summary.get("findings", [])
+        if isinstance(item, dict)
+    )
+    return dict(sorted(counter.items()))
+
+
+def _finding_categories(review_summary: dict[str, Any]) -> dict[str, int]:
+    counter = Counter(
+        str(item.get("category", "unknown"))
+        for item in review_summary.get("findings", [])
+        if isinstance(item, dict)
+    )
+    return dict(sorted(counter.items()))
+
+
+def _high_risk_files(review_summary: dict[str, Any]) -> list[str]:
+    files = {
+        str(item.get("file"))
+        for item in review_summary.get("findings", [])
+        if isinstance(item, dict) and item.get("severity") == "high" and item.get("file")
+    }
+    return sorted(files)
+
+
+def _created_at_from_run_id(run_id: str) -> str:
+    prefix = run_id[:15]
+    try:
+        return datetime.strptime(prefix, "%Y%m%d-%H%M%S").isoformat()
+    except ValueError:
+        return ""
+
+
+def build_run_index_entry(run_dir: Path) -> dict[str, Any]:
+    record = _run_record(run_dir)
+    run_id = str(record.get("run_id") or run_dir.name)
+    return {
+        "run_id": run_id,
+        "created_at": _created_at_from_run_id(run_id),
+        "task": record.get("task"),
+        "branch": record.get("branch"),
+        "status": record.get("status"),
+        "risk_level": record.get("risk_level"),
+        "checks_passed": record.get("checks_passed"),
+        "sensor_passed": record.get("sensor_passed"),
+        "repair_round": record.get("repair_round", 0),
+        "finding_counts": record.get("finding_counts", {}),
+        "finding_categories": record.get("finding_categories", {}),
+        "high_risk_files": record.get("high_risk_files", []),
+        "run_dir": str(run_dir),
+    }
+
+
+def load_run_index(repo: str) -> list[dict[str, Any]]:
+    path = get_run_index_path(repo)
+    if not path.exists():
+        return []
+    entries: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        loaded = json.loads(line)
+        if isinstance(loaded, dict):
+            entries.append(loaded)
+    return sorted(entries, key=lambda item: str(item.get("run_id", "")), reverse=True)
+
+
+def update_run_index(repo: str, run_dir: Path) -> None:
+    path = get_run_index_path(repo)
+    entry = build_run_index_entry(run_dir)
+    entries = [item for item in load_run_index(repo) if item.get("run_id") != entry["run_id"]]
+    entries.append(entry)
+    entries = sorted(entries, key=lambda item: str(item.get("run_id", "")), reverse=True)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "".join(json.dumps(item, ensure_ascii=False) + "\n" for item in entries),
+        encoding="utf-8",
+    )
+
+
+def _indexed_or_scanned_records(repo: str) -> list[dict[str, Any]]:
+    indexed = load_run_index(repo)
+    if indexed:
+        return indexed
+    return [_run_record(run_dir) for run_dir in list_run_dirs(repo)]
+
+
 def search_run_states(
     repo: str,
     *,
@@ -98,8 +214,7 @@ def search_run_states(
 ) -> list[dict[str, Any]]:
     matches: list[dict[str, Any]] = []
     query_lower = query.lower() if query else None
-    for run_dir in list_run_dirs(repo):
-        state = load_run_state(run_dir)
+    for state in _indexed_or_scanned_records(repo):
         if status and state.get("status") != status:
             continue
         if risk_level and state.get("risk_level") != risk_level:
@@ -109,8 +224,6 @@ def search_run_states(
         ).lower()
         if query_lower and query_lower not in searchable:
             continue
-        state.setdefault("run_id", run_dir.name)
-        state["run_dir"] = str(run_dir)
         matches.append(state)
         if len(matches) >= limit:
             break
@@ -118,13 +231,24 @@ def search_run_states(
 
 
 def summarize_run_states(repo: str, *, limit: int | None = None) -> dict[str, Any]:
-    run_dirs = list_run_dirs(repo)
+    records = _indexed_or_scanned_records(repo)
     if limit is not None:
-        run_dirs = run_dirs[:limit]
-    states = [load_run_state(run_dir) for run_dir in run_dirs]
+        records = records[:limit]
+    states = records
     status_counts = Counter(str(state.get("status", "unknown")) for state in states)
     risk_counts = Counter(str(state.get("risk_level", "unknown")) for state in states)
     daily_counts = Counter(str(state.get("run_id", ""))[:8] or "unknown" for state in states)
+    finding_counts: Counter[str] = Counter()
+    finding_categories: Counter[str] = Counter()
+    high_risk_files: Counter[str] = Counter()
+    for state in states:
+        finding_counts.update(
+            {str(key): int(value) for key, value in (state.get("finding_counts") or {}).items()}
+        )
+        finding_categories.update(
+            {str(key): int(value) for key, value in (state.get("finding_categories") or {}).items()}
+        )
+        high_risk_files.update(str(path) for path in state.get("high_risk_files") or [])
     failed_runs = [
         {
             "run_id": state.get("run_id"),
@@ -146,22 +270,30 @@ def summarize_run_states(repo: str, *, limit: int | None = None) -> dict[str, An
         "failed_runs": failed_runs[:20],
         "checks_passed": checks_passed,
         "sensor_passed": sensors_passed,
+        "finding_counts": dict(sorted(finding_counts.items())),
+        "finding_categories": dict(sorted(finding_categories.items())),
+        "high_risk_files": dict(sorted(high_risk_files.items())),
         "average_repair_rounds": round(sum(repair_rounds) / len(repair_rounds), 2)
         if repair_rounds
         else 0.0,
-        "latest_run_id": run_dirs[0].name if run_dirs else None,
+        "latest_run_id": states[0].get("run_id") if states else None,
     }
 
 
 def build_runs_dashboard_html(repo: str, *, limit: int = 100) -> str:
     runs = search_run_states(repo, limit=limit)
     summary = summarize_run_states(repo, limit=limit)
+    runs_json = escape(json.dumps(runs, ensure_ascii=False))
     rows = "\n".join(
-        "<tr>"
+        "<tr "
+        f"data-status='{escape(str(item.get('status', '')))}' "
+        f"data-risk='{escape(str(item.get('risk_level', '')))}' "
+        f"data-task='{escape(str(item.get('task', ''))).lower()}'>"
         f"<td>{escape(str(item.get('run_id', '')))}</td>"
         f"<td>{escape(str(item.get('status', '')))}</td>"
         f"<td>{escape(str(item.get('risk_level', '')))}</td>"
         f"<td>{escape(str(item.get('task', '')))}</td>"
+        f"<td>{escape(json.dumps(item.get('finding_counts', {}), ensure_ascii=False))}</td>"
         f"<td>{escape(str(item.get('run_dir', '')))}</td>"
         "</tr>"
         for item in runs
@@ -178,6 +310,8 @@ def build_runs_dashboard_html(repo: str, *, limit: int = 100) -> str:
   <title>CodeFlow Runs Dashboard</title>
   <style>
     body {{ font-family: system-ui, sans-serif; margin: 24px; color: #1f2937; }}
+    label {{ display: inline-flex; flex-direction: column; gap: 4px; margin: 0 12px 12px 0; }}
+    input, select {{ padding: 4px 6px; }}
     table {{ border-collapse: collapse; width: 100%; }}
     th, td {{ border: 1px solid #d1d5db; padding: 6px 8px; text-align: left; }}
     th {{ background: #f3f4f6; }}
@@ -193,16 +327,126 @@ def build_runs_dashboard_html(repo: str, *, limit: int = 100) -> str:
   <pre>{escape(json.dumps(summary["status_counts"], ensure_ascii=False, indent=2))}</pre>
   <h2>Daily Counts</h2>
   <pre>{escape(json.dumps(summary["daily_counts"], ensure_ascii=False, indent=2))}</pre>
+  <h2>Finding Categories</h2>
+  <pre>{escape(json.dumps(summary["finding_categories"], ensure_ascii=False, indent=2))}</pre>
   <h2>Recent Failed Runs</h2>
   <ul>{failed}</ul>
   <h2>Runs</h2>
+  <div>
+    <label>Status <select id="statusFilter"><option value="">all</option></select></label>
+    <label>Risk <select id="riskFilter"><option value="">all</option></select></label>
+    <label>Task Search <input id="taskFilter" type="search"></label>
+    <label><input id="failedOnly" type="checkbox"> Failed only</label>
+  </div>
   <table>
-    <thead><tr><th>Run ID</th><th>Status</th><th>Risk</th><th>Task</th><th>Run Dir</th></tr></thead>
+    <thead><tr><th>Run ID</th><th>Status</th><th>Risk</th><th>Task</th><th>Findings</th><th>Run Dir</th></tr></thead>
     <tbody>{rows}</tbody>
   </table>
+  <script type="application/json" id="runs-data">{runs_json}</script>
+  <script>
+    const rows = Array.from(document.querySelectorAll('tbody tr'));
+    const runs = JSON.parse(document.getElementById('runs-data').textContent);
+    const statusFilter = document.getElementById('statusFilter');
+    const riskFilter = document.getElementById('riskFilter');
+    const taskFilter = document.getElementById('taskFilter');
+    const failedOnly = document.getElementById('failedOnly');
+    function fill(select, values) {{
+      [...new Set(values.filter(Boolean))].sort().forEach(value => {{
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      }});
+    }}
+    fill(statusFilter, runs.map(item => item.status));
+    fill(riskFilter, runs.map(item => item.risk_level));
+    function applyFilters() {{
+      const task = taskFilter.value.toLowerCase();
+      rows.forEach(row => {{
+        const statusOk = !statusFilter.value || row.dataset.status === statusFilter.value;
+        const riskOk = !riskFilter.value || row.dataset.risk === riskFilter.value;
+        const taskOk = !task || row.dataset.task.includes(task);
+        const failedOk = !failedOnly.checked || !['checks_passed', 'committed', 'kept_uncommitted'].includes(row.dataset.status);
+        row.style.display = statusOk && riskOk && taskOk && failedOk ? '' : 'none';
+      }});
+    }}
+    [statusFilter, riskFilter, taskFilter, failedOnly].forEach(item => item.addEventListener('input', applyFilters));
+  </script>
 </body>
 </html>
 """
+
+
+def handle_observability_request(repo: str, raw_path: str) -> tuple[int, str, bytes]:
+    parsed = urlparse(raw_path)
+    path = parsed.path.rstrip("/") or "/"
+    query = parse_qs(parsed.query)
+    if path in {"/", "/dashboard"}:
+        limit = int(query.get("limit", ["100"])[0])
+        return 200, "text/html; charset=utf-8", build_runs_dashboard_html(repo, limit=limit).encode()
+    if path == "/api/runs":
+        limit = int(query.get("limit", ["100"])[0])
+        return _json_response(search_run_states(repo, limit=limit))
+    if path == "/api/summary":
+        return _json_response(summarize_run_states(repo))
+    if path.startswith("/api/runs/"):
+        run_id = unquote(path.removeprefix("/api/runs/"))
+        return _json_response(_run_record(get_run_dir(repo, run_id)))
+    if path.startswith("/api/report/"):
+        run_id = unquote(path.removeprefix("/api/report/"))
+        report_path = get_run_dir(repo, run_id) / "review_report.md"
+        if not report_path.exists():
+            return 404, "text/plain; charset=utf-8", b"report not found"
+        return 200, "text/markdown; charset=utf-8", report_path.read_bytes()
+    if path.startswith("/api/artifacts/"):
+        run_id = unquote(path.removeprefix("/api/artifacts/"))
+        run_dir = get_run_dir(repo, run_id)
+        artifacts = [str(path.relative_to(run_dir)) for path in sorted(run_dir.rglob("*")) if path.is_file()]
+        return _json_response({"run_id": run_id, "artifacts": artifacts})
+    return 404, "text/plain; charset=utf-8", b"not found"
+
+
+def _json_response(data: Any) -> tuple[int, str, bytes]:
+    return 200, "application/json; charset=utf-8", (
+        json.dumps(data, ensure_ascii=False, indent=2, default=_json_default) + "\n"
+    ).encode()
+
+
+def serve_observability(repo: str, *, host: str = "127.0.0.1", port: int = 8765) -> None:
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self) -> None:  # noqa: N802
+            status, content_type, body = handle_observability_request(repo, self.path)
+            self.send_response(status)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, _format: str, *_args: object) -> None:
+            return
+
+    ThreadingHTTPServer((host, port), Handler).serve_forever()
+
+
+def cleanup_runs(repo: str, *, keep: int = 100, dry_run: bool = True) -> dict[str, Any]:
+    if keep < 0:
+        raise RuntimeError("keep must be non-negative.")
+    run_dirs = list_run_dirs(repo)
+    delete_dirs = run_dirs[keep:]
+    deleted: list[str] = []
+    for run_dir in delete_dirs:
+        deleted.append(run_dir.name)
+        if not dry_run:
+            shutil.rmtree(run_dir)
+    if not dry_run:
+        remaining = {path.name for path in list_run_dirs(repo)}
+        entries = [item for item in load_run_index(repo) if str(item.get("run_id")) in remaining]
+        index_path = get_run_index_path(repo)
+        index_path.write_text(
+            "".join(json.dumps(item, ensure_ascii=False) + "\n" for item in entries),
+            encoding="utf-8",
+        )
+    return {"dry_run": dry_run, "keep": keep, "deleted": deleted, "deleted_count": len(deleted)}
 
 
 def _json_default(value: Any) -> Any:

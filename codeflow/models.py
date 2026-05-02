@@ -35,6 +35,10 @@ class HarnessPolicy(BaseModel):
     semantic_spec: bool = False
     semantic_review: bool = False
     require_semantic_review: bool = False
+    semantic_timeout_seconds: float = Field(default=60, gt=0)
+    semantic_max_diff_chars: int = Field(default=20000, gt=0)
+    semantic_fail_open: bool = True
+    semantic_required_for_paths: list[str] = Field(default_factory=list)
     block_commit_on_failed_checks: bool = True
     block_commit_on_high_risk: bool = False
     require_human_approval: bool = True
@@ -57,10 +61,32 @@ class CheckResult(BaseModel):
     stderr: str
 
 
-class MiniRunResult(BaseModel):
+class ExecutorResult(BaseModel):
     log_path: str
     trajectory_path: str
     returncode: int
+    status: str = "completed"
+    error_type: str | None = None
+    events_path: str | None = None
+
+
+class MiniRunResult(ExecutorResult):
+    pass
+
+
+class ReviewFinding(BaseModel):
+    source: Literal["rules", "sensor", "semantic"]
+    severity: Literal["info", "low", "medium", "high"]
+    category: str
+    file: str | None = None
+    message: str
+    recommendation: str = ""
+
+
+class ReviewSummary(BaseModel):
+    risk_level: Literal["info", "low", "medium", "high"]
+    findings: list[ReviewFinding] = Field(default_factory=list)
+    recommendation: str
 
 
 class SensorResult(BaseModel):
@@ -101,6 +127,7 @@ class RunState(BaseModel):
     check_results: list[CheckResult] = Field(default_factory=list)
     sensor_report: HarnessSensorReport | None = None
     semantic_review: dict | None = None
+    review_summary: ReviewSummary | None = None
     changed_files: list[str] = Field(default_factory=list)
     repair_history: list[dict[str, str | int]] = Field(default_factory=list)
     repair_round: int = 0

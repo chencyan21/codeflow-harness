@@ -3,6 +3,7 @@ from __future__ import annotations
 import shlex
 import shutil
 import subprocess
+import re
 from pathlib import Path
 
 from codeflow.models import CheckResult
@@ -10,6 +11,15 @@ from codeflow.redaction import redact_text
 from codeflow.utils import tail_text
 
 SHELL_CHECK_PREFIX = "shell:"
+SHELL_RISK_PATTERNS = [
+    (re.compile(r"\brm\s+-[^\n]*r[^\n]*f\b"), "destructive shell command: rm -rf"),
+    (re.compile(r"\bcurl\b[^\n|;]*\|\s*(?:sh|bash)\b"), "remote script execution: curl | sh"),
+    (re.compile(r"\bwget\b[^\n|;]*\|\s*(?:sh|bash)\b"), "remote script execution: wget | sh"),
+    (re.compile(r">\s*['\"]?\.env(?:\b|['\"]?)"), "writes to .env"),
+    (re.compile(r"\bchmod\s+777\b"), "over-broad file permission command: chmod 777"),
+    (re.compile(r"\bsudo\b"), "privileged command: sudo"),
+    (re.compile(r"\bdocker\s+run\b[^\n]*--privileged\b"), "privileged container execution"),
+]
 
 
 def check_command_executable_exists(command: str, *, allow_shell: bool = False) -> bool:
@@ -21,6 +31,14 @@ def check_command_executable_exists(command: str, *, allow_shell: bool = False) 
     except ValueError:
         return False
     return bool(parts and (shutil.which(parts[0]) or Path(parts[0]).exists()))
+
+
+def scan_shell_check_risk(command: str) -> list[str]:
+    stripped = command.strip()
+    if not stripped.startswith(SHELL_CHECK_PREFIX):
+        return []
+    shell_command = stripped.removeprefix(SHELL_CHECK_PREFIX).strip()
+    return [message for pattern, message in SHELL_RISK_PATTERNS if pattern.search(shell_command)]
 
 
 def run_check(repo: str, command: str, *, allow_shell: bool = False) -> CheckResult:

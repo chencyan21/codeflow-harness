@@ -9,12 +9,14 @@ from rich.console import Console
 
 from codeflow.doctor import run_doctor
 from codeflow.harness.observability import (
+    cleanup_runs,
     export_run_dir,
     build_runs_dashboard_html,
     get_run_dir,
     list_run_dirs,
     load_run_state,
     search_run_states,
+    serve_observability,
     summarize_run_states,
 )
 from codeflow.init_project import init_project
@@ -203,6 +205,41 @@ def dashboard_command(
     console.print(str(out_path))
 
 
+@app.command("serve")
+def serve_command(
+    repo: Annotated[str, typer.Option(help="Path to target Git repository")],
+    host: Annotated[str, typer.Option(help="Bind host")] = "127.0.0.1",
+    port: Annotated[int, typer.Option(help="Bind port")] = 8765,
+) -> None:
+    try:
+        console.print(f"Serving CodeFlow dashboard on http://{host}:{port}")
+        serve_observability(repo, host=host, port=port)
+    except KeyboardInterrupt:
+        return
+    except Exception as exc:
+        console.print(f"[bold red]CodeFlow serve failed:[/bold red] {exc}")
+        raise typer.Exit(1) from exc
+
+
+@app.command("cleanup")
+def cleanup_command(
+    repo: Annotated[str, typer.Option(help="Path to target Git repository")],
+    keep: Annotated[int, typer.Option(help="Number of latest runs to keep")] = 100,
+    dry_run: Annotated[bool, typer.Option(help="Show what would be deleted without deleting")] = True,
+    json_output: Annotated[bool, typer.Option("--json", help="Print JSON")] = False,
+) -> None:
+    try:
+        result = cleanup_runs(repo, keep=keep, dry_run=dry_run)
+    except Exception as exc:
+        console.print(f"[bold red]CodeFlow cleanup failed:[/bold red] {exc}")
+        raise typer.Exit(1) from exc
+    if json_output:
+        console.print(json.dumps(result, ensure_ascii=False, indent=2), soft_wrap=True)
+        return
+    action = "Would delete" if result["dry_run"] else "Deleted"
+    console.print(f"{action} {result['deleted_count']} run(s): {result['deleted']}")
+
+
 @app.command()
 def report(
     repo: Annotated[str, typer.Option(help="Path to target Git repository")],
@@ -287,7 +324,7 @@ def doctor(
 
     console.print("[bold]CodeFlow Doctor[/bold]")
     for item in results:
-        status = "OK" if item["ok"] else "FAILED"
+        status = "WARNING" if item.get("level") == "warning" else ("OK" if item["ok"] else "FAILED")
         console.print(f"{item['name']}: {status}")
         if item.get("message"):
             console.print(f"  Reason: {item['message']}")

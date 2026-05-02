@@ -39,6 +39,11 @@ harness:
   semantic_spec: false
   semantic_review: false
   require_semantic_review: true
+  semantic_timeout_seconds: 12
+  semantic_max_diff_chars: 1234
+  semantic_fail_open: false
+  semantic_required_for_paths:
+    - app/auth/
   governance:
     block_commit_on_failed_checks: true
     block_commit_on_high_risk: true
@@ -62,6 +67,10 @@ harness:
     assert policy.semantic_spec is False
     assert policy.semantic_review is False
     assert policy.require_semantic_review is True
+    assert policy.semantic_timeout_seconds == 12
+    assert policy.semantic_max_diff_chars == 1234
+    assert policy.semantic_fail_open is False
+    assert policy.semantic_required_for_paths == ["app/auth/"]
     assert policy.block_commit_on_high_risk is True
     assert policy.rerun_checks_before_commit is False
 

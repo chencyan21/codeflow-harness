@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 from codeflow.harness.sensors import SEVERITY_ORDER
-from codeflow.models import CheckResult, HarnessSensorReport, Spec
+from codeflow.models import CheckResult, HarnessSensorReport, ReviewFinding, ReviewSummary, Spec
 
 HIGH_RISK_PATTERNS = [
     "auth",
@@ -179,6 +179,139 @@ def _list_or_none(items: list[str]) -> str:
     return "\n".join(f"- {item}" for item in items) if items else "- none"
 
 
+def _severity_from_risk(risk_level: str) -> str:
+    return risk_level if risk_level in SEVERITY_ORDER else "medium"
+
+
+def _first_path(details: dict) -> str | None:
+    for key in ("path", "paths", "files", "changed_files"):
+        value = details.get(key)
+        if isinstance(value, str):
+            return value
+        if isinstance(value, list) and value:
+            return str(value[0])
+    return None
+
+
+def _semantic_finding_message(item: object) -> tuple[str, str, str, str]:
+    if isinstance(item, dict):
+        severity = str(item.get("severity") or "medium").lower()
+        if severity not in SEVERITY_ORDER:
+            severity = "medium"
+        return (
+            severity,
+            str(item.get("file") or "") or "",
+            str(item.get("reason") or item.get("message") or ""),
+            str(item.get("suggested_action") or item.get("recommendation") or ""),
+        )
+    return ("medium", "", str(item), "")
+
+
+def build_review_summary(
+    *,
+    diff: str,
+    check_results: list[CheckResult],
+    sensor_report: HarnessSensorReport | None = None,
+    changed_files: list[str] | None = None,
+    semantic_review: dict | None = None,
+) -> ReviewSummary:
+    risk_level, risks = score_risk(diff, changed_files=changed_files)
+    findings: list[ReviewFinding] = []
+
+    for risk in risks:
+        findings.append(
+            ReviewFinding(
+                source="rules",
+                severity=_severity_from_risk(risk_level),  # type: ignore[arg-type]
+                category="risk_pattern",
+                message=risk,
+                recommendation="Review the changed files for behavioral impact.",
+            )
+        )
+
+    if sensor_report:
+        for result in sensor_report.results:
+            if result.passed and result.severity not in {"medium", "high"}:
+                continue
+            findings.append(
+                ReviewFinding(
+                    source="sensor",
+                    severity=result.severity,
+                    category=result.name,
+                    file=_first_path(result.details),
+                    message=result.message,
+                    recommendation=(
+                        "Resolve this blocking sensor before commit."
+                        if not result.passed
+                        else "Review this warning before commit."
+                    ),
+                )
+            )
+        if SEVERITY_ORDER[sensor_report.max_severity] > SEVERITY_ORDER[risk_level]:
+            risk_level = sensor_report.max_severity
+
+    semantic_risk = str((semantic_review or {}).get("risk_level") or "")
+    if semantic_risk in SEVERITY_ORDER and SEVERITY_ORDER[semantic_risk] > SEVERITY_ORDER[risk_level]:
+        risk_level = semantic_risk
+    if semantic_review:
+        if semantic_review.get("status") != "completed":
+            findings.append(
+                ReviewFinding(
+                    source="semantic",
+                    severity=_severity_from_risk(str(semantic_review.get("risk_level") or "medium")),  # type: ignore[arg-type]
+                    category=str(semantic_review.get("reason") or "semantic_unavailable"),
+                    message=str(semantic_review.get("message") or semantic_review.get("summary") or ""),
+                    recommendation=str(semantic_review.get("recommendation") or "manual_review"),
+                )
+            )
+        for item in semantic_review.get("findings", []) or []:
+            severity, file, message, recommendation = _semantic_finding_message(item)
+            if not message:
+                continue
+            findings.append(
+                ReviewFinding(
+                    source="semantic",
+                    severity=severity,  # type: ignore[arg-type]
+                    category="semantic_review",
+                    file=file or None,
+                    message=message,
+                    recommendation=recommendation,
+                )
+            )
+
+    if not findings:
+        findings.append(
+            ReviewFinding(
+                source="rules",
+                severity="low",
+                category="risk_pattern",
+                message="No obvious high-risk pattern detected.",
+                recommendation="Proceed with normal review.",
+            )
+        )
+
+    recommendation = (
+        "Commit is allowed after human review."
+        if all(result.success for result in check_results)
+        and (sensor_report is None or sensor_report.overall_passed)
+        and str((semantic_review or {}).get("recommendation") or "").lower() != "block"
+        else "Do not commit until validation passes."
+    )
+    if str((semantic_review or {}).get("recommendation") or "").lower() in {
+        "manual_review",
+        "review",
+    }:
+        recommendation = "Manual review is required before commit."
+    if str((semantic_review or {}).get("recommendation") or "").lower() == "block":
+        recommendation = "Do not commit until semantic review findings are resolved."
+
+    return ReviewSummary(
+        risk_level=risk_level,  # type: ignore[arg-type]
+        findings=findings,
+        recommendation=recommendation,
+    )
+
+
 def _spec_section(task: str, spec: Spec | None) -> list[str]:
     if not spec:
         return [
@@ -284,10 +417,40 @@ def _semantic_section(semantic_review: dict | None) -> list[str]:
             f"- Task Alignment: {_escape_table(semantic_review.get('task_alignment', ''))}",
             f"- Test Coverage: {_escape_table(semantic_review.get('test_coverage_notes', ''))}",
             f"- Recommendation: {_escape_table(semantic_review.get('recommendation', ''))}",
+            f"- Reason: {_escape_table(semantic_review.get('reason', ''))}",
+            f"- Message: {_escape_table(semantic_review.get('message', ''))}",
             "- Findings:",
-            _list_or_none([str(item) for item in semantic_review.get("findings", [])]),
+            _list_or_none(
+                [
+                    str(item.get("reason") or item.get("message") or item)
+                    if isinstance(item, dict)
+                    else str(item)
+                    for item in semantic_review.get("findings", [])
+                ]
+            ),
         ]
     )
+    return lines
+
+
+def _structured_findings_section(review_summary: ReviewSummary) -> list[str]:
+    lines = [
+        "- Structured Findings:",
+        "",
+        "| Source | Severity | Category | File | Message | Recommendation |",
+        "| --- | --- | --- | --- | --- | --- |",
+    ]
+    for finding in review_summary.findings:
+        lines.append(
+            "| {source} | {severity} | {category} | {file} | {message} | {recommendation} |".format(
+                source=_escape_table(finding.source),
+                severity=_escape_table(finding.severity),
+                category=_escape_table(finding.category),
+                file=_escape_table(finding.file or ""),
+                message=_escape_table(finding.message),
+                recommendation=_escape_table(finding.recommendation),
+            )
+        )
     return lines
 
 
@@ -333,24 +496,27 @@ def build_review_report(
     changed_files: list[str] | None = None,
     repair_history: list[dict[str, str | int]] | None = None,
     semantic_review: dict | None = None,
+    review_summary: ReviewSummary | None = None,
 ) -> str:
-    risk_level, risks = score_risk(diff, changed_files=changed_files)
-    semantic_risk = str((semantic_review or {}).get("risk_level") or "")
-    if semantic_risk in SEVERITY_ORDER and SEVERITY_ORDER[semantic_risk] > SEVERITY_ORDER[risk_level]:
-        risk_level = semantic_risk
-    if sensor_report and SEVERITY_ORDER[sensor_report.max_severity] > SEVERITY_ORDER[risk_level]:
-        risk_level = sensor_report.max_severity
+    review_summary = review_summary or build_review_summary(
+        diff=diff,
+        check_results=check_results,
+        sensor_report=sensor_report,
+        changed_files=changed_files,
+        semantic_review=semantic_review,
+    )
+    risk_level = review_summary.risk_level
+    risks = [
+        finding.message
+        for finding in review_summary.findings
+        if finding.source == "rules" and finding.category == "risk_pattern"
+    ]
     changed_lines = len(diff.splitlines())
-    risk_text = "\n".join(f"- {item}" for item in risks)
+    risk_text = "\n".join(f"- {item}" for item in risks) or "- none"
     blocking_text = "- none"
     if sensor_report:
         blocking_text = "\n".join(f"- {reason}" for reason in sensor_report.blocking_reasons) or "- none"
-    recommendation = (
-        "Commit is allowed after human review."
-        if all(result.success for result in check_results)
-        and (sensor_report is None or sensor_report.overall_passed)
-        else "Do not commit until validation passes."
-    )
+    recommendation = review_summary.recommendation
 
     lines = [
         "# CodeFlow Review Report",
@@ -378,6 +544,8 @@ def build_review_report(
         "- Blocking Reasons:",
         blocking_text,
         f"- Diff Size: {changed_lines} diff lines",
+        "",
+        *_structured_findings_section(review_summary),
         "",
         *_repair_section(repair_history),
         "",

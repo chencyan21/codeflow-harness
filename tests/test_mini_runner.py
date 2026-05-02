@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from codeflow.mini_runner import run_mini_agent
+from codeflow.mini_runner import MiniExecutionError, run_mini_agent
 
 
 def _init_repo(path: Path) -> None:
@@ -144,13 +144,15 @@ def test_run_mini_agent_times_out_and_writes_log(tmp_path: Path, monkeypatch) ->
     monkeypatch.setenv("CODEFLOW_MINI_COMMAND", f"{sys.executable} {script}")
     monkeypatch.setenv("CODEFLOW_MINI_TIMEOUT_SECONDS", "0.1")
 
-    with pytest.raises(RuntimeError, match="mini-swe-agent timed out"):
+    with pytest.raises(MiniExecutionError, match="mini-swe-agent timed out") as exc_info:
         run_mini_agent(str(repo), "prompt")
 
+    assert exc_info.value.error_type == "timeout"
     logs = list((repo / ".git" / "codeflow").glob("mini_run_*.log"))
     assert len(logs) == 1
     log_text = logs[0].read_text(encoding="utf-8")
     assert "TIMEOUT_SECONDS: 0.1" in log_text
+    assert "ERROR_TYPE: timeout" in log_text
     assert "PROMPT:" in log_text
 
 
@@ -172,3 +174,35 @@ def test_run_mini_agent_redacts_prompt_and_logs(tmp_path: Path, monkeypatch) -> 
     assert "sk-output" not in log_text
     assert "sk-prompt" not in prompt_text
     assert "[REDACTED]" in log_text
+
+
+def test_run_mini_agent_classifies_nonzero_exit(tmp_path: Path, monkeypatch) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_repo(repo)
+    script = tmp_path / "fail_mini.py"
+    script.write_text("import sys\nprint('bad', file=sys.stderr)\nraise SystemExit(7)\n", encoding="utf-8")
+
+    monkeypatch.setenv("CODEFLOW_MINI_COMMAND", f"{sys.executable} {script}")
+
+    with pytest.raises(MiniExecutionError) as exc_info:
+        run_mini_agent(str(repo), "prompt")
+
+    assert exc_info.value.error_type == "nonzero_exit"
+    log_text = next((repo / ".git" / "codeflow").glob("mini_run_*.log")).read_text(encoding="utf-8")
+    assert "ERROR_TYPE: nonzero_exit" in log_text
+
+
+def test_run_mini_agent_reports_missing_trajectory_status(tmp_path: Path, monkeypatch) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_repo(repo)
+    script = tmp_path / "ok_no_trajectory.py"
+    script.write_text("print('ok')\n", encoding="utf-8")
+
+    monkeypatch.setenv("CODEFLOW_MINI_COMMAND", f"{sys.executable} {script}")
+
+    result = run_mini_agent(str(repo), "prompt")
+
+    assert result.status == "trajectory_missing"
+    assert result.error_type == "trajectory_missing"

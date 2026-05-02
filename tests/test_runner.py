@@ -300,6 +300,7 @@ harness:
     assert state.status == "review_required"
     assert state.semantic_review
     assert state.semantic_review["status"] == "unavailable"
+    assert state.semantic_review["reason"] == "missing_config"
 
 
 def test_run_artifacts_redact_secret_like_diff(
@@ -331,3 +332,133 @@ def test_run_artifacts_redact_secret_like_diff(
     assert "sk-runnersecret" not in diff_text
     assert "sk-runnersecret" not in state_text
     assert "[REDACTED]" in diff_text
+
+
+def test_semantic_required_path_blocks_when_unavailable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _init_repo(tmp_path)
+    policy_dir = tmp_path / ".codeflow"
+    policy_dir.mkdir()
+    (policy_dir / "codeflow.yaml").write_text(
+        f"""
+harness:
+  required_checks:
+    - {sys.executable} -c "print(1)"
+  max_repair_rounds: 0
+  semantic_required_for_paths:
+    - app/auth/
+""",
+        encoding="utf-8",
+    )
+    _run(["git", "add", ".codeflow/codeflow.yaml"], tmp_path)
+    _run(
+        [
+            "git",
+            "-c",
+            "user.email=test@example.local",
+            "-c",
+            "user.name=Test",
+            "commit",
+            "-m",
+            "policy",
+        ],
+        tmp_path,
+    )
+
+    def fake_mini(repo: str, prompt: str, **_kwargs: object) -> str:
+        auth_dir = Path(repo) / "app" / "auth"
+        auth_dir.mkdir(parents=True)
+        (auth_dir / "login.py").write_text("def login():\n    return True\n", encoding="utf-8")
+        return str(Path(repo) / ".git" / "fake.log")
+
+    monkeypatch.setattr("codeflow.runner.run_mini_agent", fake_mini)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("CODEFLOW_SEMANTIC_MODEL", raising=False)
+    monkeypatch.delenv("MSWEA_MODEL_NAME", raising=False)
+    monkeypatch.setenv("CODEFLOW_ENV_FILE", str(tmp_path / "missing.env"))
+
+    state = run_codeflow(CodeFlowConfig(repo=str(tmp_path), task="touch auth", no_commit=True))
+
+    assert state.status == "review_required"
+    assert state.semantic_review
+    assert state.semantic_review["required_by_path"] is True
+
+
+def test_semantic_fail_closed_blocks_when_review_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _init_repo(tmp_path)
+    policy_dir = tmp_path / ".codeflow"
+    policy_dir.mkdir()
+    (policy_dir / "codeflow.yaml").write_text(
+        f"""
+harness:
+  required_checks:
+    - {sys.executable} -c "print(1)"
+  max_repair_rounds: 0
+  semantic_review: true
+  semantic_fail_open: false
+""",
+        encoding="utf-8",
+    )
+    _run(["git", "add", ".codeflow/codeflow.yaml"], tmp_path)
+    _run(
+        [
+            "git",
+            "-c",
+            "user.email=test@example.local",
+            "-c",
+            "user.name=Test",
+            "commit",
+            "-m",
+            "policy",
+        ],
+        tmp_path,
+    )
+
+    def fake_mini(repo: str, prompt: str, **_kwargs: object) -> str:
+        Path(repo, "README.md").write_text("changed\n", encoding="utf-8")
+        return str(Path(repo) / ".git" / "fake.log")
+
+    monkeypatch.setattr("codeflow.runner.run_mini_agent", fake_mini)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("CODEFLOW_SEMANTIC_MODEL", raising=False)
+    monkeypatch.delenv("MSWEA_MODEL_NAME", raising=False)
+    monkeypatch.setenv("CODEFLOW_ENV_FILE", str(tmp_path / "missing.env"))
+
+    state = run_codeflow(CodeFlowConfig(repo=str(tmp_path), task="semantic fail closed", no_commit=True))
+
+    assert state.status == "review_required"
+    assert state.semantic_review
+    assert state.semantic_review["risk_level"] == "high"
+
+
+def test_review_summary_artifact_is_written(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _init_repo(tmp_path)
+
+    def fake_mini(repo: str, prompt: str, **_kwargs: object) -> str:
+        Path(repo, "README.md").write_text("changed\n", encoding="utf-8")
+        return str(Path(repo) / ".git" / "fake.log")
+
+    monkeypatch.setattr("codeflow.runner.run_mini_agent", fake_mini)
+
+    state = run_codeflow(
+        CodeFlowConfig(
+            repo=str(tmp_path),
+            task="write summary",
+            checks=[f'{sys.executable} -c "print(1)"'],
+            max_repair_rounds=0,
+            no_commit=True,
+        )
+    )
+
+    assert state.run_dir is not None
+    summary_path = Path(state.run_dir) / "review_summary.json"
+    assert summary_path.exists()
+    assert "review_summary" in state.artifacts

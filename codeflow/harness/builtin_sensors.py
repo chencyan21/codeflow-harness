@@ -7,6 +7,7 @@ from typing import Literal
 
 from codeflow.harness.sensors import BaseSensor, build_sensor_report
 from codeflow.models import HarnessSensorReport, SensorContext, SensorResult
+from codeflow.test_gate import scan_shell_check_risk
 
 DEPENDENCY_FILES = {
     "pyproject.toml",
@@ -160,6 +161,40 @@ class CheckCommandSensor:
             severity="info",
             message="All validation checks passed.",
             details={"commands": [result.command for result in context.check_results]},
+        )
+
+
+@dataclass
+class ShellCheckRiskSensor:
+    name: str = "shell_check_risk"
+
+    def run(self, context: SensorContext) -> SensorResult:
+        findings = [
+            {"command": command, "risks": risks}
+            for command in context.policy.required_checks
+            if (risks := scan_shell_check_risk(command))
+        ]
+        if not findings:
+            return SensorResult(
+                name=self.name,
+                passed=True,
+                severity="info",
+                message="No high-risk shell check patterns detected.",
+            )
+        severity: Literal["medium", "high"] = (
+            "high"
+            if any(
+                any("rm -rf" in risk or "privileged" in risk or "curl | sh" in risk for risk in item["risks"])
+                for item in findings
+            )
+            else "medium"
+        )
+        return SensorResult(
+            name=self.name,
+            passed=True,
+            severity=severity,
+            message="Shell check risk patterns detected.",
+            details={"findings": findings},
         )
 
 
@@ -451,6 +486,7 @@ class NoChangeSensor:
 
 BUILTIN_SENSORS: list[BaseSensor] = [
     CheckCommandSensor(),
+    ShellCheckRiskSensor(),
     ForbiddenPathSensor(),
     ForbiddenPathWriteSensor(),
     AllowedPathSensor(),

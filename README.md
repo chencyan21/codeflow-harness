@@ -98,6 +98,8 @@ codeflow inspect --repo ./examples/todo_api --latest
 codeflow search --repo ./examples/todo_api --status checks_failed
 codeflow summary --repo ./examples/todo_api
 codeflow dashboard --repo ./examples/todo_api --out ./codeflow-dashboard.html
+codeflow serve --repo ./examples/todo_api --host 127.0.0.1 --port 8765
+codeflow cleanup --repo ./examples/todo_api --keep 100 --dry-run
 codeflow report --repo ./examples/todo_api --latest
 codeflow export --repo ./examples/todo_api --latest --out ./codeflow-run.zip
 ```
@@ -126,9 +128,10 @@ export OPENAI_BASE_URL="https://dashscope.aliyuncs.com/compatible-mode/v1"
 ```
 
 可选语义 Spec / Diff 审查使用同一套 OpenAI-compatible 配置；也可以用
-`CODEFLOW_SEMANTIC_MODEL` 单独覆盖审查模型。没有模型配置时，语义能力会自动跳过；
-如果 policy 设置 `require_semantic_review: true`，语义审查不可用会进入
-`review_required` 并拒绝提交。
+`CODEFLOW_SEMANTIC_MODEL` 单独覆盖审查模型。语义审查会把失败原因结构化写入
+`semantic_review.json`，例如 `missing_config`、`timeout`、`api_error`、`invalid_json`。
+如果 policy 设置 `require_semantic_review: true`、`semantic_fail_open: false` 或命中
+`semantic_required_for_paths`，语义审查不可用会进入 `review_required` 并拒绝提交。
 
 ## 项目规则
 
@@ -175,6 +178,12 @@ harness:
   semantic_spec: true
   semantic_review: true
   require_semantic_review: false
+  semantic_timeout_seconds: 60
+  semantic_max_diff_chars: 20000
+  semantic_fail_open: true
+  semantic_required_for_paths:
+    - app/auth/
+    - migrations/
   governance:
     block_commit_on_failed_checks: true
     block_commit_on_high_risk: false
@@ -192,13 +201,15 @@ CLI 参数 > codeflow.yaml > project_rules.md > 默认值
 
 `required_checks` 默认不经 shell 解释，CodeFlow 会用 `shlex.split` 后直接执行命令。
 确实需要 shell 语法时，需要同时设置 `allow_shell_checks: true` 并使用显式前缀，
-例如 `shell: cd app && pytest -q`；这类 check 应只来自可信配置。
+例如 `shell: cd app && pytest -q`；这类 check 应只来自可信配置。CodeFlow 会对允许的
+shell check 做静态风险提示，例如 `rm -rf`、`curl | sh`、`chmod 777`、`sudo`。
 
 ## Sensors
 
 当前内置 sensors：
 
 - `check_commands`：汇总 pytest / ruff 等 required checks。
+- `shell_check_risk`：允许 shell checks 时提示高风险 shell 片段。
 - `forbidden_path`：阻止 `.env`、secret、key 等敏感路径变更。
 - `forbidden_path_write`：阻止新增代码绕过路径变更、间接写入 `.env` 等禁改路径。
 - `allowed_path`：配置 `allowed_paths` 时阻止越界文件修改。

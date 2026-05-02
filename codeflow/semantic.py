@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import fnmatch
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -31,21 +32,27 @@ def enhance_spec_with_semantics(
         "base_spec": base_spec.model_dump(),
         "required_checks": policy.required_checks,
     }
-    result = _semantic_json("spec", payload, client=client)
-    if not result:
+    result = _semantic_json_result(
+        "spec",
+        payload,
+        client=client,
+        timeout_seconds=policy.semantic_timeout_seconds,
+    )
+    if result["status"] != "completed":
         return base_spec, None
+    semantic_data = result["result"]
 
-    criteria = _strings(result.get("acceptance_criteria"))
-    constraints = _strings(result.get("constraints"))
-    notes = _strings(result.get("semantic_notes") or result.get("notes"))
+    criteria = _strings(semantic_data.get("acceptance_criteria"))
+    constraints = _strings(semantic_data.get("constraints"))
+    notes = _strings(semantic_data.get("semantic_notes") or semantic_data.get("notes"))
     enhanced = Spec(
-        task_type=str(result.get("task_type") or base_spec.task_type),
-        goal=str(result.get("goal") or base_spec.goal),
+        task_type=str(semantic_data.get("task_type") or base_spec.task_type),
+        goal=str(semantic_data.get("goal") or base_spec.goal),
         acceptance_criteria=_merge_unique(base_spec.acceptance_criteria, criteria),
         constraints=_merge_unique(base_spec.constraints, constraints),
         semantic_notes=notes,
     )
-    return enhanced, {"status": "completed", "result": result}
+    return enhanced, {"status": "completed", "result": semantic_data}
 
 
 def review_diff_with_semantics(
@@ -58,30 +65,66 @@ def review_diff_with_semantics(
     policy: HarnessPolicy,
     client: SemanticJsonClient | None = None,
 ) -> dict[str, Any] | None:
-    if not (policy.semantic_review or policy.require_semantic_review):
+    path_required = semantic_review_required_for_paths(policy, changed_files)
+    if not (policy.semantic_review or policy.require_semantic_review or path_required):
         return None
     payload = {
         "task": task,
-        "diff": redact_text(diff[-20000:]),
+        "diff": redact_text(diff[-policy.semantic_max_diff_chars :]),
         "changed_files": changed_files,
         "checks": [result.model_dump() for result in check_results],
         "sensor_report": sensor_report.model_dump() if sensor_report else None,
     }
-    result = _semantic_json("review", payload, client=client)
-    if not result:
-        return None
+    result = _semantic_json_result(
+        "review",
+        payload,
+        client=client,
+        timeout_seconds=policy.semantic_timeout_seconds,
+    )
+    if result["status"] != "completed":
+        blocking = policy.require_semantic_review or path_required or not policy.semantic_fail_open
+        return {
+            "status": "unavailable",
+            "reason": result.get("reason", "unknown"),
+            "message": result.get("message", ""),
+            "risk_level": "high" if blocking else "medium",
+            "summary": result.get("message", "Semantic review did not complete."),
+            "findings": [
+                {
+                    "severity": "high" if blocking else "medium",
+                    "file": "",
+                    "reason": result.get("message", "Semantic review did not complete."),
+                    "suggested_action": "Configure semantic review or rerun after the model/API issue is fixed.",
+                }
+            ],
+            "recommendation": "block" if blocking else "manual_review",
+            "task_alignment": "unknown",
+            "test_coverage": {"level": "unknown", "notes": ""},
+            "test_coverage_notes": "",
+            "behavioral_risks": [],
+            "security_risks": [],
+            "data_migration_risks": [],
+            "required_by_path": path_required,
+        }
 
-    risk = str(result.get("risk_level") or "low").lower()
+    semantic_data = result["result"]
+    risk = str(semantic_data.get("risk_level") or "low").lower()
     if risk not in {"low", "medium", "high"}:
         risk = "medium"
+    test_coverage = _test_coverage(semantic_data.get("test_coverage"), semantic_data.get("test_coverage_notes"))
     return {
         "status": "completed",
         "risk_level": risk,
-        "summary": str(result.get("summary") or ""),
-        "findings": _strings(result.get("findings")),
-        "recommendation": str(result.get("recommendation") or ""),
-        "task_alignment": str(result.get("task_alignment") or ""),
-        "test_coverage_notes": str(result.get("test_coverage_notes") or ""),
+        "summary": str(semantic_data.get("summary") or ""),
+        "findings": _findings(semantic_data.get("findings")),
+        "recommendation": str(semantic_data.get("recommendation") or ""),
+        "task_alignment": str(semantic_data.get("task_alignment") or "unknown"),
+        "test_coverage": test_coverage,
+        "test_coverage_notes": test_coverage["notes"],
+        "behavioral_risks": _strings(semantic_data.get("behavioral_risks")),
+        "security_risks": _strings(semantic_data.get("security_risks")),
+        "data_migration_risks": _strings(semantic_data.get("data_migration_risks")),
+        "required_by_path": path_required,
     }
 
 
@@ -89,21 +132,53 @@ def semantic_llm_available() -> bool:
     return _semantic_config() is not None
 
 
-def _semantic_json(
+def semantic_review_required_for_paths(policy: HarnessPolicy, changed_files: list[str]) -> bool:
+    return any(
+        _matches_path(path, pattern)
+        for path in changed_files
+        for pattern in policy.semantic_required_for_paths
+    )
+
+
+def _semantic_json_result(
     kind: str,
     payload: dict[str, Any],
     *,
     client: SemanticJsonClient | None,
-) -> dict[str, Any] | None:
+    timeout_seconds: float,
+) -> dict[str, Any]:
     if client:
-        return client(kind, payload)
+        try:
+            result = client(kind, payload)
+        except Exception as exc:
+            reason = _exception_reason(exc)
+            return {"status": "unavailable", "reason": reason, "message": str(exc)}
+        if isinstance(result, dict):
+            return {"status": "completed", "result": result}
+        return {
+            "status": "unavailable",
+            "reason": "invalid_json",
+            "message": "Semantic client did not return a JSON object.",
+        }
     config = _semantic_config()
     if config is None:
-        return None
+        return {
+            "status": "unavailable",
+            "reason": "missing_config",
+            "message": "Semantic LLM configuration is missing.",
+        }
     try:
-        return _call_openai_compatible(kind, payload, config)
-    except Exception:
-        return None
+        result = _call_openai_compatible(kind, payload, config, timeout_seconds=timeout_seconds)
+    except Exception as exc:
+        reason = _exception_reason(exc)
+        return {"status": "unavailable", "reason": reason, "message": str(exc)}
+    if isinstance(result, dict):
+        return {"status": "completed", "result": result}
+    return {
+        "status": "unavailable",
+        "reason": "invalid_json",
+        "message": "Semantic model did not return a JSON object.",
+    }
 
 
 def _semantic_config() -> dict[str, str] | None:
@@ -142,13 +217,19 @@ def _load_codeflow_env() -> dict[str, str]:
     return {key: value for key, value in dotenv_values(path).items() if value is not None}
 
 
-def _call_openai_compatible(kind: str, payload: dict[str, Any], config: dict[str, str]) -> dict[str, Any] | None:
+def _call_openai_compatible(
+    kind: str,
+    payload: dict[str, Any],
+    config: dict[str, str],
+    *,
+    timeout_seconds: float,
+) -> dict[str, Any] | None:
     from openai import OpenAI
 
     if base_url := config.get("base_url"):
-        client = OpenAI(api_key=config["api_key"], base_url=base_url)
+        client = OpenAI(api_key=config["api_key"], base_url=base_url, timeout=timeout_seconds)
     else:
-        client = OpenAI(api_key=config["api_key"])
+        client = OpenAI(api_key=config["api_key"], timeout=timeout_seconds)
     response = client.chat.completions.create(
         model=config["model"],
         messages=[
@@ -168,6 +249,7 @@ def _call_openai_compatible(kind: str, payload: dict[str, Any], config: dict[str
 
 
 def _prompt(kind: str, payload: dict[str, Any]) -> str:
+    schema: dict[str, Any]
     if kind == "spec":
         schema = {
             "task_type": "coding_task|bugfix|test|refactor|docs",
@@ -180,10 +262,20 @@ def _prompt(kind: str, payload: dict[str, Any]) -> str:
         schema = {
             "risk_level": "low|medium|high",
             "summary": "semantic summary",
-            "findings": ["specific concern or confirmation"],
-            "recommendation": "commit|review|block with rationale",
-            "task_alignment": "whether the diff appears aligned with the task",
-            "test_coverage_notes": "test coverage assessment",
+            "findings": [
+                {
+                    "severity": "low|medium|high",
+                    "file": "path or empty",
+                    "reason": "specific issue or confirmation",
+                    "suggested_action": "what to inspect or change",
+                }
+            ],
+            "recommendation": "commit|manual_review|block",
+            "task_alignment": "aligned|partial|not_aligned|unknown",
+            "test_coverage": {"level": "none|weak|adequate|strong", "notes": "coverage assessment"},
+            "behavioral_risks": ["risk"],
+            "security_risks": ["risk"],
+            "data_migration_risks": ["risk"],
         }
     return json.dumps({"kind": kind, "schema": schema, "payload": payload}, ensure_ascii=False)
 
@@ -201,6 +293,70 @@ def _strings(value: object) -> list[str]:
     if not isinstance(value, list):
         return []
     return [str(item).strip() for item in value if str(item).strip()]
+
+
+def _findings(value: object) -> list[dict[str, str]]:
+    if not isinstance(value, list):
+        return []
+    findings: list[dict[str, str]] = []
+    for item in value:
+        if isinstance(item, dict):
+            severity = str(item.get("severity") or "medium").lower()
+            if severity not in {"low", "medium", "high"}:
+                severity = "medium"
+            findings.append(
+                {
+                    "severity": severity,
+                    "file": str(item.get("file") or ""),
+                    "reason": str(item.get("reason") or item.get("message") or ""),
+                    "suggested_action": str(
+                        item.get("suggested_action") or item.get("recommendation") or ""
+                    ),
+                }
+            )
+        else:
+            text = str(item).strip()
+            if text:
+                findings.append(
+                    {
+                        "severity": "medium",
+                        "file": "",
+                        "reason": text,
+                        "suggested_action": "",
+                    }
+                )
+    return findings
+
+
+def _test_coverage(value: object, fallback_notes: object) -> dict[str, str]:
+    if isinstance(value, dict):
+        level = str(value.get("level") or "unknown").lower()
+        notes = str(value.get("notes") or fallback_notes or "")
+    else:
+        level = "unknown"
+        notes = str(fallback_notes or "")
+    if level not in {"none", "weak", "adequate", "strong", "unknown"}:
+        level = "unknown"
+    return {"level": level, "notes": notes}
+
+
+def _matches_path(path: str, pattern: str) -> bool:
+    normalized = path.strip("/")
+    normalized_pattern = pattern.strip("/")
+    if not normalized_pattern:
+        return False
+    if pattern.endswith("/"):
+        return normalized == normalized_pattern or normalized.startswith(f"{normalized_pattern}/")
+    return normalized == normalized_pattern or fnmatch.fnmatch(normalized, normalized_pattern)
+
+
+def _exception_reason(exc: Exception) -> str:
+    if isinstance(exc, json.JSONDecodeError):
+        return "invalid_json"
+    text = f"{exc.__class__.__name__}: {exc}".lower()
+    if "timeout" in text or "timed out" in text:
+        return "timeout"
+    return "api_error"
 
 
 def _merge_unique(first: list[str], second: list[str]) -> list[str]:

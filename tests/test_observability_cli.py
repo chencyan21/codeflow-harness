@@ -10,10 +10,13 @@ from typer.testing import CliRunner
 
 from codeflow.cli import app
 from codeflow.harness.observability import (
+    cleanup_runs,
     create_run_dir,
     export_run_dir,
+    handle_observability_request,
     search_run_states,
     summarize_run_states,
+    update_run_index,
     write_json,
     write_text,
 )
@@ -43,6 +46,23 @@ def _write_run(
         "sensor_passed": status == "checks_passed",
     }
     write_json(run_dir / "state.json", state)
+    write_json(
+        run_dir / "review_summary.json",
+        {
+            "risk_level": risk_level,
+            "recommendation": "review",
+            "findings": [
+                {
+                    "source": "rules",
+                    "severity": risk_level,
+                    "category": "risk_pattern",
+                    "file": "app/auth.py" if risk_level == "high" else "",
+                    "message": "finding",
+                    "recommendation": "review",
+                }
+            ],
+        },
+    )
     write_text(run_dir / "review_report.md", "# Report\n")
     write_text(run_dir / "diff.patch", "+ changed\n")
     write_text(run_dir / "initial_prompt.md", "prompt\n")
@@ -52,6 +72,7 @@ def _write_run(
     write_json(run_dir / "sensor_report_round_0.json", {})
     write_text(run_dir / "mini_run_0.log", "log\n")
     write_text(run_dir / "mini_run_0.trajectory.json", "{}\n")
+    update_run_index(str(repo), run_dir)
     return run_dir
 
 
@@ -148,6 +169,7 @@ def test_inspect_report_export_cli(tmp_path: Path) -> None:
     )
     assert dashboard_result.exit_code == 0, dashboard_result.output
     assert "CodeFlow Runs Dashboard" in dashboard.read_text(encoding="utf-8")
+    assert "Finding Categories" in dashboard.read_text(encoding="utf-8")
 
 
 def test_search_and_summary_helpers_filter_runs(tmp_path: Path) -> None:
@@ -165,6 +187,31 @@ def test_search_and_summary_helpers_filter_runs(tmp_path: Path) -> None:
     assert summary["status_counts"]["checks_passed"] == 1
     assert summary["failed_runs"][0]["task"] == "first task"
     assert summary["daily_counts"]
+    assert summary["finding_counts"]["high"] == 1
+    assert summary["finding_categories"]["risk_pattern"] == 2
+
+
+def test_observability_http_responses_and_cleanup(tmp_path: Path) -> None:
+    _init_repo(tmp_path)
+    first = _write_run(tmp_path, task="first task", status="checks_failed", risk_level="high")
+    second = _write_run(tmp_path, task="second task", status="checks_passed", risk_level="low")
+
+    status, content_type, body = handle_observability_request(str(tmp_path), "/api/summary")
+    assert status == 200
+    assert content_type.startswith("application/json")
+    assert json.loads(body)["total_runs"] == 2
+
+    status, _content_type, body = handle_observability_request(str(tmp_path), f"/api/runs/{first.name}")
+    assert status == 200
+    assert json.loads(body)["task"] == "first task"
+
+    dry_run = cleanup_runs(str(tmp_path), keep=1, dry_run=True)
+    assert dry_run["deleted_count"] == 1
+    assert first.exists()
+
+    cleaned = cleanup_runs(str(tmp_path), keep=1, dry_run=False)
+    assert cleaned["deleted_count"] == 1
+    assert second.exists()
 
 
 def test_inspect_no_run_is_clear(tmp_path: Path) -> None:

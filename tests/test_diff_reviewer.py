@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from codeflow.diff_reviewer import build_review_report, score_risk
+from codeflow.diff_reviewer import build_review_report, build_review_summary, score_risk
 from codeflow.models import CheckResult
 
 
@@ -83,7 +83,7 @@ def test_build_review_report_includes_semantic_review() -> None:
             "status": "completed",
             "risk_level": "medium",
             "summary": "Needs review.",
-            "findings": ["Behavior may be incomplete."],
+            "findings": [{"severity": "medium", "reason": "Behavior may be incomplete."}],
             "recommendation": "review",
             "task_alignment": "partial",
             "test_coverage_notes": "missing edge case",
@@ -93,3 +93,17 @@ def test_build_review_report_includes_semantic_review() -> None:
     assert "## 8. Semantic Review" in report
     assert "Behavior may be incomplete." in report
     assert "- Risk Level: medium" in report
+
+
+def test_build_review_summary_returns_structured_findings() -> None:
+    result = CheckResult(command="pytest -q", success=True, returncode=0, stdout="", stderr="")
+
+    summary = build_review_summary(
+        diff="+ shutil.rmtree(workspace)",
+        changed_files=["app/auth/session.py"],
+        check_results=[result],
+    )
+
+    assert summary.risk_level == "high"
+    assert any(finding.source == "rules" for finding in summary.findings)
+    assert any("shutil.rmtree" in finding.message for finding in summary.findings)
