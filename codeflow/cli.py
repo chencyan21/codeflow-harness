@@ -95,7 +95,8 @@ def inspect(
 
     if len(states) == 1:
         state = states[0]
-        console.print("[bold]Latest CodeFlow Run[/bold]")
+        title = "Latest CodeFlow Run" if latest or run_id is None else "CodeFlow Run"
+        console.print(f"[bold]{title}[/bold]")
         console.print(f"Run ID: {state.get('run_id') or runs[0].name}")
         console.print(f"Task: {state.get('task', '')}")
         console.print(f"Branch: {state.get('branch', '')}")

@@ -76,6 +76,9 @@ def test_run_mini_agent_maps_codeflow_env_file(
     assert capture["MSWEA_CONFIGURED"] == "true"
     assert capture["MSWEA_MODEL_NAME"] == "openai/deepseek-v4-flash"
     assert capture["MSWEA_COST_TRACKING"] == "ignore_errors"
+    assert "--task" not in capture["argv"]
+    task_file = Path(capture["argv"][capture["argv"].index("--task-file") + 1])
+    assert task_file.read_text(encoding="utf-8") == "prompt"
     assert capture["argv"][capture["argv"].index("--model") + 1] == "openai/deepseek-v4-flash"
 
 

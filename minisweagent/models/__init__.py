@@ -17,6 +17,11 @@ class GlobalModelStats:
         self._cost = 0.0
         self._n_calls = 0
         self._lock = threading.Lock()
+        self.cost_limit = 0.0
+        self.call_limit = 0
+        self.reload_limits_from_env()
+
+    def reload_limits_from_env(self) -> None:
         self.cost_limit = float(os.getenv("MSWEA_GLOBAL_COST_LIMIT", "0"))
         self.call_limit = int(os.getenv("MSWEA_GLOBAL_CALL_LIMIT", "0"))
         if (self.cost_limit > 0 or self.call_limit > 0) and not os.getenv("MSWEA_SILENT_STARTUP"):

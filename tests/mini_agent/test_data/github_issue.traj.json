@@ -1,0 +1,18 @@
+[
+  {
+    "role": "system",
+    "content": "You are a helpful assistant."
+  },
+  {
+    "role": "user",
+    "content": "Fix the dummy SWE-bench issue."
+  },
+  {
+    "role": "assistant",
+    "content": "THOUGHT: I will submit the known patch for the dummy issue.\n\n```mswea_bash_command\ncat <<'EOF'\nCOMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT\ndiff --git a/tests/missing_colon.py b/tests/missing_colon.py\nindex 20edef5..5857437 100755\n--- a/tests/missing_colon.py\n+++ b/tests/missing_colon.py\n@@ -1,7 +1,7 @@\n #!/usr/bin/env python3\n \n \n-def division(a: float, b: float) -> float\n+def division(a: float, b: float) -> float:\n     return a/b\nEOF\n```"
+  },
+  {
+    "role": "exit",
+    "content": "diff --git a/tests/missing_colon.py b/tests/missing_colon.py\nindex 20edef5..5857437 100755\n--- a/tests/missing_colon.py\n+++ b/tests/missing_colon.py\n@@ -1,7 +1,7 @@\n #!/usr/bin/env python3\n \n \n-def division(a: float, b: float) -> float\n+def division(a: float, b: float) -> float:\n     return a/b\n"
+  }
+]

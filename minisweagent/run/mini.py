@@ -8,13 +8,10 @@ from typing import Any
 
 import typer
 from rich.console import Console
+from typer.models import OptionInfo
 
-from minisweagent import global_config_dir
-from minisweagent.agents import get_agent
-from minisweagent.agents.utils.prompt_user import _multiline_prompt
+from minisweagent import global_config_dir, load_global_config
 from minisweagent.config import builtin_config_dir, get_config_from_spec
-from minisweagent.environments import get_environment
-from minisweagent.models import get_model
 from minisweagent.run.utilities.config import configure_if_first_time
 from minisweagent.utils.serialize import UNSET, recursive_merge
 
@@ -44,6 +41,30 @@ console = Console(highlight=False)
 app = typer.Typer(rich_markup_mode="rich")
 
 
+def get_agent(*args, **kwargs):
+    from minisweagent.agents import get_agent as _get_agent
+
+    return _get_agent(*args, **kwargs)
+
+
+def get_environment(*args, **kwargs):
+    from minisweagent.environments import get_environment as _get_environment
+
+    return _get_environment(*args, **kwargs)
+
+
+def get_model(*args, **kwargs):
+    from minisweagent.models import get_model as _get_model
+
+    return _get_model(*args, **kwargs)
+
+
+def _multiline_prompt() -> str:
+    from minisweagent.agents.utils.prompt_user import _multiline_prompt as prompt
+
+    return prompt()
+
+
 # fmt: off
 @app.command(help=_HELP_TEXT)
 def main(
@@ -52,6 +73,7 @@ def main(
     agent_class: str | None = typer.Option(None, "--agent-class", help="Agent class to use (e.g., 'interactive' or 'minisweagent.agents.interactive.InteractiveAgent')", rich_help_panel="Advanced"),
     environment_class: str | None = typer.Option(None, "--environment-class", help="Environment class to use (e.g., 'local' or 'minisweagent.environments.local.LocalEnvironment')", rich_help_panel="Advanced"),
     task: str | None = typer.Option(None, "-t", "--task", help="Task/problem statement", show_default=False),
+    task_file: Path | None = typer.Option(None, "--task-file", help="Read task/problem statement from a file", show_default=False),
     yolo: bool = typer.Option(False, "-y", "--yolo", help="Run without confirmation"),
     cost_limit: float | None = typer.Option(None, "-l", "--cost-limit", help="Cost limit. Set to 0 to disable."),
     config_spec: list[str] = typer.Option([str(DEFAULT_CONFIG_FILE)], "-c", "--config", help=_CONFIG_SPEC_HELP_TEXT),
@@ -59,7 +81,16 @@ def main(
     exit_immediately: bool = typer.Option(False, "--exit-immediately", help="Exit immediately when the agent wants to finish instead of prompting.", rich_help_panel="Advanced"),
 ) -> Any:
     # fmt: on
+    load_global_config(verbose=True)
     configure_if_first_time()
+    if isinstance(task_file, OptionInfo):
+        task_file = None
+    if isinstance(exit_immediately, OptionInfo):
+        exit_immediately = False
+    if task_file is not None:
+        if task is not None:
+            raise typer.BadParameter("Use either --task or --task-file, not both.")
+        task = task_file.read_text(encoding="utf-8")
 
     # Build the config from the command line arguments
     console.print(f"Building agent config from specs: [bold green]{config_spec}[/bold green]")

@@ -5,6 +5,7 @@ import subprocess
 import zipfile
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from codeflow.cli import app
@@ -53,6 +54,14 @@ def test_observability_creates_and_exports_run(tmp_path: Path) -> None:
     assert "review_report.md" in names
     assert "mini_run_0.log" not in names
     assert "mini_run_0.trajectory.json" not in names
+
+
+def test_export_rejects_output_inside_run_dir(tmp_path: Path) -> None:
+    _init_repo(tmp_path)
+    run_dir = _write_run(tmp_path)
+
+    with pytest.raises(RuntimeError, match="outside the run directory"):
+        export_run_dir(run_dir, run_dir / "run.zip")
 
 
 def test_inspect_report_export_cli(tmp_path: Path) -> None:

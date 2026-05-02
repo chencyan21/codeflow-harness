@@ -8,31 +8,57 @@ This file provides:
   unless you want the static type checking.
 """
 
-__version__ = "2.2.8"
-
 import os
+import sys
 from pathlib import Path
 from typing import Any, Protocol
 
-import dotenv
 from platformdirs import user_config_dir
-from rich.console import Console
 
 from minisweagent.utils.log import logger
+
+__version__ = "2.2.8"
 
 package_dir = Path(__file__).resolve().parent
 
 
 global_config_dir = Path(os.getenv("MSWEA_GLOBAL_CONFIG_DIR") or user_config_dir("mini-swe-agent"))
-global_config_dir.mkdir(parents=True, exist_ok=True)
 global_config_file = Path(global_config_dir) / ".env"
+_global_config_loaded = False
 
-if not os.getenv("MSWEA_SILENT_STARTUP"):
-    Console().print(
-        f"👋 This is [bold green]mini-swe-agent[/bold green] version [bold green]{__version__}[/bold green].\n"
-        f"Loading global config from [bold green]'{global_config_file}'[/bold green]",
-    )
-dotenv.load_dotenv(dotenv_path=global_config_file)
+
+def ensure_global_config_dir() -> Path:
+    """Create and return the mini-SWE-agent global config directory."""
+    global_config_dir.mkdir(parents=True, exist_ok=True)
+    return global_config_dir
+
+
+def load_global_config(*, verbose: bool = False, override: bool = False) -> Path:
+    """Load the global `.env` file when running a mini-SWE-agent command.
+
+    Importing `minisweagent` stays quiet and filesystem-neutral; command entry
+    points call this function explicitly before reading model settings.
+    """
+    global _global_config_loaded
+    ensure_global_config_dir()
+    if verbose and not os.getenv("MSWEA_SILENT_STARTUP"):
+        from rich.console import Console
+
+        Console().print(
+            f"👋 This is [bold green]mini-swe-agent[/bold green] version [bold green]{__version__}[/bold green].\n"
+            f"Loading global config from [bold green]'{global_config_file}'[/bold green]",
+        )
+
+    import dotenv
+
+    dotenv.load_dotenv(dotenv_path=global_config_file, override=override)
+    _global_config_loaded = True
+
+    models_module = sys.modules.get("minisweagent.models")
+    stats = getattr(models_module, "GLOBAL_MODEL_STATS", None)
+    if stats is not None and hasattr(stats, "reload_limits_from_env"):
+        stats.reload_limits_from_env()
+    return global_config_file
 
 
 # === Protocols ===
@@ -87,5 +113,7 @@ __all__ = [
     "__version__",
     "global_config_file",
     "global_config_dir",
+    "ensure_global_config_dir",
+    "load_global_config",
     "logger",
 ]

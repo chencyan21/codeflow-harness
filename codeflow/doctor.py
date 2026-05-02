@@ -5,6 +5,7 @@ import os
 import shlex
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 from dotenv import dotenv_values
@@ -33,6 +34,31 @@ def _command_exists(command: str) -> bool:
     return bool(parts and shutil.which(parts[0]))
 
 
+def _python_command_target_error(parts: list[str]) -> str:
+    if not parts:
+        return "Empty command."
+    executable = Path(parts[0]).name
+    if executable not in {Path(sys.executable).name, "python", "python3"}:
+        return ""
+    args = parts[1:]
+    index = 0
+    while index < len(args) and args[index].startswith("-") and args[index] != "-m":
+        index += 1
+    if index >= len(args):
+        return ""
+    if args[index] == "-m":
+        if index + 1 >= len(args):
+            return "Python -m command is missing a module name."
+        module = args[index + 1]
+        if importlib.util.find_spec(module) is None:
+            return f"Python module not found: {module}"
+        return ""
+    target = Path(args[index])
+    if target.suffix == ".py" and not target.exists():
+        return f"Python script not found: {target}"
+    return ""
+
+
 def _mini_available() -> tuple[bool, str, str]:
     configured = os.environ.get("CODEFLOW_MINI_COMMAND")
     if configured:
@@ -40,7 +66,10 @@ def _mini_available() -> tuple[bool, str, str]:
             parts = shlex.split(configured)
         except ValueError as exc:
             return False, str(exc), "Fix CODEFLOW_MINI_COMMAND."
-        if parts and shutil.which(parts[0]):
+        target_error = _python_command_target_error(parts)
+        if target_error:
+            return False, target_error, "Fix CODEFLOW_MINI_COMMAND."
+        if parts and (shutil.which(parts[0]) or Path(parts[0]).exists()):
             return True, f"CODEFLOW_MINI_COMMAND={configured}", ""
         return False, f"Command not found: {configured}", "Install mini-swe-agent or fix CODEFLOW_MINI_COMMAND."
     if shutil.which("mini"):

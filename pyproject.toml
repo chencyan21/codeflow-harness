@@ -64,7 +64,7 @@ where = ["."]
 include = ["codeflow*", "minisweagent*"]
 
 [tool.setuptools.package-data]
-minisweagent = ["config/**/*"]
+minisweagent = ["config/**/*", "py.typed"]
 
 [tool.ruff]
 line-length = 100

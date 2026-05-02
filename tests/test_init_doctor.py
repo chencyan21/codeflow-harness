@@ -84,6 +84,17 @@ def test_doctor_reports_structured_results(tmp_path: Path) -> None:
     assert any(item["name"] == "Policy file" and item["ok"] for item in results)
 
 
+def test_doctor_rejects_missing_python_script_command(tmp_path: Path, monkeypatch) -> None:
+    _init_repo(tmp_path)
+    monkeypatch.setenv("CODEFLOW_MINI_COMMAND", "python missing_mini.py")
+
+    results = run_doctor(str(tmp_path), skip_checks=True, skip_llm=True)
+
+    mini = next(item for item in results if item["name"] == "mini CLI")
+    assert not mini["ok"]
+    assert "Python script not found" in str(mini["message"])
+
+
 def test_doctor_cli_json(tmp_path: Path) -> None:
     _init_repo(tmp_path)
     init_project(str(tmp_path))

@@ -15,7 +15,7 @@ import typer
 from jinja2 import StrictUndefined, Template
 from rich.live import Live
 
-from minisweagent import Environment
+from minisweagent import Environment, load_global_config
 from minisweagent.agents.default import DefaultAgent
 from minisweagent.config import builtin_config_dir, get_config_from_spec
 from minisweagent.environments import get_environment
@@ -222,6 +222,7 @@ def main(
     environment_class: str | None = typer.Option(None, "--environment-class", help="Environment type to use. Recommended are docker or singularity", rich_help_panel="Advanced"),
 ) -> None:
     # fmt: on
+    load_global_config(verbose=True)
     output_path = Path(output)
     output_path.mkdir(parents=True, exist_ok=True)
     logger.info(f"Results will be saved to {output_path}")

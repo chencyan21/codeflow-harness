@@ -18,7 +18,17 @@ from typer import Argument, Typer
 from minisweagent import global_config_file
 
 
+def _ensure_config_parent() -> None:
+    global_config_file.parent.mkdir(parents=True, exist_ok=True)
+
+
+def _load_config() -> None:
+    _ensure_config_parent()
+    load_dotenv(dotenv_path=global_config_file)
+
+
 def _reload_config():
+    _ensure_config_parent()
     load_dotenv(dotenv_path=global_config_file, override=True)
 
 
@@ -59,6 +69,7 @@ def prompt(*args, **kwargs):
 
 
 def configure_if_first_time():
+    _load_config()
     if not os.getenv("MSWEA_CONFIGURED"):
         console.print(Rule())
         setup()
@@ -68,6 +79,7 @@ def configure_if_first_time():
 @app.command()
 def setup():
     """Setup the global config file."""
+    _load_config()
     console.print(_SETUP_HELP.format(global_config_file=global_config_file))
     default_model = prompt(
         "Enter your default model (e.g., anthropic/claude-sonnet-4-5-20250929): ",
@@ -101,6 +113,7 @@ def set(
     value: str | None = Argument(None, help="The value to set"),
 ):
     """Set a key in the global config file."""
+    _ensure_config_parent()
     if key is None:
         key = prompt("Enter the key to set: ")
     if value is None:
@@ -112,6 +125,7 @@ def set(
 @app.command()
 def unset(key: str | None = Argument(None, help="The key to unset")):
     """Unset a key in the global config file."""
+    _ensure_config_parent()
     if key is None:
         key = prompt("Enter the key to unset: ")
     unset_key(global_config_file, key)
@@ -121,6 +135,7 @@ def unset(key: str | None = Argument(None, help="The key to unset")):
 @app.command()
 def edit():
     """Edit the global config file."""
+    _ensure_config_parent()
     editor = os.getenv("EDITOR", "nano")
     subprocess.run([editor, global_config_file])
     _reload_config()

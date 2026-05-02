@@ -325,11 +325,15 @@ def _apply_task(repo: Path, task: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("--task", "-t", required=True)
+    parser.add_argument("--task", "-t")
+    parser.add_argument("--task-file")
     parser.add_argument("--output")
     args, _unknown = parser.parse_known_args()
 
-    task = _extract_task(args.task)
+    raw_task = Path(args.task_file).read_text(encoding="utf-8") if args.task_file else args.task
+    if raw_task is None:
+        parser.error("--task or --task-file is required")
+    task = _extract_task(raw_task)
     _apply_task(Path.cwd(), task)
 
     if args.output:

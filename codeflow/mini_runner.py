@@ -114,7 +114,7 @@ def _command_for_log(cmd: list[str], prompt_path: Path) -> str:
             skip_next = False
             continue
         rendered.append(item)
-        if item in {"--task", "-t"}:
+        if item in {"--task", "-t", "--task-file"}:
             skip_next = True
     return shlex.join(rendered)
 
@@ -141,7 +141,7 @@ def run_mini_agent(
     effective_model = _resolve_model(model, env_values)
 
     cmd, command_env = _mini_command()
-    cmd.extend(["--task", prompt, "--yolo", "--exit-immediately", "--output", str(trajectory_path)])
+    cmd.extend(["--task-file", str(prompt_path), "--yolo", "--exit-immediately", "--output", str(trajectory_path)])
     if effective_model:
         cmd.extend(["--model", effective_model])
     if mini_config:
@@ -160,8 +160,6 @@ def run_mini_agent(
         raise RuntimeError(
             "mini-swe-agent CLI was not found. Install it or set CODEFLOW_MINI_COMMAND."
         ) from exc
-    finally:
-        prompt_path.unlink(missing_ok=True)
 
     log_path.write_text(
         "\n".join(

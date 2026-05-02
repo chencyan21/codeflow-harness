@@ -111,6 +111,10 @@ def export_run_dir(
     if not run_dir.is_dir():
         raise RuntimeError(f"Run directory does not exist: {run_dir}")
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    resolved_run_dir = run_dir.resolve()
+    resolved_out_path = out_path.resolve()
+    if resolved_out_path == resolved_run_dir or resolved_run_dir in resolved_out_path.parents:
+        raise RuntimeError("Export output path must be outside the run directory.")
     if out_path.exists():
         out_path.unlink()
 

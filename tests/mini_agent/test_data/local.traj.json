@@ -1,0 +1,18 @@
+[
+  {
+    "role": "system",
+    "content": "You are a helpful assistant."
+  },
+  {
+    "role": "user",
+    "content": "Blah blah blah"
+  },
+  {
+    "role": "assistant",
+    "content": "THOUGHT: I can finish this deterministic test run.\n\n```mswea_bash_command\necho COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT\n```"
+  },
+  {
+    "role": "exit",
+    "content": ""
+  }
+]

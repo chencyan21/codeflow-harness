@@ -5,7 +5,7 @@ from pathlib import Path
 import typer
 from datasets import load_dataset
 
-from minisweagent import global_config_dir
+from minisweagent import global_config_dir, load_global_config
 from minisweagent.agents import get_agent
 from minisweagent.config import builtin_config_dir, get_config_from_spec
 from minisweagent.models import get_model
@@ -56,6 +56,7 @@ def main(
 ) -> None:
     # fmt: on
     """Run on a single SWE-Bench instance."""
+    load_global_config(verbose=True)
     dataset_path = DATASET_MAPPING.get(subset, subset)
     logger.info(f"Loading dataset from {dataset_path}, split {split}...")
     instances = {
