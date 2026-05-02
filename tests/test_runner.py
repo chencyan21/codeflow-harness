@@ -251,3 +251,83 @@ harness:
     assert state.commit_action == "refused"
     assert _head(tmp_path) == before
     assert bool(_status(tmp_path)) is True
+
+
+def test_required_semantic_review_blocks_when_unavailable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _init_repo(tmp_path)
+    policy_dir = tmp_path / ".codeflow"
+    policy_dir.mkdir()
+    (policy_dir / "codeflow.yaml").write_text(
+        f"""
+harness:
+  required_checks:
+    - {sys.executable} -c "print(1)"
+  max_repair_rounds: 0
+  require_semantic_review: true
+""",
+        encoding="utf-8",
+    )
+    _run(["git", "add", ".codeflow/codeflow.yaml"], tmp_path)
+    _run(
+        [
+            "git",
+            "-c",
+            "user.email=test@example.local",
+            "-c",
+            "user.name=Test",
+            "commit",
+            "-m",
+            "policy",
+        ],
+        tmp_path,
+    )
+
+    def fake_mini(repo: str, prompt: str, **_kwargs: object) -> str:
+        Path(repo, "README.md").write_text("changed\n", encoding="utf-8")
+        return str(Path(repo) / ".git" / "fake.log")
+
+    monkeypatch.setattr("codeflow.runner.run_mini_agent", fake_mini)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("CODEFLOW_SEMANTIC_MODEL", raising=False)
+    monkeypatch.delenv("MSWEA_MODEL_NAME", raising=False)
+    monkeypatch.setenv("CODEFLOW_ENV_FILE", str(tmp_path / "missing.env"))
+
+    state = run_codeflow(CodeFlowConfig(repo=str(tmp_path), task="semantic required", no_commit=True))
+
+    assert state.status == "review_required"
+    assert state.semantic_review
+    assert state.semantic_review["status"] == "unavailable"
+
+
+def test_run_artifacts_redact_secret_like_diff(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _init_repo(tmp_path)
+
+    def fake_mini(repo: str, prompt: str, **_kwargs: object) -> str:
+        Path(repo, "README.md").write_text("api_key=sk-runnersecret123456\n", encoding="utf-8")
+        return str(Path(repo) / ".git" / "fake.log")
+
+    monkeypatch.setattr("codeflow.runner.run_mini_agent", fake_mini)
+
+    state = run_codeflow(
+        CodeFlowConfig(
+            repo=str(tmp_path),
+            task="redact diff",
+            checks=[f'{sys.executable} -c "print(1)"'],
+            max_repair_rounds=0,
+            no_commit=True,
+        )
+    )
+
+    assert "sk-runnersecret" in state.diff
+    assert state.run_dir is not None
+    diff_text = (Path(state.run_dir) / "diff.patch").read_text(encoding="utf-8")
+    state_text = (Path(state.run_dir) / "state.json").read_text(encoding="utf-8")
+    assert "sk-runnersecret" not in diff_text
+    assert "sk-runnersecret" not in state_text
+    assert "[REDACTED]" in diff_text

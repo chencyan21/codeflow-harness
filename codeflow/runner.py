@@ -29,6 +29,8 @@ from codeflow.models import (
     SensorContext,
 )
 from codeflow.prompt_builder import build_initial_prompt, build_repair_prompt
+from codeflow.redaction import redact_text
+from codeflow.semantic import enhance_spec_with_semantics, review_diff_with_semantics
 from codeflow.spec_builder import build_spec
 from codeflow.test_gate import all_checks_passed, failed_checks, run_checks
 from codeflow.utils import read_project_rules
@@ -53,10 +55,12 @@ def _write_final_state(state: RunState) -> None:
     if not state.run_dir:
         return
     run_dir = Path(state.run_dir)
+    state_dump = state.model_dump()
+    state_dump["diff"] = redact_text(state_dump.get("diff", ""))
     write_json(
         run_dir / "state.json",
         {
-            **state.model_dump(),
+            **state_dump,
             "checks_passed": all_checks_passed(state.check_results),
             "sensor_passed": state.sensor_report.overall_passed if state.sensor_report else None,
             "risk_level": state.sensor_report.max_severity if state.sensor_report else "unknown",
@@ -70,7 +74,7 @@ def _verify(
     task: str,
     policy: HarnessPolicy,
 ) -> tuple[list[CheckResult], str, list[str], HarnessSensorReport]:
-    results = run_checks(repo, policy.required_checks)
+    results = run_checks(repo, policy.required_checks, allow_shell=policy.allow_shell_checks)
     diff = get_diff(repo)
     changed_files = get_changed_files(repo)
     sensor_report = run_builtin_sensors(
@@ -118,6 +122,20 @@ def _commit_block_reason(
             "high-risk sensor findings require --allow-high-risk-commit",
             "commit_refused_high_risk",
         )
+    if (
+        state.semantic_review
+        and policy.block_commit_on_high_risk
+        and state.semantic_review.get("risk_level") == "high"
+        and not allow_high_risk_commit
+    ):
+        return (
+            "high-risk semantic review findings require --allow-high-risk-commit",
+            "commit_refused_high_risk",
+        )
+    if policy.require_semantic_review and (
+        not state.semantic_review or state.semantic_review.get("status") != "completed"
+    ):
+        return ("semantic review is required but did not complete", "commit_refused_semantic_review")
     return None
 
 
@@ -133,6 +151,12 @@ def run_codeflow(config: CodeFlowConfig) -> RunState:
         cli_max_repair_rounds=config.max_repair_rounds,
     )
     spec = build_spec(config.task)
+    spec, semantic_spec = enhance_spec_with_semantics(
+        task=config.task,
+        rules=rules,
+        policy=policy,
+        base_spec=spec,
+    )
     run_dir = create_run_dir(repo, config.task)
     run_id = run_dir.name
 
@@ -145,6 +169,8 @@ def run_codeflow(config: CodeFlowConfig) -> RunState:
     )
     write_json(run_dir / "policy.json", policy.model_dump())
     write_json(run_dir / "spec.json", spec.model_dump())
+    if semantic_spec:
+        write_json(run_dir / "semantic_spec.json", semantic_spec)
     write_text(run_dir / "initial_prompt.md", prompt)
 
     if config.dry_run:
@@ -163,6 +189,8 @@ def run_codeflow(config: CodeFlowConfig) -> RunState:
         state.commit_action = "not_requested"
         _artifact(state, "policy", run_dir / "policy.json")
         _artifact(state, "spec", run_dir / "spec.json")
+        if semantic_spec:
+            _artifact(state, "semantic_spec", run_dir / "semantic_spec.json")
         _artifact(state, "initial_prompt", run_dir / "initial_prompt.md")
         write_text(run_dir / "diff.patch", "")
         write_text(run_dir / "review_report.md", prompt)
@@ -184,6 +212,8 @@ def run_codeflow(config: CodeFlowConfig) -> RunState:
     )
     _artifact(state, "policy", run_dir / "policy.json")
     _artifact(state, "spec", run_dir / "spec.json")
+    if semantic_spec:
+        _artifact(state, "semantic_spec", run_dir / "semantic_spec.json")
     _artifact(state, "initial_prompt", run_dir / "initial_prompt.md")
     console.print(f"[bold green]Created branch:[/bold green] {branch}")
 
@@ -257,10 +287,37 @@ def run_codeflow(config: CodeFlowConfig) -> RunState:
         _record_mini_result(state, mini_result, repair_round)
         state.repair_round = repair_round
 
+    state.semantic_review = review_diff_with_semantics(
+        task=config.task,
+        diff=state.diff,
+        changed_files=state.changed_files,
+        check_results=state.check_results,
+        sensor_report=state.sensor_report,
+        policy=policy,
+    )
+    if state.semantic_review:
+        semantic_review_path = run_dir / "semantic_review.json"
+        write_json(semantic_review_path, state.semantic_review)
+        _artifact(state, "semantic_review", semantic_review_path)
+    elif policy.require_semantic_review:
+        state.status = "review_required"
+        state.semantic_review = {
+            "status": "unavailable",
+            "risk_level": "high",
+            "summary": "Semantic review is required by policy but no semantic LLM configuration is available.",
+            "findings": ["Configure CODEFLOW_SEMANTIC_MODEL plus OpenAI-compatible API settings."],
+            "recommendation": "Do not commit until semantic review runs.",
+            "task_alignment": "",
+            "test_coverage_notes": "",
+        }
+        semantic_review_path = run_dir / "semantic_review.json"
+        write_json(semantic_review_path, state.semantic_review)
+        _artifact(state, "semantic_review", semantic_review_path)
+
     state.report = build_review_report(
         task=config.task,
         branch=branch,
-        diff=state.diff,
+        diff=redact_text(state.diff),
         check_results=state.check_results,
         sensor_report=state.sensor_report,
         spec=spec,
@@ -270,8 +327,9 @@ def run_codeflow(config: CodeFlowConfig) -> RunState:
         run_dir=str(run_dir),
         changed_files=state.changed_files,
         repair_history=state.repair_history,
+        semantic_review=state.semantic_review,
     )
-    write_text(run_dir / "diff.patch", state.diff)
+    write_text(run_dir / "diff.patch", redact_text(state.diff))
     write_text(run_dir / "review_report.md", state.report)
     _artifact(state, "diff", run_dir / "diff.patch")
     _artifact(state, "review_report", run_dir / "review_report.md")

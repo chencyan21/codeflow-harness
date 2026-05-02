@@ -8,7 +8,15 @@ import typer
 from rich.console import Console
 
 from codeflow.doctor import run_doctor
-from codeflow.harness.observability import export_run_dir, get_run_dir, list_run_dirs
+from codeflow.harness.observability import (
+    export_run_dir,
+    build_runs_dashboard_html,
+    get_run_dir,
+    list_run_dirs,
+    load_run_state,
+    search_run_states,
+    summarize_run_states,
+)
 from codeflow.init_project import init_project
 from codeflow.models import CodeFlowConfig
 from codeflow.runner import run_codeflow
@@ -60,13 +68,6 @@ def run(
         console.print(state.report)
 
 
-def _load_state(run_dir: Path) -> dict:
-    state_path = run_dir / "state.json"
-    if not state_path.exists():
-        return {"run_id": run_dir.name, "run_dir": str(run_dir)}
-    return json.loads(state_path.read_text(encoding="utf-8"))
-
-
 @app.command()
 def inspect(
     repo: Annotated[str, typer.Option(help="Path to target Git repository")],
@@ -88,9 +89,12 @@ def inspect(
         console.print(f"[bold red]CodeFlow inspect failed:[/bold red] {exc}")
         raise typer.Exit(1) from exc
 
-    states = [_load_state(run_dir) for run_dir in runs]
+    states = [load_run_state(run_dir) for run_dir in runs]
     if json_output:
-        console.print(json.dumps(states[0] if len(states) == 1 else states, ensure_ascii=False, indent=2))
+        console.print(
+            json.dumps(states[0] if len(states) == 1 else states, ensure_ascii=False, indent=2),
+            soft_wrap=True,
+        )
         return
 
     if len(states) == 1:
@@ -118,6 +122,85 @@ def inspect(
             f"{index}. {run_dir.name}   {state.get('status', 'unknown')}   "
             f"{state.get('risk_level', 'unknown')}"
         )
+
+
+@app.command("search")
+def search_command(
+    repo: Annotated[str, typer.Option(help="Path to target Git repository")],
+    query: Annotated[str | None, typer.Option(help="Text to match in run id, task, branch, or status")] = None,
+    status: Annotated[str | None, typer.Option(help="Filter by run status")] = None,
+    risk_level: Annotated[str | None, typer.Option(help="Filter by risk level")] = None,
+    limit: Annotated[int, typer.Option(help="Maximum matching runs")] = 20,
+    json_output: Annotated[bool, typer.Option("--json", help="Print JSON")] = False,
+) -> None:
+    try:
+        runs = search_run_states(
+            repo,
+            query=query,
+            status=status,
+            risk_level=risk_level,
+            limit=limit,
+        )
+    except Exception as exc:
+        console.print(f"[bold red]CodeFlow search failed:[/bold red] {exc}")
+        raise typer.Exit(1) from exc
+
+    if json_output:
+        console.print(json.dumps(runs, ensure_ascii=False, indent=2), soft_wrap=True)
+        return
+
+    console.print("[bold]Matching Runs[/bold]")
+    for index, state in enumerate(runs, start=1):
+        console.print(
+            f"{index}. {state.get('run_id', '')}   {state.get('status', 'unknown')}   "
+            f"{state.get('risk_level', 'unknown')}   {state.get('task', '')}"
+        )
+
+
+@app.command("summary")
+def summary_command(
+    repo: Annotated[str, typer.Option(help="Path to target Git repository")],
+    limit: Annotated[int | None, typer.Option(help="Only summarize latest N runs")] = None,
+    json_output: Annotated[bool, typer.Option("--json", help="Print JSON")] = False,
+) -> None:
+    try:
+        summary = summarize_run_states(repo, limit=limit)
+    except Exception as exc:
+        console.print(f"[bold red]CodeFlow summary failed:[/bold red] {exc}")
+        raise typer.Exit(1) from exc
+
+    if json_output:
+        console.print(json.dumps(summary, ensure_ascii=False, indent=2), soft_wrap=True)
+        return
+
+    console.print("[bold]Run Summary[/bold]")
+    console.print(f"Total Runs: {summary['total_runs']}")
+    console.print(f"Latest Run: {summary['latest_run_id'] or ''}")
+    console.print(f"Checks Passed: {summary['checks_passed']}/{summary['total_runs']}")
+    console.print(f"Sensors Passed: {summary['sensor_passed']}/{summary['total_runs']}")
+    console.print(f"Average Repair Rounds: {summary['average_repair_rounds']}")
+    console.print(f"Status Counts: {summary['status_counts']}")
+    console.print(f"Risk Counts: {summary['risk_counts']}")
+    console.print(f"Daily Counts: {summary['daily_counts']}")
+    if summary["failed_runs"]:
+        console.print(f"Recent Failed Runs: {summary['failed_runs']}")
+
+
+@app.command("dashboard")
+def dashboard_command(
+    repo: Annotated[str, typer.Option(help="Path to target Git repository")],
+    out: Annotated[str, typer.Option(help="HTML output path")],
+    limit: Annotated[int, typer.Option(help="Maximum runs to include")] = 100,
+) -> None:
+    try:
+        html = build_runs_dashboard_html(repo, limit=limit)
+        out_path = Path(out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(html, encoding="utf-8")
+    except Exception as exc:
+        console.print(f"[bold red]CodeFlow dashboard failed:[/bold red] {exc}")
+        raise typer.Exit(1) from exc
+    console.print(str(out_path))
 
 
 @app.command()
@@ -199,7 +282,7 @@ def doctor(
         raise typer.Exit(1) from exc
 
     if json_output:
-        console.print(json.dumps(results, ensure_ascii=False, indent=2))
+        console.print(json.dumps(results, ensure_ascii=False, indent=2), soft_wrap=True)
         return
 
     console.print("[bold]CodeFlow Doctor[/bold]")

@@ -9,25 +9,38 @@ import pytest
 from typer.testing import CliRunner
 
 from codeflow.cli import app
-from codeflow.harness.observability import create_run_dir, export_run_dir, write_json, write_text
+from codeflow.harness.observability import (
+    create_run_dir,
+    export_run_dir,
+    search_run_states,
+    summarize_run_states,
+    write_json,
+    write_text,
+)
 
 
 def _init_repo(path: Path) -> None:
     subprocess.run(["git", "init"], cwd=path, text=True, capture_output=True, check=True)
 
 
-def _write_run(repo: Path, task: str = "task") -> Path:
+def _write_run(
+    repo: Path,
+    task: str = "task",
+    *,
+    status: str = "checks_passed",
+    risk_level: str = "low",
+) -> Path:
     run_dir = create_run_dir(str(repo), task)
     state = {
         "run_id": run_dir.name,
         "task": task,
         "branch": "ai/task",
-        "status": "checks_passed",
+        "status": status,
         "commit_action": "skipped",
         "repair_round": 0,
-        "risk_level": "low",
-        "checks_passed": True,
-        "sensor_passed": True,
+        "risk_level": risk_level,
+        "checks_passed": status == "checks_passed",
+        "sensor_passed": status == "checks_passed",
     }
     write_json(run_dir / "state.json", state)
     write_text(run_dir / "review_report.md", "# Report\n")
@@ -116,6 +129,42 @@ def test_inspect_report_export_cli(tmp_path: Path) -> None:
     assert exported_with_prompts.exit_code == 0, exported_with_prompts.output
     with zipfile.ZipFile(out_with_prompts) as archive:
         assert "initial_prompt.md" in set(archive.namelist())
+
+    summary = runner.invoke(app, ["summary", "--repo", str(tmp_path), "--json"])
+    assert summary.exit_code == 0, summary.output
+    summary_data = json.loads(summary.output)
+    assert summary_data["total_runs"] == 1
+    assert summary_data["daily_counts"]
+
+    searched = runner.invoke(app, ["search", "--repo", str(tmp_path), "--query", "inspect", "--json"])
+    assert searched.exit_code == 0, searched.output
+    search_data = json.loads(searched.output)
+    assert search_data[0]["run_id"] == run_dir.name
+
+    dashboard = tmp_path / "dashboard.html"
+    dashboard_result = runner.invoke(
+        app,
+        ["dashboard", "--repo", str(tmp_path), "--out", str(dashboard)],
+    )
+    assert dashboard_result.exit_code == 0, dashboard_result.output
+    assert "CodeFlow Runs Dashboard" in dashboard.read_text(encoding="utf-8")
+
+
+def test_search_and_summary_helpers_filter_runs(tmp_path: Path) -> None:
+    _init_repo(tmp_path)
+    _write_run(tmp_path, task="first task", status="checks_failed", risk_level="high")
+    _write_run(tmp_path, task="second task", status="checks_passed", risk_level="low")
+
+    failed = search_run_states(str(tmp_path), status="checks_failed")
+    summary = summarize_run_states(str(tmp_path))
+
+    assert len(failed) == 1
+    assert failed[0]["task"] == "first task"
+    assert summary["total_runs"] == 2
+    assert summary["status_counts"]["checks_failed"] == 1
+    assert summary["status_counts"]["checks_passed"] == 1
+    assert summary["failed_runs"][0]["task"] == "first task"
+    assert summary["daily_counts"]
 
 
 def test_inspect_no_run_is_clear(tmp_path: Path) -> None:

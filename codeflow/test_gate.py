@@ -6,15 +6,16 @@ import subprocess
 from pathlib import Path
 
 from codeflow.models import CheckResult
+from codeflow.redaction import redact_text
 from codeflow.utils import tail_text
 
 SHELL_CHECK_PREFIX = "shell:"
 
 
-def check_command_executable_exists(command: str) -> bool:
+def check_command_executable_exists(command: str, *, allow_shell: bool = False) -> bool:
     stripped = command.strip()
     if stripped.startswith(SHELL_CHECK_PREFIX):
-        return bool(stripped.removeprefix(SHELL_CHECK_PREFIX).strip())
+        return allow_shell and bool(stripped.removeprefix(SHELL_CHECK_PREFIX).strip())
     try:
         parts = shlex.split(command)
     except ValueError:
@@ -22,9 +23,17 @@ def check_command_executable_exists(command: str) -> bool:
     return bool(parts and (shutil.which(parts[0]) or Path(parts[0]).exists()))
 
 
-def run_check(repo: str, command: str) -> CheckResult:
+def run_check(repo: str, command: str, *, allow_shell: bool = False) -> CheckResult:
     stripped = command.strip()
     if stripped.startswith(SHELL_CHECK_PREFIX):
+        if not allow_shell:
+            return CheckResult(
+                command=command,
+                success=False,
+                returncode=126,
+                stdout="",
+                stderr="Shell check is disabled by policy. Set allow_shell_checks: true to permit it.",
+            )
         shell_command = stripped.removeprefix(SHELL_CHECK_PREFIX).strip()
         if not shell_command:
             return CheckResult(
@@ -45,8 +54,8 @@ def run_check(repo: str, command: str) -> CheckResult:
             command=command,
             success=result.returncode == 0,
             returncode=result.returncode,
-            stdout=tail_text(result.stdout),
-            stderr=tail_text(result.stderr),
+            stdout=redact_text(tail_text(result.stdout)),
+            stderr=redact_text(tail_text(result.stderr)),
         )
 
     try:
@@ -87,16 +96,16 @@ def run_check(repo: str, command: str) -> CheckResult:
         command=command,
         success=result.returncode == 0,
         returncode=result.returncode,
-        stdout=tail_text(result.stdout),
-        stderr=tail_text(result.stderr),
+        stdout=redact_text(tail_text(result.stdout)),
+        stderr=redact_text(tail_text(result.stderr)),
     )
 
 
-def run_checks(repo: str, checks: list[str]) -> list[CheckResult]:
+def run_checks(repo: str, checks: list[str], *, allow_shell: bool = False) -> list[CheckResult]:
     results: list[CheckResult] = []
 
     for command in checks:
-        results.append(run_check(repo, command))
+        results.append(run_check(repo, command, allow_shell=allow_shell))
 
     return results
 

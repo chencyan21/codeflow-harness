@@ -31,6 +31,10 @@ class HarnessPolicy(BaseModel):
     require_test_change: bool = False
     allow_dependency_change: bool = True
     allow_delete_tests: bool = False
+    allow_shell_checks: bool = False
+    semantic_spec: bool = False
+    semantic_review: bool = False
+    require_semantic_review: bool = False
     block_commit_on_failed_checks: bool = True
     block_commit_on_high_risk: bool = False
     require_human_approval: bool = True
@@ -42,6 +46,7 @@ class Spec(BaseModel):
     goal: str
     acceptance_criteria: list[str]
     constraints: list[str]
+    semantic_notes: list[str] = Field(default_factory=list)
 
 
 class CheckResult(BaseModel):
@@ -95,6 +100,7 @@ class RunState(BaseModel):
     mini_runs: list[str] = Field(default_factory=list)
     check_results: list[CheckResult] = Field(default_factory=list)
     sensor_report: HarnessSensorReport | None = None
+    semantic_review: dict | None = None
     changed_files: list[str] = Field(default_factory=list)
     repair_history: list[dict[str, str | int]] = Field(default_factory=list)
     repair_round: int = 0

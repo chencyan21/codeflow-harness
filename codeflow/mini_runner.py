@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import shlex
 import shutil
+import signal
 import subprocess
 import sys
 from pathlib import Path
@@ -11,6 +12,7 @@ from uuid import uuid4
 from dotenv import dotenv_values
 
 from codeflow.models import MiniRunResult
+from codeflow.redaction import redact_file_in_place, redact_text
 
 
 OPENAI_COMPAT_ENV_KEYS = {
@@ -157,17 +159,50 @@ def _write_mini_log(
                 *header,
                 "",
                 "PROMPT:",
-                prompt,
+                redact_text(prompt),
                 "",
                 "STDOUT:",
-                "" if stdout is None else str(stdout),
+                redact_text(stdout),
                 "",
                 "STDERR:",
-                "" if stderr is None else str(stderr),
+                redact_text(stderr),
             ]
         ),
         encoding="utf-8",
     )
+
+
+def _run_mini_subprocess(
+    cmd: list[str],
+    *,
+    cwd: str,
+    env: dict[str, str],
+    timeout_seconds: float,
+) -> subprocess.CompletedProcess[str]:
+    process = subprocess.Popen(
+        cmd,
+        cwd=cwd,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env=env,
+        start_new_session=True,
+    )
+    try:
+        stdout, stderr = process.communicate(timeout=timeout_seconds)
+    except subprocess.TimeoutExpired as exc:
+        if os.name == "nt":
+            process.kill()
+        else:
+            os.killpg(process.pid, signal.SIGKILL)
+        stdout, stderr = process.communicate()
+        raise subprocess.TimeoutExpired(
+            exc.cmd,
+            exc.timeout,
+            output=stdout,
+            stderr=stderr,
+        ) from exc
+    return subprocess.CompletedProcess(cmd, process.returncode, stdout, stderr)
 
 
 def run_mini_agent(
@@ -201,19 +236,20 @@ def run_mini_agent(
     timeout_seconds = _mini_timeout_seconds()
 
     try:
-        result = subprocess.run(
+        result = _run_mini_subprocess(
             cmd,
             cwd=repo,
-            text=True,
-            capture_output=True,
             env=env,
-            timeout=timeout_seconds,
+            timeout_seconds=timeout_seconds,
         )
     except FileNotFoundError as exc:
+        redact_file_in_place(prompt_path)
         raise RuntimeError(
             "mini-swe-agent CLI was not found. Install it or set CODEFLOW_MINI_COMMAND."
         ) from exc
     except subprocess.TimeoutExpired as exc:
+        redact_file_in_place(prompt_path)
+        redact_file_in_place(trajectory_path)
         _write_mini_log(
             log_path=log_path,
             cmd=cmd,
@@ -226,6 +262,8 @@ def run_mini_agent(
         )
         raise RuntimeError(f"mini-swe-agent timed out after {timeout_seconds:g}s. See {log_path}") from exc
 
+    redact_file_in_place(prompt_path)
+    redact_file_in_place(trajectory_path)
     _write_mini_log(
         log_path=log_path,
         cmd=cmd,

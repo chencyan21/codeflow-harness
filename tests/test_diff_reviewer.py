@@ -68,4 +68,28 @@ def test_build_review_report_mentions_validation() -> None:
     assert "# CodeFlow Review Report" in report
     assert "| pytest -q | PASS | 0 |" in report
     assert "ai/task" in report
-    assert "## 8. Manual Review Checklist" in report
+    assert "## 9. Manual Review Checklist" in report
+
+
+def test_build_review_report_includes_semantic_review() -> None:
+    result = CheckResult(command="pytest -q", success=True, returncode=0, stdout="", stderr="")
+
+    report = build_review_report(
+        "task",
+        "ai/task",
+        "+ change",
+        [result],
+        semantic_review={
+            "status": "completed",
+            "risk_level": "medium",
+            "summary": "Needs review.",
+            "findings": ["Behavior may be incomplete."],
+            "recommendation": "review",
+            "task_alignment": "partial",
+            "test_coverage_notes": "missing edge case",
+        },
+    )
+
+    assert "## 8. Semantic Review" in report
+    assert "Behavior may be incomplete." in report
+    assert "- Risk Level: medium" in report

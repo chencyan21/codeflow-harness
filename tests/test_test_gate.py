@@ -32,10 +32,32 @@ def test_run_checks_does_not_use_shell_by_default(tmp_path: Path) -> None:
     assert marker.read_text(encoding="utf-8") == "ok"
 
 
-def test_run_checks_requires_explicit_shell_prefix(tmp_path: Path) -> None:
+def test_run_checks_rejects_shell_prefix_without_policy(tmp_path: Path) -> None:
     marker = tmp_path / "shell-marker.txt"
 
     result = run_checks(str(tmp_path), [f"shell: printf ok > {shlex.quote(str(marker))}"])[0]
 
+    assert result.success is False
+    assert result.returncode == 126
+    assert not marker.exists()
+
+
+def test_run_checks_allows_shell_prefix_when_policy_allows(tmp_path: Path) -> None:
+    marker = tmp_path / "shell-marker.txt"
+
+    result = run_checks(
+        str(tmp_path),
+        [f"shell: printf ok > {shlex.quote(str(marker))}"],
+        allow_shell=True,
+    )[0]
+
     assert result.success is True
     assert marker.read_text(encoding="utf-8") == "ok"
+
+
+def test_run_checks_redacts_secret_like_output(tmp_path: Path) -> None:
+    result = run_checks(str(tmp_path), [f"{sys.executable} -c 'print(\"api_key=sk-secret123456\")'"])[0]
+
+    assert result.success is True
+    assert "sk-secret" not in result.stdout
+    assert "[REDACTED]" in result.stdout

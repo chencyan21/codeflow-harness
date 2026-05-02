@@ -152,3 +152,23 @@ def test_run_mini_agent_times_out_and_writes_log(tmp_path: Path, monkeypatch) ->
     log_text = logs[0].read_text(encoding="utf-8")
     assert "TIMEOUT_SECONDS: 0.1" in log_text
     assert "PROMPT:" in log_text
+
+
+def test_run_mini_agent_redacts_prompt_and_logs(tmp_path: Path, monkeypatch) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_repo(repo)
+    script = tmp_path / "echo_secret.py"
+    script.write_text("print('api_key=sk-output123456789')\n", encoding="utf-8")
+
+    monkeypatch.setenv("CODEFLOW_MINI_COMMAND", f"{sys.executable} {script}")
+
+    run_mini_agent(str(repo), "api_key=sk-prompt123456789")
+
+    artifact_dir = repo / ".git" / "codeflow"
+    log_text = next(artifact_dir.glob("mini_run_*.log")).read_text(encoding="utf-8")
+    prompt_text = next(artifact_dir.glob("prompt_*.txt")).read_text(encoding="utf-8")
+    assert "sk-prompt" not in log_text
+    assert "sk-output" not in log_text
+    assert "sk-prompt" not in prompt_text
+    assert "[REDACTED]" in log_text

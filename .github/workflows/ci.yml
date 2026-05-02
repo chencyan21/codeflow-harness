@@ -43,7 +43,10 @@ jobs:
       - name: Lint
         run: uv run ruff check .
 
-      - name: Unit tests
+      - name: Type check
+        run: uv run mypy codeflow
+
+      - name: Unit tests with coverage
         run: >
           uv run pytest -q
           --ignore=tests/mini_agent/environments/extra
@@ -53,3 +56,6 @@ jobs:
           --ignore=tests/mini_agent/run/test_swebench_single.py
           --ignore=tests/mini_agent/test_fire.py
           -m "not fire"
+          --cov=codeflow
+          --cov-report=term-missing
+          --cov-fail-under=70

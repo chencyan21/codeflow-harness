@@ -127,6 +127,28 @@ def test_doctor_probes_env_wrapped_mini_command(tmp_path: Path, monkeypatch) -> 
     assert "command probe passed" in str(mini["message"])
 
 
+def test_doctor_reports_shell_checks_disabled_by_policy(tmp_path: Path, monkeypatch) -> None:
+    _init_repo(tmp_path)
+    init_project(str(tmp_path))
+    policy_path = tmp_path / ".codeflow" / "codeflow.yaml"
+    policy_path.write_text(
+        """
+harness:
+  required_checks:
+    - "shell: echo ok"
+  allow_shell_checks: false
+""",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("CODEFLOW_MINI_COMMAND", f"{sys.executable} -m minisweagent.run.mini")
+
+    results = run_doctor(str(tmp_path), skip_checks=True, skip_llm=True)
+
+    shell_check = next(item for item in results if str(item["name"]).startswith("Required check:"))
+    assert not shell_check["ok"]
+    assert "shell check disabled" in str(shell_check["message"])
+
+
 def test_doctor_cli_json(tmp_path: Path) -> None:
     _init_repo(tmp_path)
     init_project(str(tmp_path))

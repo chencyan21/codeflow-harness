@@ -11,6 +11,8 @@ def test_policy_falls_back_when_yaml_missing(tmp_path: Path) -> None:
     assert policy.required_checks == ["pytest -q"]
     assert ".env" in policy.forbidden_paths
     assert policy.max_repair_rounds == 3
+    assert policy.semantic_spec is False
+    assert policy.semantic_review is False
 
 
 def test_policy_loads_yaml_and_flattens_governance(tmp_path: Path) -> None:
@@ -33,6 +35,10 @@ harness:
   require_test_change: true
   allow_dependency_change: false
   allow_delete_tests: false
+  allow_shell_checks: true
+  semantic_spec: false
+  semantic_review: false
+  require_semantic_review: true
   governance:
     block_commit_on_failed_checks: true
     block_commit_on_high_risk: true
@@ -52,6 +58,10 @@ harness:
     assert policy.high_risk_paths == ["app/auth/"]
     assert policy.require_test_change is True
     assert policy.allow_dependency_change is False
+    assert policy.allow_shell_checks is True
+    assert policy.semantic_spec is False
+    assert policy.semantic_review is False
+    assert policy.require_semantic_review is True
     assert policy.block_commit_on_high_risk is True
     assert policy.rerun_checks_before_commit is False
 
@@ -88,3 +98,5 @@ def test_policy_prompt_contains_harness_settings(tmp_path: Path) -> None:
     assert "pytest -q" in text
     assert "ruff check ." in text
     assert "forbidden paths" in text
+    assert "allow shell checks" in text
+    assert "semantic review" in text

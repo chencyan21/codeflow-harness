@@ -41,6 +41,10 @@ DEFAULT_CODEFLOW_YAML = """harness:
   require_test_change: true
   allow_dependency_change: false
   allow_delete_tests: false
+  allow_shell_checks: false
+  semantic_spec: true
+  semantic_review: true
+  require_semantic_review: false
 
   governance:
     block_commit_on_failed_checks: true

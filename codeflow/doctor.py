@@ -27,10 +27,6 @@ def _run(cmd: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
 
 
-def _command_exists(command: str) -> bool:
-    return check_command_executable_exists(command)
-
-
 def _python_command_target_error(parts: list[str]) -> str:
     if not parts:
         return "Empty command."
@@ -198,15 +194,19 @@ def run_doctor(repo: str, *, skip_checks: bool = False, skip_llm: bool = False) 
 
     if policy:
         for command in policy.required_checks:
-            exists = _command_exists(command)
+            exists = check_command_executable_exists(command, allow_shell=policy.allow_shell_checks)
             ok = exists
             message = "command found"
             suggestion = ""
             if not exists:
-                message = "command executable not found"
-                suggestion = "Install the command or update required_checks."
+                if command.strip().startswith("shell:") and not policy.allow_shell_checks:
+                    message = "shell check disabled by policy"
+                    suggestion = "Set allow_shell_checks: true only for trusted shell checks."
+                else:
+                    message = "command executable not found"
+                    suggestion = "Install the command or update required_checks."
             elif not skip_checks:
-                check = run_check(str(root), command)
+                check = run_check(str(root), command, allow_shell=policy.allow_shell_checks)
                 ok = check.success
                 message = "OK" if ok else (check.stderr.strip() or check.stdout.strip() or "check failed")
                 suggestion = "Fix project checks before running CodeFlow." if not ok else ""

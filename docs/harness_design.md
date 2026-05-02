@@ -117,6 +117,7 @@ Run Report + Benchmark Result
 ## 7. 当前边界
 
 当前实现已经覆盖 Harness 化基础、结构化 policy、第一批 sensors、commit 前二次检查、
-标准 run 目录、`inspect` / `report` / `export` 命令、mini 子进程超时保护、GitHub Actions CI、
-raw mini 对比 benchmark 和真实 LLM 小子集评测。
-仍属于后续阶段的是 LLM Spec、LLM Review、更大规模 benchmark 覆盖、可复现 raw artifact 归档和长期回归仪表盘。
+可选 LLM Spec / Review、标准 run 目录、`inspect` / `search` / `summary` / `dashboard` /
+`report` / `export` 命令、mini 子进程超时保护、GitHub Actions CI、raw mini 对比 benchmark
+和真实 LLM 小子集评测。
+仍属于后续阶段的是更大规模 benchmark 覆盖、可复现 raw artifact 归档和服务化长期回归仪表盘。

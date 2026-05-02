@@ -42,6 +42,7 @@ full = [
 
 [dependency-groups]
 dev = [
+    "mypy>=1.20.2",
     "portkey-ai",
     "pre-commit",
     "pytest>=8.0.0",
@@ -50,7 +51,12 @@ dev = [
     "pytest-xdist",
     "ruff>=0.8.0",
     "swe-rex",
+    "types-pyyaml>=6.0.12.20260408",
 ]
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
 
 [project.scripts]
 codeflow = "codeflow.cli:app"
@@ -68,6 +74,15 @@ minisweagent = ["config/**/*", "py.typed"]
 
 [tool.ruff]
 line-length = 100
+
+[tool.mypy]
+python_version = "3.11"
+plugins = []
+files = ["codeflow"]
+ignore_missing_imports = true
+warn_unused_configs = true
+no_implicit_optional = true
+check_untyped_defs = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

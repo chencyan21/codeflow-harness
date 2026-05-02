@@ -157,7 +157,12 @@ def _is_config_file(path: str) -> bool:
 
 
 def _changed_file_groups(changed_files: list[str]) -> dict[str, list[str]]:
-    groups = {"Source Files": [], "Test Files": [], "Config Files": [], "Unknown": []}
+    groups: dict[str, list[str]] = {
+        "Source Files": [],
+        "Test Files": [],
+        "Config Files": [],
+        "Unknown": [],
+    }
     for path in changed_files:
         if _is_test_file(path):
             groups["Test Files"].append(path)
@@ -266,6 +271,26 @@ def _repair_section(repair_history: list[dict[str, str | int]] | None) -> list[s
     return lines
 
 
+def _semantic_section(semantic_review: dict | None) -> list[str]:
+    lines = ["## 8. Semantic Review", ""]
+    if not semantic_review:
+        lines.append("- not run")
+        return lines
+    lines.extend(
+        [
+            f"- Status: {_escape_table(semantic_review.get('status', 'unknown'))}",
+            f"- Risk Level: {_escape_table(semantic_review.get('risk_level', 'unknown'))}",
+            f"- Summary: {_escape_table(semantic_review.get('summary', ''))}",
+            f"- Task Alignment: {_escape_table(semantic_review.get('task_alignment', ''))}",
+            f"- Test Coverage: {_escape_table(semantic_review.get('test_coverage_notes', ''))}",
+            f"- Recommendation: {_escape_table(semantic_review.get('recommendation', ''))}",
+            "- Findings:",
+            _list_or_none([str(item) for item in semantic_review.get("findings", [])]),
+        ]
+    )
+    return lines
+
+
 def _checklist(sensor_report: HarnessSensorReport | None) -> list[str]:
     items = [
         "- [ ] 任务目标是否已满足？",
@@ -307,8 +332,12 @@ def build_review_report(
     run_dir: str | None = None,
     changed_files: list[str] | None = None,
     repair_history: list[dict[str, str | int]] | None = None,
+    semantic_review: dict | None = None,
 ) -> str:
     risk_level, risks = score_risk(diff, changed_files=changed_files)
+    semantic_risk = str((semantic_review or {}).get("risk_level") or "")
+    if semantic_risk in SEVERITY_ORDER and SEVERITY_ORDER[semantic_risk] > SEVERITY_ORDER[risk_level]:
+        risk_level = semantic_risk
     if sensor_report and SEVERITY_ORDER[sensor_report.max_severity] > SEVERITY_ORDER[risk_level]:
         risk_level = sensor_report.max_severity
     changed_lines = len(diff.splitlines())
@@ -352,11 +381,13 @@ def build_review_report(
         "",
         *_repair_section(repair_history),
         "",
-        "## 8. Manual Review Checklist",
+        *_semantic_section(semantic_review),
+        "",
+        "## 9. Manual Review Checklist",
         "",
         *_checklist(sensor_report),
         "",
-        "## 9. Recommendation",
+        "## 10. Recommendation",
         "",
         recommendation,
     ]

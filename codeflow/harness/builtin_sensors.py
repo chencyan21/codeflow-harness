@@ -3,8 +3,9 @@ from __future__ import annotations
 import fnmatch
 import re
 from dataclasses import dataclass
+from typing import Literal
 
-from codeflow.harness.sensors import build_sensor_report
+from codeflow.harness.sensors import BaseSensor, build_sensor_report
 from codeflow.models import HarnessSensorReport, SensorContext, SensorResult
 
 DEPENDENCY_FILES = {
@@ -272,7 +273,9 @@ class HighRiskPathSensor:
     def run(self, context: SensorContext) -> SensorResult:
         matches = _matching_paths(context.changed_files, context.policy.high_risk_paths)
         if matches:
-            severity = "high" if context.policy.block_commit_on_high_risk else "medium"
+            severity: Literal["medium", "high"] = (
+                "high" if context.policy.block_commit_on_high_risk else "medium"
+            )
             return SensorResult(
                 name=self.name,
                 passed=True,
@@ -446,7 +449,7 @@ class NoChangeSensor:
         )
 
 
-BUILTIN_SENSORS = [
+BUILTIN_SENSORS: list[BaseSensor] = [
     CheckCommandSensor(),
     ForbiddenPathSensor(),
     ForbiddenPathWriteSensor(),
