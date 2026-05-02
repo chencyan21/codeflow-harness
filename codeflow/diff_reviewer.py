@@ -20,12 +20,41 @@ HIGH_RISK_PATTERNS = [
     "drop",
 ]
 
+HIGH_RISK_PATH_PATTERNS = [
+    "auth/",
+    "authentication/",
+    "permissions/",
+    "migrations/",
+    "secrets/",
+    "credentials/",
+]
+
 MEDIUM_RISK_PATTERNS = [
     "api",
     "schema",
     "model",
     "database",
     "config",
+]
+
+MEDIUM_RISK_PATH_PATTERNS = [
+    ".github/workflows/",
+    ".codeflow/",
+    "config/",
+    "pyproject.toml",
+    "requirements.txt",
+    "requirements-dev.txt",
+    "poetry.lock",
+    "uv.lock",
+]
+
+HIGH_RISK_ADDED_LINE_PATTERNS = [
+    (re.compile(r"\bshutil\.rmtree\s*\("), "recursive deletion call added: shutil.rmtree"),
+    (re.compile(r"\bos\.(remove|unlink|rmdir)\s*\("), "filesystem deletion call added"),
+    (re.compile(r"\bPath\s*\([^)]*\)\.unlink\s*\("), "filesystem unlink call added"),
+    (re.compile(r"\brm\s+-[^\n]*r[^\n]*f\b"), "destructive shell command added: rm -rf"),
+    (re.compile(r"\b(drop\s+table|delete\s+from|truncate\s+table)\b"), "destructive SQL statement added"),
+    (re.compile(r"\bchmod\s+777\b"), "over-broad file permission command added"),
 ]
 
 
@@ -35,16 +64,57 @@ def _contains_risk_pattern(diff: str, pattern: str) -> bool:
     return re.search(rf"(?<![a-z0-9]){re.escape(pattern)}(?![a-z0-9])", diff) is not None
 
 
-def score_risk(diff: str) -> tuple[str, list[str]]:
+def _added_lines(diff: str) -> list[str]:
+    return [
+        line[1:].strip().lower()
+        for line in diff.splitlines()
+        if line.startswith("+") and not line.startswith("+++")
+    ]
+
+
+def _path_risks(changed_files: list[str] | None) -> tuple[list[str], list[str]]:
+    high: list[str] = []
+    medium: list[str] = []
+    for path in changed_files or []:
+        normalized = path.replace("\\", "/").lower()
+        for pattern in HIGH_RISK_PATH_PATTERNS:
+            if pattern in normalized:
+                high.append(f"High-risk path changed: {path}")
+                break
+        else:
+            for pattern in MEDIUM_RISK_PATH_PATTERNS:
+                if normalized == pattern.rstrip("/") or pattern in normalized:
+                    medium.append(f"Medium-risk path changed: {path}")
+                    break
+    return high, medium
+
+
+def _behavioral_risks(diff: str) -> list[str]:
+    risks: list[str] = []
+    for line in _added_lines(diff):
+        for pattern, message in HIGH_RISK_ADDED_LINE_PATTERNS:
+            if pattern.search(line):
+                risks.append(message)
+    return risks
+
+
+def score_risk(diff: str, changed_files: list[str] | None = None) -> tuple[str, list[str]]:
     lower = diff.lower()
     risks: list[str] = []
+
+    path_high, path_medium = _path_risks(changed_files)
+    risks.extend(path_high)
 
     for pattern in HIGH_RISK_PATTERNS:
         if _contains_risk_pattern(lower, pattern):
             risks.append(f"High-risk keyword found in diff: {pattern}")
 
+    risks.extend(_behavioral_risks(diff))
+
     if risks:
         return "high", risks
+
+    risks.extend(path_medium)
 
     for pattern in MEDIUM_RISK_PATTERNS:
         if _contains_risk_pattern(lower, pattern):
@@ -238,7 +308,7 @@ def build_review_report(
     changed_files: list[str] | None = None,
     repair_history: list[dict[str, str | int]] | None = None,
 ) -> str:
-    risk_level, risks = score_risk(diff)
+    risk_level, risks = score_risk(diff, changed_files=changed_files)
     if sensor_report and SEVERITY_ORDER[sensor_report.max_severity] > SEVERITY_ORDER[risk_level]:
         risk_level = sensor_report.max_severity
     changed_lines = len(diff.splitlines())

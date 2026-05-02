@@ -17,6 +17,7 @@ OPENAI_COMPAT_ENV_KEYS = {
     "api_key": "OPENAI_API_KEY",
     "base_url": "OPENAI_BASE_URL",
 }
+DEFAULT_MINI_TIMEOUT_SECONDS = 3600.0
 
 
 def _nonempty(value: object) -> str | None:
@@ -105,6 +106,19 @@ def _mini_command() -> tuple[list[str], dict[str, str] | None]:
     return [sys.executable, "-m", "minisweagent.run.mini"], None
 
 
+def _mini_timeout_seconds() -> float:
+    raw = os.environ.get("CODEFLOW_MINI_TIMEOUT_SECONDS")
+    if raw is None:
+        return DEFAULT_MINI_TIMEOUT_SECONDS
+    try:
+        timeout = float(raw)
+    except ValueError as exc:
+        raise RuntimeError("CODEFLOW_MINI_TIMEOUT_SECONDS must be a positive number.") from exc
+    if timeout <= 0:
+        raise RuntimeError("CODEFLOW_MINI_TIMEOUT_SECONDS must be a positive number.")
+    return timeout
+
+
 def _command_for_log(cmd: list[str], prompt_path: Path) -> str:
     rendered: list[str] = []
     skip_next = False
@@ -117,6 +131,43 @@ def _command_for_log(cmd: list[str], prompt_path: Path) -> str:
         if item in {"--task", "-t", "--task-file"}:
             skip_next = True
     return shlex.join(rendered)
+
+
+def _write_mini_log(
+    *,
+    log_path: Path,
+    cmd: list[str],
+    prompt_path: Path,
+    trajectory_path: Path,
+    prompt: str,
+    stdout: object,
+    stderr: object,
+    timeout_seconds: float | None = None,
+) -> None:
+    header = [
+        f"COMMAND: {_command_for_log(cmd, prompt_path)}",
+        f"PROMPT_FILE: {prompt_path}",
+        f"TRAJECTORY: {trajectory_path}",
+    ]
+    if timeout_seconds is not None:
+        header.append(f"TIMEOUT_SECONDS: {timeout_seconds:g}")
+    log_path.write_text(
+        "\n".join(
+            [
+                *header,
+                "",
+                "PROMPT:",
+                prompt,
+                "",
+                "STDOUT:",
+                "" if stdout is None else str(stdout),
+                "",
+                "STDERR:",
+                "" if stderr is None else str(stderr),
+            ]
+        ),
+        encoding="utf-8",
+    )
 
 
 def run_mini_agent(
@@ -147,6 +198,7 @@ def run_mini_agent(
     if mini_config:
         cmd.extend(["--config", mini_config])
     env = _mini_env(command_env, env_values, effective_model)
+    timeout_seconds = _mini_timeout_seconds()
 
     try:
         result = subprocess.run(
@@ -155,30 +207,33 @@ def run_mini_agent(
             text=True,
             capture_output=True,
             env=env,
+            timeout=timeout_seconds,
         )
     except FileNotFoundError as exc:
         raise RuntimeError(
             "mini-swe-agent CLI was not found. Install it or set CODEFLOW_MINI_COMMAND."
         ) from exc
+    except subprocess.TimeoutExpired as exc:
+        _write_mini_log(
+            log_path=log_path,
+            cmd=cmd,
+            prompt_path=prompt_path,
+            trajectory_path=trajectory_path,
+            prompt=prompt,
+            stdout=exc.stdout,
+            stderr=exc.stderr,
+            timeout_seconds=timeout_seconds,
+        )
+        raise RuntimeError(f"mini-swe-agent timed out after {timeout_seconds:g}s. See {log_path}") from exc
 
-    log_path.write_text(
-        "\n".join(
-            [
-                f"COMMAND: {_command_for_log(cmd, prompt_path)}",
-                f"PROMPT_FILE: {prompt_path}",
-                f"TRAJECTORY: {trajectory_path}",
-                "",
-                "PROMPT:",
-                prompt,
-                "",
-                "STDOUT:",
-                result.stdout,
-                "",
-                "STDERR:",
-                result.stderr,
-            ]
-        ),
-        encoding="utf-8",
+    _write_mini_log(
+        log_path=log_path,
+        cmd=cmd,
+        prompt_path=prompt_path,
+        trajectory_path=trajectory_path,
+        prompt=prompt,
+        stdout=result.stdout,
+        stderr=result.stderr,
     )
 
     if result.returncode != 0:

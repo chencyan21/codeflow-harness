@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 from codeflow.mini_runner import run_mini_agent
 
 
@@ -130,3 +132,23 @@ def test_existing_openai_env_values_are_preserved(
     assert capture["OPENAI_API_KEY"] == "existing-key"
     assert capture["OPENAI_BASE_URL"] == "https://existing.test/v1"
     assert capture["OPENAI_API_BASE"] == "https://file.test/v1"
+
+
+def test_run_mini_agent_times_out_and_writes_log(tmp_path: Path, monkeypatch) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_repo(repo)
+    script = tmp_path / "sleep_mini.py"
+    script.write_text("import time\ntime.sleep(5)\n", encoding="utf-8")
+
+    monkeypatch.setenv("CODEFLOW_MINI_COMMAND", f"{sys.executable} {script}")
+    monkeypatch.setenv("CODEFLOW_MINI_TIMEOUT_SECONDS", "0.1")
+
+    with pytest.raises(RuntimeError, match="mini-swe-agent timed out"):
+        run_mini_agent(str(repo), "prompt")
+
+    logs = list((repo / ".git" / "codeflow").glob("mini_run_*.log"))
+    assert len(logs) == 1
+    log_text = logs[0].read_text(encoding="utf-8")
+    assert "TIMEOUT_SECONDS: 0.1" in log_text
+    assert "PROMPT:" in log_text

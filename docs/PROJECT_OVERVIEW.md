@@ -259,6 +259,7 @@ mini --task "<prompt>" --yolo --exit-immediately --output <trajectory.json>
 - 如果没有 `mini`，回退到当前环境中的 `python -m minisweagent.run.mini`。
 - mini 返回非零时抛出 `RuntimeError`，日志路径会写入错误信息。
 - prompt 文件保留在 run artifact 目录中用于审计；`codeflow export` 默认排除 prompt，需要时可显式包含。
+- mini 子进程默认 3600 秒超时，可通过 `CODEFLOW_MINI_TIMEOUT_SECONDS` 覆盖；超时时会写入 log 后失败。
 
 模型和 API 配置：
 
@@ -497,6 +498,7 @@ git diff --check
 - `codeflow inspect` / `report` / `export` 运行结果查看与导出。
 - commit / rollback / keep 人工治理。
 - commit 前二次验证。
+- GitHub Actions CI，覆盖 ruff 和稳定单元测试子集。
 - Harness-Bench、自建示例项目、QuixBugs、BugsInPy、SWE-bench mini subset。
 - fake mini 离线验证能力。
 - 当前真实 LLM benchmark 汇总报告，报告已按 method 拆分 baseline 与 full run。
@@ -506,6 +508,7 @@ git diff --check
 当前仍然是规则版 Harness，不是完整产品化平台。主要边界：
 
 - Spec 生成和 diff review 都是规则实现，没有 LLM 级语义审查。
+- diff review 已结合关键词、changed files 路径和部分破坏性新增代码模式，但仍不是语义级审查。
 - Observability 已有 run 目录、inspect、report 和 export；还没有跨 run 搜索、Web UI 或长期趋势仪表盘。
 - `benchmark/generated/` 和 `benchmark/results/` 不入库，fresh clone 需要重新准备 runnable workspaces 才能跑 SWE-bench / BugsInPy 真实任务。
 - SWE-bench 当前只验证了很小的 Astropy mini subset，还不是全量 SWE-bench 结论。

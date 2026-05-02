@@ -168,6 +168,7 @@ mini --task "<prompt>" --yolo --exit-immediately --output <trajectory.json>
 - 支持 `CODEFLOW_MINI_COMMAND` 覆盖 mini 命令，便于测试或调试。
 - 如果 PATH 中没有 `mini`，会回退到当前环境中的 `python -m minisweagent.run.mini`。
 - mini 返回非零退出码时抛出 `RuntimeError`，并指向日志文件。
+- 默认 mini 子进程超时为 3600 秒，可用 `CODEFLOW_MINI_TIMEOUT_SECONDS` 覆盖；超时时同样写入 mini log。
 
 ### 模型配置
 
@@ -238,6 +239,9 @@ sensor report 会进入 repair prompt 和最终 review report。当前可自动 
 - medium：命中 `api`、`schema`、`model`、`database`、`config`
 - low：没有明显高风险关键词
 
+评分还会结合 changed files 和新增代码行为：`auth/`、`migrations/`、`secrets/` 等路径会提高风险；
+新增 `shutil.rmtree`、`rm -rf`、破坏性 SQL 或 `chmod 777` 会直接标记为 high。
+
 ## 示例项目
 
 `examples/todo_api` 是最小 Python 示例项目，包含：
@@ -298,6 +302,16 @@ cd examples/todo_api && pytest -q
 ```
 
 还使用 fake mini 验证了完整 pass/fail/repair/human approval 流程，并使用真实 LLM 验证了 `.env` 自动映射后的 mini-swe-agent 调用链路。
+
+## CI
+
+`.github/workflows/ci.yml` 在 push / pull request 上运行 Python 3.11 和 3.12 矩阵：
+
+- `uv sync --locked --group dev`
+- `uv run ruff check .`
+- `uv run pytest -q` 的稳定单元测试子集
+
+CI 默认排除 Docker/Podman、Singularity、SWE-bench container、extra environment 和真实 API fire tests。
 
 ## 当前注意事项
 
