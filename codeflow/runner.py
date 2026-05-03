@@ -244,6 +244,7 @@ def run_codeflow(config: CodeFlowConfig) -> RunState:
         run_index=0,
         model=config.model,
         mini_config=config.mini_config,
+        policy=policy,
     )
     _record_mini_result(state, mini_result, 0)
 
@@ -302,6 +303,7 @@ def run_codeflow(config: CodeFlowConfig) -> RunState:
             run_index=repair_round,
             model=config.model,
             mini_config=config.mini_config,
+            policy=policy,
         )
         _record_mini_result(state, mini_result, repair_round)
         state.repair_round = repair_round

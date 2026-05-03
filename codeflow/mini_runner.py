@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import fnmatch
 import importlib
 import io
 import json
@@ -19,8 +20,9 @@ from uuid import uuid4
 
 from dotenv import dotenv_values
 
-from codeflow.models import MiniRunRequest, MiniRunResult
+from codeflow.models import HarnessPolicy, MiniEvent, MiniRunRequest, MiniRunResult
 from codeflow.redaction import redact_file_in_place, redact_text
+from codeflow.test_gate import scan_shell_check_risk
 
 
 OPENAI_COMPAT_ENV_KEYS = {
@@ -38,6 +40,15 @@ class ExecutorHook(Protocol):
         ...
 
     def before_file_write(self, path: str) -> None:
+        ...
+
+    def after_file_write(self, path: str) -> None:
+        ...
+
+    def before_model_step(self, step: int) -> None:
+        ...
+
+    def after_model_step(self, step: int, result: object) -> None:
         ...
 
 
@@ -58,11 +69,26 @@ class MiniExecutionError(RuntimeError):
 
 
 class JsonlExecutorHook:
-    def __init__(self, path: Path) -> None:
+    def __init__(self, path: Path, *, forbidden_paths: list[str] | None = None) -> None:
         self.path = path
+        self.forbidden_paths = forbidden_paths or []
         self.path.parent.mkdir(parents=True, exist_ok=True)
 
     def before_command(self, command: str) -> None:
+        risks = _scan_realtime_command_risk(command)
+        if risks:
+            message = f"Blocked high-risk mini command: {', '.join(risks)}"
+            self._write(
+                "before_command",
+                {
+                    "command": command,
+                    "risk_level": "high",
+                    "blocked": True,
+                    "message": message,
+                    "details": {"risks": risks},
+                },
+            )
+            raise MiniExecutionError(message, error_type="policy_blocked")
         self._write("before_command", {"command": command})
 
     def after_command(self, command: str, result: object) -> None:
@@ -75,22 +101,42 @@ class JsonlExecutorHook:
         )
 
     def before_file_write(self, path: str) -> None:
+        matches = _forbidden_path_matches(path, self.forbidden_paths)
+        if matches:
+            message = f"Blocked mini write to forbidden path: {path}"
+            self._write(
+                "before_file_write",
+                {
+                    "path": path,
+                    "risk_level": "high",
+                    "blocked": True,
+                    "message": message,
+                    "details": {"matched_patterns": matches},
+                },
+            )
+            raise MiniExecutionError(message, error_type="policy_blocked")
         self._write("before_file_write", {"path": path})
+
+    def after_file_write(self, path: str) -> None:
+        self._write("after_file_write", {"path": path})
+
+    def before_model_step(self, step: int) -> None:
+        self._write("before_model_step", {"step": step})
+
+    def after_model_step(self, step: int, result: object) -> None:
+        details: dict[str, object] = {}
+        if isinstance(result, dict):
+            details["role"] = str(result.get("role", result.get("object", "")))
+            actions = result.get("extra", {}).get("actions", [])
+            if isinstance(actions, list):
+                details["actions_count"] = len(actions)
+        self._write("after_model_step", {"step": step, "details": details})
 
     def _write(self, event_type: str, payload: dict[str, object]) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        event = MiniEvent.model_validate({"event": event_type, "ts": time.time(), **payload})
         with self.path.open("a", encoding="utf-8") as handle:
-            handle.write(
-                json.dumps(
-                    {
-                        "ts": time.time(),
-                        "event": event_type,
-                        **payload,
-                    },
-                    ensure_ascii=False,
-                )
-                + "\n"
-            )
+            handle.write(json.dumps(event.model_dump(exclude_none=True), ensure_ascii=False) + "\n")
 
 
 class SubprocessMiniExecutor:
@@ -143,6 +189,7 @@ class InProcessMiniExecutor:
                     config_spec=[request.mini_config] if request.mini_config else None,
                     output=Path(request.trajectory_path),
                     exit_immediately=True,
+                    executor_hook=hook,
                 )
             result = subprocess.CompletedProcess(
                 request.command,
@@ -157,6 +204,8 @@ class InProcessMiniExecutor:
                 output=stdout.getvalue(),
                 stderr=stderr.getvalue(),
             )
+        except MiniExecutionError:
+            raise
         except Exception:
             stderr.write(traceback.format_exc())
             result = subprocess.CompletedProcess(
@@ -329,6 +378,36 @@ def _selected_executor() -> MiniExecutor:
     )
 
 
+def _scan_realtime_command_risk(command: str) -> list[str]:
+    return scan_shell_check_risk(f"shell: {command}")
+
+
+def _forbidden_path_matches(path: str, patterns: list[str]) -> list[str]:
+    return sorted({pattern for pattern in patterns if _path_matches_pattern(path, pattern)})
+
+
+def _path_matches_pattern(path: str, pattern: str) -> bool:
+    normalized_path = path.replace("\\", "/").strip("/")
+    normalized_pattern = pattern.replace("\\", "/").strip("/")
+    if not normalized_path or not normalized_pattern:
+        return False
+    name = Path(normalized_path).name
+    if pattern.endswith("/"):
+        prefix = normalized_pattern.rstrip("/")
+        return (
+            normalized_path == prefix
+            or normalized_path.startswith(f"{prefix}/")
+            or f"/{prefix}/" in f"/{normalized_path}/"
+            or normalized_path.endswith(f"/{prefix}")
+        )
+    return (
+        normalized_path == normalized_pattern
+        or normalized_path.endswith(f"/{normalized_pattern}")
+        or fnmatch.fnmatch(normalized_path, normalized_pattern)
+        or fnmatch.fnmatch(name, normalized_pattern)
+    )
+
+
 def _command_for_log(cmd: list[str], prompt_path: Path) -> str:
     rendered: list[str] = []
     skip_next = False
@@ -424,6 +503,7 @@ def run_mini_agent(
     run_index: int | None = None,
     model: str | None = None,
     mini_config: str | None = None,
+    policy: HarnessPolicy | None = None,
     executor: MiniExecutor | None = None,
 ) -> MiniRunResult:
     run_id = str(uuid4())[:8]
@@ -434,9 +514,11 @@ def run_mini_agent(
     log_path = artifacts / f"mini_run_{suffix}.log"
     trajectory_path = artifacts / f"mini_run_{suffix}.trajectory.json"
     events_path = artifacts / f"mini_run_{suffix}.events.jsonl"
-    hook = JsonlExecutorHook(events_path)
+    effective_policy = policy or HarnessPolicy()
+    hook = JsonlExecutorHook(events_path, forbidden_paths=effective_policy.forbidden_paths)
     hook.before_file_write(str(prompt_path))
     prompt_path.write_text(prompt, encoding="utf-8")
+    hook.after_file_write(str(prompt_path))
 
     env_values = _load_codeflow_env()
     effective_model = _resolve_model(model, env_values)
@@ -471,6 +553,7 @@ def run_mini_agent(
         timeout_seconds=timeout_seconds,
         executor_name=executor_name,
         events_path=str(events_path),
+        forbidden_paths=effective_policy.forbidden_paths,
     )
 
     try:
@@ -488,6 +571,7 @@ def run_mini_agent(
             stderr=str(exc),
             error_type="command_not_found",
         )
+        hook.after_file_write(str(log_path))
         raise MiniExecutionError(
             "mini-swe-agent CLI was not found. Install it or set CODEFLOW_MINI_COMMAND.",
             error_type="command_not_found",
@@ -507,10 +591,27 @@ def run_mini_agent(
             timeout_seconds=timeout_seconds,
             error_type="timeout",
         )
+        hook.after_file_write(str(log_path))
         raise MiniExecutionError(
             f"mini-swe-agent timed out after {timeout_seconds:g}s. See {log_path}",
             error_type="timeout",
         ) from exc
+    except MiniExecutionError as exc:
+        redact_file_in_place(prompt_path)
+        redact_file_in_place(trajectory_path)
+        hook.before_file_write(str(log_path))
+        _write_mini_log(
+            log_path=log_path,
+            cmd=cmd,
+            prompt_path=prompt_path,
+            trajectory_path=trajectory_path,
+            prompt=prompt,
+            stdout="",
+            stderr=str(exc),
+            error_type=exc.error_type,
+        )
+        hook.after_file_write(str(log_path))
+        raise
 
     redact_file_in_place(prompt_path)
     redact_file_in_place(trajectory_path)
@@ -525,6 +626,7 @@ def run_mini_agent(
         stderr=result.stderr,
         error_type="nonzero_exit" if result.returncode != 0 else None,
     )
+    hook.after_file_write(str(log_path))
 
     if result.returncode != 0:
         raise MiniExecutionError(

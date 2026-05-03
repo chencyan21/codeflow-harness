@@ -187,13 +187,17 @@ mini --task-file <prompt.txt> --yolo --exit-immediately --output <trajectory.jso
 - 支持 `CODEFLOW_MINI_COMMAND` 覆盖 mini 命令，便于测试或调试。
 - 如果 PATH 中没有 `mini`，会回退到当前环境中的 `python -m minisweagent.run.mini`。
 - 支持 `CODEFLOW_MINI_EXECUTOR=subprocess|inprocess`；in-process 路径直接调用
-  `minisweagent.run.mini.run_mini_in_process()`，用于更细粒度集成和后续 hook 扩展。
+  `minisweagent.run.mini.run_mini_in_process()`，并把 `ExecutorHook` 传入 mini 内部。
+- in-process hook 会记录 model step、shell command、prompt/log/trajectory 写入事件；命中
+  `rm -rf`、`curl | sh`、`wget | sh`、写 `.env`、`sudo`、`chmod 777`、
+  `docker run --privileged` 或 forbidden path 写入时，会以 `policy_blocked` 阻断。
 - mini 返回非零退出码时抛出 `MiniExecutionError`，并在日志中记录 `ERROR_TYPE`。
 - 默认 mini 子进程超时为 3600 秒，可用 `CODEFLOW_MINI_TIMEOUT_SECONDS` 覆盖；超时时会终止子进程组并写入 mini log。
-- 每次 mini 调用都会写入 `mini_run_N.events.jsonl`，记录 executor 边界事件，例如 prompt/log 写入和 command 前后事件。
+- 每次 mini 调用都会写入 `mini_run_N.events.jsonl`，记录结构化 `MiniEvent`。
 - `MiniRunRequest` 记录 repo、prompt path、trajectory path、model、mini config、env、timeout 和 command。
 - `MiniRunResult` 记录 `status`、`error_type` 和 `events_path`，当前可区分 `timeout`、
-  `command_not_found`、`nonzero_exit`、`invalid_timeout` 和 `trajectory_missing`。
+  `command_not_found`、`nonzero_exit`、`invalid_timeout`、`policy_blocked` 和
+  `trajectory_missing`。
 
 ### 模型配置
 

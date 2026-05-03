@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from codeflow.models import HarnessPolicy
 from codeflow.mini_runner import MiniExecutionError, run_mini_agent
 from minisweagent.run import mini as mini_module
 
@@ -228,11 +229,13 @@ def test_run_mini_agent_writes_executor_events(tmp_path: Path, monkeypatch) -> N
     ]
     assert [event["event"] for event in events] == [
         "before_file_write",
+        "after_file_write",
         "before_command",
         "after_command",
         "before_file_write",
+        "after_file_write",
     ]
-    assert events[2]["returncode"] == 0
+    assert events[3]["returncode"] == 0
 
 
 def test_run_mini_agent_can_use_inprocess_executor(tmp_path: Path, monkeypatch) -> None:
@@ -282,3 +285,57 @@ def test_invalid_executor_name_is_clear(tmp_path: Path, monkeypatch) -> None:
         run_mini_agent(str(repo), "prompt")
 
     assert exc_info.value.error_type == "invalid_executor"
+
+
+def test_inprocess_executor_blocks_high_risk_internal_command(tmp_path: Path, monkeypatch) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_repo(repo)
+
+    def fake_run_mini_in_process(**kwargs: object) -> object:
+        hook = kwargs["executor_hook"]
+        hook.before_command("rm -rf build")
+        return object()
+
+    monkeypatch.setattr(mini_module, "run_mini_in_process", fake_run_mini_in_process)
+    monkeypatch.setenv("CODEFLOW_MINI_EXECUTOR", "inprocess")
+
+    with pytest.raises(MiniExecutionError) as exc_info:
+        run_mini_agent(str(repo), "prompt")
+
+    assert exc_info.value.error_type == "policy_blocked"
+    artifact_dir = repo / ".git" / "codeflow"
+    events_path = next(artifact_dir.glob("mini_run_*.events.jsonl"))
+    events = [
+        json.loads(line)
+        for line in events_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    blocked = [event for event in events if event.get("blocked")]
+    assert blocked
+    assert blocked[0]["risk_level"] == "high"
+    assert "rm -rf" in blocked[0]["message"]
+    log_text = next(artifact_dir.glob("mini_run_*.log")).read_text(encoding="utf-8")
+    assert "ERROR_TYPE: policy_blocked" in log_text
+
+
+def test_forbidden_path_write_hook_blocks_policy_path(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_repo(repo)
+
+    class ForbiddenWriteExecutor:
+        def run(self, request, *, hook=None):
+            assert hook is not None
+            hook.before_file_write(str(Path(request.repo) / ".env"))
+            raise AssertionError("forbidden write should be blocked")
+
+    with pytest.raises(MiniExecutionError) as exc_info:
+        run_mini_agent(
+            str(repo),
+            "prompt",
+            executor=ForbiddenWriteExecutor(),
+            policy=HarnessPolicy(forbidden_paths=[".env"]),
+        )
+
+    assert exc_info.value.error_type == "policy_blocked"

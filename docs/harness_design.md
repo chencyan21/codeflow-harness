@@ -36,8 +36,9 @@ mini-swe-agent v2 负责：
 
 CodeFlow 不重写这些能力，默认通过 `SubprocessMiniExecutor` 调用本地 `mini` CLI。
 需要更紧密集成时，可用 `CODEFLOW_MINI_EXECUTOR=inprocess` 直接调用
-`minisweagent.run.mini.run_mini_in_process()`；executor hook 已记录基础 events，
-后续可继续扩展到更细粒度的工具调用和文件写入拦截。
+`minisweagent.run.mini.run_mini_in_process()`。executor hook 已接入 mini 内部
+agent/environment，可记录 model step、shell command 和写文件事件，并对高风险命令或
+forbidden path 写入做实时阻断；后续可继续扩展更丰富的工具事件类型。
 
 ## 4. CodeFlow Harness 负责什么
 

@@ -86,7 +86,9 @@ export CODEFLOW_MINI_COMMAND="python -m minisweagent.run.mini"
 ```
 
 默认执行器仍是稳定的 subprocess CLI 路径；也可以启用 in-process adapter，直接调用本仓库内
-`minisweagent.run.mini.run_mini_in_process()`：
+`minisweagent.run.mini.run_mini_in_process()`。in-process 模式会把 mini 内部的
+model step、shell command 和 trajectory 写入事件记录到 `mini_run_N.events.jsonl`，
+并在高风险 shell 命令或 forbidden path 写入前阻断执行：
 
 ```bash
 export CODEFLOW_MINI_EXECUTOR=inprocess

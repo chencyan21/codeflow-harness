@@ -16,14 +16,23 @@ class LocalEnvironmentConfig(BaseModel):
 
 
 class LocalEnvironment:
-    def __init__(self, *, config_class: type = LocalEnvironmentConfig, **kwargs):
+    def __init__(
+        self,
+        *,
+        config_class: type = LocalEnvironmentConfig,
+        executor_hook: Any | None = None,
+        **kwargs,
+    ):
         """This class executes bash commands directly on the local machine."""
         self.config = config_class(**kwargs)
+        self.executor_hook = executor_hook
 
     def execute(self, action: dict, cwd: str = "", *, timeout: int | None = None) -> dict[str, Any]:
         """Execute a command in the local environment and return the result as a dict."""
         command = action.get("command", "")
         cwd = cwd or self.config.cwd or os.getcwd()
+        if self.executor_hook:
+            self.executor_hook.before_command(command)
         try:
             result = subprocess.run(
                 command,
@@ -49,6 +58,8 @@ class LocalEnvironment:
                 "exception_info": f"An error occurred while executing the command: {e}",
                 "extra": {"exception_type": type(e).__name__, "exception": str(e)},
             }
+        if self.executor_hook:
+            self.executor_hook.after_command(command, output)
         self._check_finished(output)
         return output
 

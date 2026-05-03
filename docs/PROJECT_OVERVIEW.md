@@ -267,11 +267,14 @@ mini --task-file <prompt.txt> --yolo --exit-immediately --output <trajectory.jso
 - 如果 PATH 中有 `mini`，优先使用它。
 - 如果没有 `mini`，回退到当前环境中的 `python -m minisweagent.run.mini`。
 - 支持 `CODEFLOW_MINI_EXECUTOR=subprocess|inprocess`；in-process 路径调用
-  `minisweagent.run.mini.run_mini_in_process()`，绕过 CLI subprocess 边界。
+  `minisweagent.run.mini.run_mini_in_process()`，绕过 CLI subprocess 边界，并把 hook 传入
+  mini 内部 agent/environment。
+- in-process hook 会记录 model step、shell command 和写文件事件，并在高风险 shell 命令或
+  forbidden path 写入前以 `policy_blocked` 阻断。
 - mini 返回非零时抛出 `MiniExecutionError`，日志路径会写入错误信息和 `ERROR_TYPE`。
 - prompt 文件保留在 run artifact 目录中用于审计；`codeflow export` 默认排除 prompt，需要时可显式包含。
 - mini 子进程默认 3600 秒超时，可通过 `CODEFLOW_MINI_TIMEOUT_SECONDS` 覆盖；超时时会终止子进程组并写入 log 后失败。
-- 每次调用会写入 `mini_run_N.events.jsonl`，记录 prompt/log 写入和 executor command 前后事件。
+- 每次调用会写入 `mini_run_N.events.jsonl`，记录结构化 `MiniEvent`。
 
 模型和 API 配置：
 
@@ -546,8 +549,8 @@ git diff --check
 - BugsInPy 当前重点验证 youtube-dl 5 个任务，还没有大规模跨项目覆盖。
 - benchmark 中真实 LLM 结果受模型、网络、代理和依赖缓存影响，长期回归仍需要把 raw artifact 按策略归档。
 - `test_gate.py` 默认不经 shell 解释 checks；允许 shell 后已有风险扫描，但仍要求这类配置来自可信项目。
-- `mini_runner.py` 已有 executor 抽象、错误分类、events artifact 和 in-process adapter；
-  仍需要继续把更细的 mini 工具调用/文件写入事件接入实时 policy hook。
+- `mini_runner.py` 已有 executor 抽象、错误分类、events artifact、in-process adapter、
+  mini 内部 hook 和实时 policy 阻断；后续主要是继续扩展更丰富的工具事件类型。
 - 完整测试中会按条件跳过 Docker/Podman、Singularity、Contree/Modal 和真实 API provider 相关用例；这些依赖需要本机环境提供。
 
 建议后续优先级：
@@ -555,4 +558,4 @@ git diff --check
 1. 增加可选 raw JSON / workspace artifact 归档策略，至少归档关键 summary 和失败样本。
 2. 扩大 BugsInPy 和 SWE-bench runnable 子集。
 3. 为 real benchmark 增加长期回归脚本和趋势对比，基于现有 per-task retry manifest 做稳定性统计。
-4. 在 mini 内部 API 稳定后，增加 in-process executor 和实时 policy hook。
+4. 扩展 mini 内部更丰富的工具事件类型，并纳入 Observability 趋势分析。

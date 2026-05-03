@@ -200,3 +200,39 @@ def test_local_environment_shell_features():
     result = env.execute({"command": "echo $(echo 'nested')"})
     assert result["returncode"] == 0
     assert "nested" in result["output"]
+
+
+def test_local_environment_executor_hook_records_commands():
+    events = []
+
+    class RecordingHook:
+        def before_command(self, command):
+            events.append(("before", command))
+
+        def after_command(self, command, result):
+            events.append(("after", command, result["returncode"]))
+
+    env = LocalEnvironment(executor_hook=RecordingHook())
+
+    result = env.execute({"command": "echo hooked"})
+
+    assert result["returncode"] == 0
+    assert events == [("before", "echo hooked"), ("after", "echo hooked", 0)]
+
+
+def test_local_environment_executor_hook_can_block_command(tmp_path: Path):
+    blocked_file = tmp_path / "blocked.txt"
+
+    class BlockingHook:
+        def before_command(self, command):
+            raise RuntimeError(f"blocked: {command}")
+
+        def after_command(self, command, result):
+            raise AssertionError("after_command should not run when command is blocked")
+
+    env = LocalEnvironment(cwd=str(tmp_path), executor_hook=BlockingHook())
+
+    with pytest.raises(RuntimeError, match="blocked"):
+        env.execute({"command": f"touch {blocked_file.name}"})
+
+    assert not blocked_file.exists()

@@ -80,6 +80,7 @@ def run_mini_in_process(
     exit_immediately: bool = False,
     load_config: bool = True,
     configure: bool = True,
+    executor_hook: Any | None = None,
 ) -> Any:
     """Run mini-SWE-agent through its Python API instead of the Typer CLI boundary."""
     if load_config:
@@ -124,6 +125,9 @@ def run_mini_in_process(
     model = get_model(config=config.get("model", {}))
     env = get_environment(config.get("environment", {}), default_type="local")
     agent = get_agent(model, env, config.get("agent", {}), default_type="interactive")
+    if executor_hook is not None:
+        setattr(env, "executor_hook", executor_hook)
+        setattr(agent, "executor_hook", executor_hook)
     agent.run(run_task)
     if (output_path := config.get("agent", {}).get("output_path")):
         console.print(f"Saved trajectory to [bold green]'{output_path}'[/bold green]")

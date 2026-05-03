@@ -4,6 +4,7 @@ import json
 import logging
 import traceback
 from pathlib import Path
+from typing import Any
 
 from jinja2 import StrictUndefined, Template
 from pydantic import BaseModel
@@ -29,12 +30,23 @@ class AgentConfig(BaseModel):
 
 
 class DefaultAgent:
-    def __init__(self, model: Model, env: Environment, *, config_class: type = AgentConfig, **kwargs):
+    def __init__(
+        self,
+        model: Model,
+        env: Environment,
+        *,
+        config_class: type = AgentConfig,
+        executor_hook: Any | None = None,
+        **kwargs,
+    ):
         """See the `AgentConfig` class for permitted keyword arguments."""
         self.config = config_class(**kwargs)
         self.messages: list[dict] = []
         self.model = model
         self.env = env
+        self.executor_hook = executor_hook
+        if executor_hook is not None and hasattr(self.env, "executor_hook"):
+            setattr(self.env, "executor_hook", executor_hook)
         self.extra_template_vars = {}
         self.logger = logging.getLogger("agent")
         self.cost = 0.0
@@ -108,10 +120,15 @@ class DefaultAgent:
                     "extra": {"exit_status": "LimitsExceeded", "submission": ""},
                 }
             )
-        self.n_calls += 1
+        step = self.n_calls + 1
+        if self.executor_hook:
+            self.executor_hook.before_model_step(step)
+        self.n_calls = step
         message = self.model.query(self.messages)
         self.cost += message.get("extra", {}).get("cost", 0.0)
         self.add_messages(message)
+        if self.executor_hook:
+            self.executor_hook.after_model_step(step, message)
         return message
 
     def execute_actions(self, message: dict) -> list[dict]:
@@ -148,6 +165,10 @@ class DefaultAgent:
         """
         data = self.serialize(*extra_dicts)
         if path:
+            if self.executor_hook:
+                self.executor_hook.before_file_write(str(path))
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(json.dumps(data, indent=2))
+            if self.executor_hook:
+                self.executor_hook.after_file_write(str(path))
         return data

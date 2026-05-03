@@ -149,6 +149,54 @@ def test_successful_completion(model_factory):
     assert agent.n_calls == 2
 
 
+def test_agent_executor_hook_records_model_command_and_save_events(default_config, tmp_path):
+    events = []
+
+    class RecordingHook:
+        def before_command(self, command):
+            events.append(("before_command", command))
+
+        def after_command(self, command, result):
+            events.append(("after_command", command, result["returncode"]))
+
+        def before_file_write(self, path):
+            events.append(("before_file_write", Path(path).name))
+
+        def after_file_write(self, path):
+            events.append(("after_file_write", Path(path).name))
+
+        def before_model_step(self, step):
+            events.append(("before_model_step", step))
+
+        def after_model_step(self, step, result):
+            events.append(("after_model_step", step, result["role"]))
+
+    output_path = tmp_path / "trajectory.json"
+    agent = DefaultAgent(
+        model=DeterministicModel(
+            outputs=[
+                make_output(
+                    "finish",
+                    [{"command": "echo 'COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT'\necho done"}],
+                )
+            ]
+        ),
+        env=LocalEnvironment(),
+        executor_hook=RecordingHook(),
+        **{**default_config, "output_path": output_path},
+    )
+
+    info = agent.run("finish")
+
+    assert info["exit_status"] == "Submitted"
+    assert output_path.exists()
+    assert ("before_model_step", 1) in events
+    assert ("after_model_step", 1, "assistant") in events
+    assert any(event[0] == "before_command" for event in events)
+    assert ("before_file_write", "trajectory.json") in events
+    assert ("after_file_write", "trajectory.json") in events
+
+
 def test_step_limit_enforcement(model_factory):
     """Test agent stops when step limit is reached."""
     factory, config = model_factory

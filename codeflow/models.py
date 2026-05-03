@@ -70,6 +70,20 @@ class ExecutorResult(BaseModel):
     events_path: str | None = None
 
 
+class MiniEvent(BaseModel):
+    event: str
+    ts: float
+    run_id: str | None = None
+    step: int | None = None
+    command: str | None = None
+    path: str | None = None
+    returncode: int | None = None
+    risk_level: str | None = None
+    blocked: bool = False
+    message: str = ""
+    details: dict[str, object] = Field(default_factory=dict)
+
+
 class MiniRunRequest(BaseModel):
     repo: str
     prompt: str
@@ -83,6 +97,7 @@ class MiniRunRequest(BaseModel):
     timeout_seconds: float = Field(gt=0)
     executor_name: str = "subprocess"
     events_path: str | None = None
+    forbidden_paths: list[str] = Field(default_factory=list)
 
 
 class MiniRunResult(ExecutorResult):
