@@ -1,0 +1,95 @@
+name: Benchmark Real LLM
+
+on:
+  workflow_dispatch:
+    inputs:
+      tasks:
+        description: Task file to run
+        required: true
+        default: benchmark/tasks/quixbugs_extended.yaml
+      method:
+        description: Benchmark method
+        required: true
+        type: choice
+        default: codeflow_full
+        options:
+          - checks_only
+          - raw_mini
+          - codeflow_basic
+          - codeflow_full
+      model:
+        description: Model name
+        required: true
+        default: openai/deepseek-v4-flash
+      max_task_attempts:
+        description: Attempts per task, maximum 10
+        required: true
+        default: "3"
+      limit:
+        description: Optional first N tasks
+        required: false
+        default: ""
+
+jobs:
+  real-llm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked --group dev --python 3.11
+
+      - name: Check LLM environment
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+          MSWEA_MODEL_NAME: ${{ inputs.model }}
+        run: uv run python benchmark/scripts/check_llm_env.py
+
+      - name: Run benchmark
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+          MSWEA_MODEL_NAME: ${{ inputs.model }}
+        run: |
+          LIMIT_ARG=""
+          if [ -n "${{ inputs.limit }}" ]; then
+            LIMIT_ARG="--limit ${{ inputs.limit }}"
+          fi
+          uv run python benchmark/scripts/run_eval.py \
+            --tasks "${{ inputs.tasks }}" \
+            --method "${{ inputs.method }}" \
+            --model "${{ inputs.model }}" \
+            --max-repair-rounds 3 \
+            --max-task-attempts "${{ inputs.max_task_attempts }}" \
+            --out-dir "benchmark/results/real_llm_${{ github.run_id }}" \
+            $LIMIT_ARG
+
+      - name: Archive benchmark artifacts
+        if: always()
+        run: >
+          uv run python benchmark/scripts/archive_run.py
+          benchmark/results/real_llm_${{ github.run_id }}
+
+      - name: Upload benchmark artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmark-real-llm-${{ github.run_id }}
+          path: |
+            benchmark/results/real_llm_${{ github.run_id }}
+            benchmark/artifacts/manifests
+            benchmark/artifact_archives

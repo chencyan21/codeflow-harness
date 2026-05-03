@@ -3,20 +3,27 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from pathlib import Path
 from typing import Any
+
+from dotenv import dotenv_values
 
 from _harness_bench_common import (
     DEFAULT_TASKS_PATH,
     DEFAULT_WORKSPACES_DIR,
     ROOT,
     benchmark_env,
+    benchmark_platform_metadata,
     load_tasks,
+    portable_path,
     prepare_workspace,
     project_path,
+    repo_git_metadata,
     select_tasks,
+    utc_now_iso,
 )
 from summarize_results import build_markdown_report
 
@@ -36,6 +43,7 @@ from codeflow.harness.sensors import SEVERITY_ORDER  # noqa: E402
 from codeflow.mini_runner import run_mini_agent  # noqa: E402
 from codeflow.models import CodeFlowConfig, HarnessSensorReport, RunState  # noqa: E402
 from codeflow.prompt_builder import build_initial_prompt, build_repair_prompt  # noqa: E402
+from codeflow.redaction import redact_text  # noqa: E402
 from codeflow.runner import run_codeflow  # noqa: E402
 from codeflow.spec_builder import build_spec  # noqa: E402
 from codeflow.test_gate import all_checks_passed  # noqa: E402
@@ -53,6 +61,112 @@ UNSAFE_SENSOR_NAMES = {
 }
 
 EVAL_METHODS = ("raw_mini", "checks_only", "codeflow_basic", "codeflow_full")
+MAX_TASK_ATTEMPTS = 10
+
+
+def _safe_id(value: str) -> str:
+    return re.sub(r"[^A-Za-z0-9_.-]+", "_", value).strip("_").lower() or "run"
+
+
+def _make_run_id(*, method: str, model: str | None, tasks_path: Path) -> str:
+    timestamp = utc_now_iso().replace("-", "").replace(":", "").replace("Z", "Z")
+    model_part = _safe_id(model or "default")
+    return f"{timestamp}_{_safe_id(tasks_path.stem)}_{_safe_id(method)}_{model_part}"
+
+
+def _provider_metadata(model: str | None) -> dict[str, Any]:
+    dotenv = dotenv_values(ROOT / ".env") if (ROOT / ".env").exists() else {}
+    base_url = (
+        os.environ.get("OPENAI_BASE_URL")
+        or os.environ.get("LITELLM_BASE_URL")
+        or os.environ.get("base_url")
+        or dotenv.get("OPENAI_BASE_URL")
+        or dotenv.get("LITELLM_BASE_URL")
+        or dotenv.get("base_url")
+    )
+    provider = "unknown"
+    if base_url:
+        provider = "openai-compatible"
+    elif model and "/" in model:
+        provider = model.split("/", 1)[0]
+    return {
+        "model": model,
+        "provider": provider,
+        "base_url": redact_text(base_url) if base_url else None,
+    }
+
+
+def _patch_stats(diff: str) -> dict[str, int]:
+    files: set[str] = set()
+    additions = 0
+    deletions = 0
+    for line in diff.splitlines():
+        if line.startswith("diff --git "):
+            parts = line.split()
+            if len(parts) >= 4:
+                files.add(parts[3].removeprefix("b/"))
+        elif line.startswith("+") and not line.startswith("+++"):
+            additions += 1
+        elif line.startswith("-") and not line.startswith("---"):
+            deletions += 1
+    return {"files": len(files), "additions": additions, "deletions": deletions}
+
+
+def _classify_error(error_type: str | None, error: str | None) -> str | None:
+    if not error_type and not error:
+        return None
+    text = f"{error_type or ''} {error or ''}".lower()
+    if "api" in text or "openai" in text or "litellm" in text or "rate limit" in text:
+        return "llm_api_failed"
+    if "llm provider not provided" in text or "provider list" in text:
+        return "llm_api_failed"
+    if "timeout" in text or "timed out" in text:
+        return "llm_timeout" if "model" in text or "mini" in text else "checks_timeout"
+    if "clone" in text or "checkout" in text or "git apply" in text:
+        return "checkout_failed"
+    if "temporary failure" in text or "name resolution" in text or "network" in text:
+        return "network_failed"
+    if "setup" in text or "pip" in text or "uv " in text or "dependency" in text:
+        return "dependency_failed"
+    if "policy_blocked" in text:
+        return "policy_blocked"
+    if "sensor" in text:
+        return "sensor_blocked"
+    if "dirty" in text or "worktree" in text:
+        return "workspace_dirty"
+    return "benchmark_runner_error"
+
+
+def _error_context(error: str) -> str:
+    marker = "See "
+    if marker not in error:
+        return error
+    path_text = error.split(marker, 1)[1].strip()
+    path = Path(path_text)
+    if not path.exists():
+        return error
+    try:
+        log_text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return error
+    return f"{error}\n{log_text[-8000:]}"
+
+
+def _status_category(record: dict[str, Any]) -> str | None:
+    if record.get("error_category"):
+        return str(record["error_category"])
+    status = str(record.get("status", ""))
+    if record.get("checks_passed"):
+        return None
+    if status == "checks_failed":
+        return "checks_failed"
+    if status == "sensor_failed":
+        return "sensor_blocked"
+    if status == "review_required":
+        return "semantic_review_blocked" if record.get("review_risk_level") == "high" else "review_required"
+    if record.get("no_change"):
+        return "agent_no_change"
+    return None
 
 
 def _should_retry_record(record: dict[str, Any], *, method: str, attempt: int, max_attempts: int) -> bool:
@@ -77,8 +191,10 @@ def _retry_manifest_record(
     will_retry: bool,
     model: str | None,
     workspace: Path | None,
+    run_id: str | None = None,
 ) -> dict[str, Any]:
     return {
+        "run_id": run_id,
         "id": task.get("id", "unknown"),
         "dataset": task.get("dataset", "harness_bench"),
         "method": method,
@@ -117,6 +233,9 @@ def _state_record(
     workspace: Path,
     state: RunState,
     runtime_seconds: float,
+    run_id: str,
+    model: str | None,
+    provider: dict[str, Any],
 ) -> dict[str, Any]:
     sensors = _sensor_by_name(state.sensor_report)
     review_risk_level, review_risks = score_risk(state.diff)
@@ -132,7 +251,8 @@ def _state_record(
     except RuntimeError:
         changed_files = []
 
-    return {
+    record = {
+        "run_id": run_id,
         "id": task["id"],
         "dataset": task.get("dataset", "harness_bench"),
         "method": method,
@@ -153,14 +273,26 @@ def _state_record(
         "no_change": _sensor_failed(sensors, "no_change"),
         "runtime_seconds": round(runtime_seconds, 3),
         "error_type": None,
+        "error_category": None,
         "error": None,
+        "model": model,
+        "provider": provider.get("provider"),
+        "base_url": provider.get("base_url"),
+        "prompt_tokens": None,
+        "completion_tokens": None,
+        "total_tokens": None,
+        "estimated_cost_usd": None,
         "blocking_reasons": state.sensor_report.blocking_reasons if state.sensor_report else [],
         "changed_files": changed_files,
+        "patch_stats": _patch_stats(state.diff),
+        "artifact_paths": dict(state.artifacts),
         "sensor_results": sensors,
         "check_results": [result.model_dump() for result in state.check_results],
         "expected_type": task.get("expected_type"),
         "risk_tags": task.get("risk_tags", []),
     }
+    record["error_category"] = _status_category(record)
+    return record
 
 
 def _error_record(
@@ -170,8 +302,16 @@ def _error_record(
     workspace: Path | None,
     exc: Exception,
     runtime_seconds: float,
+    run_id: str | None = None,
+    model: str | None = None,
+    provider: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    error_type = exc.__class__.__name__
+    error = str(exc)
+    classified_context = _error_context(error)
+    provider = provider or {}
     return {
+        "run_id": run_id,
         "id": task.get("id", "unknown"),
         "dataset": task.get("dataset", "harness_bench"),
         "method": method,
@@ -191,10 +331,20 @@ def _error_record(
         "missing_test_warning": False,
         "no_change": False,
         "runtime_seconds": round(runtime_seconds, 3),
-        "error_type": exc.__class__.__name__,
-        "error": str(exc),
+        "error_type": error_type,
+        "error_category": _classify_error(error_type, classified_context),
+        "error": error,
+        "model": model,
+        "provider": provider.get("provider"),
+        "base_url": provider.get("base_url"),
+        "prompt_tokens": None,
+        "completion_tokens": None,
+        "total_tokens": None,
+        "estimated_cost_usd": None,
         "blocking_reasons": [],
         "changed_files": [],
+        "patch_stats": {"files": 0, "additions": 0, "deletions": 0},
+        "artifact_paths": {},
         "sensor_results": {},
         "check_results": [],
         "expected_type": task.get("expected_type"),
@@ -221,6 +371,102 @@ def _restore_mini_command(old_command: str | None) -> None:
 
 def _mini_log_path(result: object) -> str:
     return str(getattr(result, "log_path", result))
+
+
+def _write_attempt_artifacts(
+    *,
+    out_dir: Path,
+    task_id: str,
+    attempt: int,
+    state: RunState | None,
+    record: dict[str, Any],
+) -> dict[str, str]:
+    artifact_dir = out_dir / "artifacts" / task_id / f"attempt_{attempt}"
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    paths: dict[str, str] = {}
+    if state is not None:
+        diff_path = artifact_dir / "diff.patch"
+        checks_path = artifact_dir / "checks.json"
+        sensors_path = artifact_dir / "sensors.json"
+        review_path = artifact_dir / "review.md"
+        diff_path.write_text(redact_text(state.diff), encoding="utf-8")
+        checks_path.write_text(
+            json.dumps([result.model_dump() for result in state.check_results], ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        sensors_path.write_text(
+            json.dumps(state.sensor_report.model_dump() if state.sensor_report else {}, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        review_path.write_text(redact_text(state.report), encoding="utf-8")
+        paths.update(
+            {
+                "attempt_diff": str(diff_path),
+                "attempt_checks": str(checks_path),
+                "attempt_sensors": str(sensors_path),
+                "attempt_review": str(review_path),
+            }
+        )
+        for name, path in state.artifacts.items():
+            paths[name] = path
+    else:
+        error_path = artifact_dir / "error.json"
+        error_path.write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
+        paths["attempt_error"] = str(error_path)
+    return paths
+
+
+def _make_portable_artifact_paths(record: dict[str, Any]) -> None:
+    artifacts = record.get("artifact_paths")
+    if not isinstance(artifacts, dict):
+        return
+    record["artifact_paths"] = {
+        str(name): portable_path(str(path)) if path else path
+        for name, path in artifacts.items()
+    }
+
+
+def _write_run_manifest(
+    *,
+    path: Path,
+    run_id: str,
+    tasks_path: Path,
+    out_dir: Path,
+    method: str,
+    model: str | None,
+    max_repair_rounds: int | None,
+    max_task_attempts: int,
+    task_count: int,
+    proxy: str | None,
+    provider: dict[str, Any],
+    status: str,
+    started_at: str,
+    completed_at: str | None = None,
+    results: list[dict[str, Any]] | None = None,
+) -> None:
+    passed = sum(1 for item in results or [] if item.get("checks_passed"))
+    manifest = {
+        "schema_version": 1,
+        "run_id": run_id,
+        "status": status,
+        "created_at": started_at,
+        "completed_at": completed_at,
+        "git": repo_git_metadata(ROOT),
+        "platform": benchmark_platform_metadata(),
+        "tasks_file": portable_path(tasks_path),
+        "task_count": task_count,
+        "method": method,
+        "model": model,
+        "provider": provider.get("provider"),
+        "base_url": provider.get("base_url"),
+        "max_repair_rounds": max_repair_rounds,
+        "max_task_attempts": max_task_attempts,
+        "proxy_enabled": bool(proxy),
+        "out_dir": portable_path(out_dir),
+        "results_count": len(results or []),
+        "checks_passed": passed,
+    }
+    path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def _direct_state(
@@ -342,6 +588,7 @@ def main() -> None:
     parser.add_argument("--task-id", action="append", help="Run only this task id")
     parser.add_argument("--limit", type=int, help="Run only the first N selected tasks")
     parser.add_argument("--model", help="Model name passed to mini-swe-agent")
+    parser.add_argument("--run-id", help="Stable run id for manifests and result records")
     parser.add_argument("--max-repair-rounds", type=int, help="Override repair rounds")
     parser.add_argument(
         "--max-task-attempts",
@@ -369,6 +616,8 @@ def main() -> None:
     args = parser.parse_args()
     if args.max_task_attempts < 1:
         parser.error("--max-task-attempts must be >= 1")
+    if args.max_task_attempts > MAX_TASK_ATTEMPTS:
+        parser.error(f"--max-task-attempts must be <= {MAX_TASK_ATTEMPTS}")
 
     tasks_path = project_path(args.tasks)
     workspaces_dir = project_path(args.workspaces_dir)
@@ -376,6 +625,25 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     tasks = select_tasks(load_tasks(tasks_path), task_ids=args.task_id, limit=args.limit)
+    run_id = args.run_id or _make_run_id(method=args.method, model=args.model, tasks_path=tasks_path)
+    provider = _provider_metadata(args.model)
+    started_at = utc_now_iso()
+    run_manifest_path = out_dir / "run_manifest.json"
+    _write_run_manifest(
+        path=run_manifest_path,
+        run_id=run_id,
+        tasks_path=tasks_path,
+        out_dir=out_dir,
+        method=args.method,
+        model=args.model,
+        max_repair_rounds=args.max_repair_rounds,
+        max_task_attempts=args.max_task_attempts,
+        task_count=len(tasks),
+        proxy=args.proxy,
+        provider=provider,
+        status="running",
+        started_at=started_at,
+    )
     old_mini_command = _set_mini_command(args.fake_mini, args.mini_command)
     env = benchmark_env(proxy=args.proxy)
     results: list[dict[str, Any]] = []
@@ -389,6 +657,7 @@ def main() -> None:
             for attempt in range(1, args.max_task_attempts + 1):
                 start = time.perf_counter()
                 workspace: Path | None = None
+                state: RunState | None = None
                 try:
                     workspace = prepare_workspace(
                         task,
@@ -410,6 +679,9 @@ def main() -> None:
                         workspace=workspace,
                         state=state,
                         runtime_seconds=runtime,
+                        run_id=run_id,
+                        model=args.model,
+                        provider=provider,
                     )
                     (out_dir / f"{task['id']}_review.md").write_text(
                         state.report,
@@ -423,8 +695,23 @@ def main() -> None:
                         workspace=workspace,
                         exc=exc,
                         runtime_seconds=runtime,
+                        run_id=run_id,
+                        model=args.model,
+                        provider=provider,
                     )
+                artifact_paths = _write_attempt_artifacts(
+                    out_dir=out_dir,
+                    task_id=str(task.get("id", "unknown")),
+                    attempt=attempt,
+                    state=state,
+                    record=record,
+                )
+                record["artifact_paths"] = {**record.get("artifact_paths", {}), **artifact_paths}
+                _make_portable_artifact_paths(record)
                 record["attempts"] = attempt
+                record["first_attempt_success"] = attempt == 1 and bool(record.get("checks_passed"))
+                record["final_attempt"] = False
+                record["error_category"] = _status_category(record)
                 will_retry = _should_retry_record(
                     record,
                     method=args.method,
@@ -441,6 +728,7 @@ def main() -> None:
                         will_retry=will_retry,
                         model=args.model,
                         workspace=workspace,
+                        run_id=run_id,
                     )
                 )
                 retry_manifest_path.write_text(
@@ -461,7 +749,11 @@ def main() -> None:
                     workspace=workspace,
                     exc=RuntimeError("Task did not produce a result record."),
                     runtime_seconds=0.0,
+                    run_id=run_id,
+                    model=args.model,
+                    provider=provider,
                 )
+            final_record["final_attempt"] = True
             results.append(final_record)
     finally:
         _restore_mini_command(old_mini_command)
@@ -470,9 +762,27 @@ def main() -> None:
     report_path = out_dir / f"{result_prefix}_report.md"
     results_path.write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
     report_path.write_text(build_markdown_report(results), encoding="utf-8")
+    _write_run_manifest(
+        path=run_manifest_path,
+        run_id=run_id,
+        tasks_path=tasks_path,
+        out_dir=out_dir,
+        method=args.method,
+        model=args.model,
+        max_repair_rounds=args.max_repair_rounds,
+        max_task_attempts=args.max_task_attempts,
+        task_count=len(tasks),
+        proxy=args.proxy,
+        provider=provider,
+        status="completed",
+        started_at=started_at,
+        completed_at=utc_now_iso(),
+        results=results,
+    )
     print(f"wrote {results_path}")
     print(f"wrote {report_path}")
     print(f"wrote {retry_manifest_path}")
+    print(f"wrote {run_manifest_path}")
 
 
 if __name__ == "__main__":

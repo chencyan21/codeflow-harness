@@ -14,10 +14,13 @@ from _harness_bench_common import (
     ROOT,
     benchmark_env,
     mark_setup_done,
+    portable_path,
     project_path,
     run_command,
     run_shell_command,
+    utc_now_iso,
     write_benchmark_git_exclude,
+    write_workspace_manifest,
 )
 
 
@@ -163,6 +166,37 @@ def _load_hf_records(dataset: str, split: str, limit: int | None) -> list[dict[s
     return records
 
 
+def _filter_records(records: list[dict[str, Any]], instance_ids: list[str] | None) -> list[dict[str, Any]]:
+    if not instance_ids:
+        return records
+    wanted = set(instance_ids)
+    selected = [record for record in records if str(record.get("instance_id")) in wanted]
+    missing = wanted - {str(record.get("instance_id")) for record in selected}
+    if missing:
+        raise RuntimeError(f"Unknown SWE-bench instance id(s): {', '.join(sorted(missing))}")
+    return selected
+
+
+def _repo_cache_path(repo: str, repo_cache_dir: Path) -> Path:
+    return repo_cache_dir / _safe_id(repo)
+
+
+def _ensure_repo_cache(repo: str, *, repo_cache_dir: Path, env: dict[str, str]) -> Path:
+    cache_path = _repo_cache_path(repo, repo_cache_dir)
+    clone_url = f"https://github.com/{repo}.git"
+    if cache_path.exists():
+        subprocess.run(["git", "fetch", "--all", "--prune"], cwd=cache_path, text=True, check=True, env=env)
+        return cache_path
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["git", "clone", "--filter=blob:none", clone_url, str(cache_path)],
+        text=True,
+        check=True,
+        env=env,
+    )
+    return cache_path
+
+
 def _clone_workspace(
     record: dict[str, Any],
     target: Path,
@@ -170,16 +204,21 @@ def _clone_workspace(
     env: dict[str, str],
     apply_test_patch: bool,
     setup_commands: list[str],
+    repo_cache_dir: Path | None = None,
 ) -> None:
     repo = str(record["repo"])
     base_commit = str(record["base_commit"])
-    clone_url = f"https://github.com/{repo}.git"
+    clone_source = (
+        str(_ensure_repo_cache(repo, repo_cache_dir=repo_cache_dir, env=env))
+        if repo_cache_dir
+        else f"https://github.com/{repo}.git"
+    )
 
     if target.exists():
         shutil.rmtree(target)
     target.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(
-        ["git", "clone", "--filter=blob:none", clone_url, str(target)],
+        ["git", "clone", "--filter=blob:none", clone_source, str(target)],
         text=True,
         check=True,
         env=env,
@@ -218,6 +257,27 @@ def _clone_workspace(
         target,
     )
     write_benchmark_git_exclude(target)
+    write_workspace_manifest(
+        target,
+        {
+            "id": target.name,
+            "dataset": _dataset_label(str(record.get("dataset", ""))),
+            "source_repo": _task_source_repo(target),
+            "metadata": {
+                "source_kind": "swebench",
+                "repo": f"https://github.com/{repo}",
+                "base_commit": base_commit,
+            },
+        },
+        source_repo=Path(clone_source),
+        setup_commands=setup_commands,
+        setup_status="passed" if setup_commands else "not_required",
+        setup_runtime_seconds=0.0,
+        source_kind="swebench",
+        upstream_repo=f"https://github.com/{repo}",
+        base_commit=base_commit,
+        test_patch_applied=apply_test_patch and bool(str(record.get("test_patch") or "").strip()),
+    )
 
 
 def write_jsonl(path: Path, tasks: list[dict[str, Any]]) -> None:
@@ -242,12 +302,16 @@ def prepare_swebench(
     check_prefix: str | None = None,
     setup_recipe: str = "auto",
     extra_setup_commands: list[str] | None = None,
+    instance_ids: list[str] | None = None,
+    repo_cache_dir: Path | None = None,
+    manifest_out: Path | None = None,
+    continue_on_error: bool = False,
 ) -> list[dict[str, Any]]:
     env = configure_proxy(proxy)
     old_env = os.environ.copy()
     os.environ.update(env)
     try:
-        records = _load_hf_records(dataset, split, limit)
+        records = _filter_records(_load_hf_records(dataset, split, limit), instance_ids)
     finally:
         os.environ.clear()
         os.environ.update(old_env)
@@ -263,22 +327,86 @@ def prepare_swebench(
         )
         for record in records
     ]
+    manifest_rows: list[dict[str, Any]] = []
     if prepare_workspaces:
         for record, task in zip(records, tasks):
             target = project_path(task["source_repo"])
             if target.exists() and not clean:
                 print(f"reuse {task['id']}: {target}")
+                manifest_rows.append(
+                    {
+                        "id": task["id"],
+                        "instance_id": record.get("instance_id"),
+                        "repo": record.get("repo"),
+                        "status": "reused",
+                        "workspace": portable_path(target),
+                        "reason": None,
+                    }
+                )
                 continue
             print(f"prepare {task['id']}: {record['repo']}@{record['base_commit']}")
-            _clone_workspace(
-                record,
-                target,
-                env=env,
-                apply_test_patch=apply_test_patch,
-                setup_commands=[str(command) for command in task.get("setup_commands", [])],
-            )
+            try:
+                _clone_workspace(
+                    {**record, "dataset": dataset},
+                    target,
+                    env=env,
+                    apply_test_patch=apply_test_patch,
+                    setup_commands=[str(command) for command in task.get("setup_commands", [])],
+                    repo_cache_dir=repo_cache_dir,
+                )
+                manifest_rows.append(
+                    {
+                        "id": task["id"],
+                        "instance_id": record.get("instance_id"),
+                        "repo": record.get("repo"),
+                        "status": "prepared",
+                        "workspace": portable_path(target),
+                        "reason": None,
+                    }
+                )
+            except Exception as exc:
+                manifest_rows.append(
+                    {
+                        "id": task["id"],
+                        "instance_id": record.get("instance_id"),
+                        "repo": record.get("repo"),
+                        "status": "prepare_failed",
+                        "workspace": portable_path(target),
+                        "reason": str(exc),
+                    }
+                )
+                if not continue_on_error:
+                    raise
 
     write_jsonl(tasks_out, tasks)
+    if manifest_out:
+        manifest_out.parent.mkdir(parents=True, exist_ok=True)
+        manifest = {
+            "schema_version": 1,
+            "dataset": _dataset_label(dataset),
+            "hf_dataset": dataset,
+            "split": split,
+            "created_at": utc_now_iso(),
+            "selected": len(records),
+            "tasks_out": portable_path(tasks_out),
+            "prepare_workspaces": prepare_workspaces,
+            "apply_test_patch": apply_test_patch,
+            "proxy_enabled": bool(proxy),
+            "repo_cache_dir": portable_path(repo_cache_dir) if repo_cache_dir else None,
+            "records": manifest_rows
+            or [
+                {
+                    "id": task["id"],
+                    "instance_id": record.get("instance_id"),
+                    "repo": record.get("repo"),
+                    "status": "metadata_only",
+                    "workspace": portable_path(project_path(task["source_repo"])),
+                    "reason": None,
+                }
+                for record, task in zip(records, tasks)
+            ],
+        }
+        manifest_out.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     return tasks
 
 
@@ -291,6 +419,8 @@ def main() -> None:
     parser.add_argument("--out", default=str(DEFAULT_OUT), help="Workspace root")
     parser.add_argument("--tasks-out", default=str(DEFAULT_TASKS_OUT), help="Task JSONL output path")
     parser.add_argument("--proxy", help="Proxy URL, for example http://127.0.0.1:10087")
+    parser.add_argument("--instance-id", action="append", help="Select a specific SWE-bench instance id")
+    parser.add_argument("--repo-cache-dir", help="Optional shared Git clone cache directory")
     parser.add_argument(
         "--prepare-workspaces",
         action="store_true",
@@ -317,6 +447,12 @@ def main() -> None:
         default=[],
         help="Extra shell command to run before the benchmark baseline commit",
     )
+    parser.add_argument("--manifest-out", help="Optional dataset preparation manifest JSON path")
+    parser.add_argument(
+        "--continue-on-error",
+        action="store_true",
+        help="Continue preparing other instances after clone/setup failures and record failures",
+    )
     parser.add_argument("--clean", action="store_true", help="Recreate existing workspaces")
     args = parser.parse_args()
 
@@ -334,6 +470,10 @@ def main() -> None:
         check_prefix=args.check_prefix,
         setup_recipe=args.setup_recipe,
         extra_setup_commands=args.setup_command,
+        instance_ids=args.instance_id,
+        repo_cache_dir=project_path(args.repo_cache_dir) if args.repo_cache_dir else None,
+        manifest_out=project_path(args.manifest_out) if args.manifest_out else None,
+        continue_on_error=args.continue_on_error,
     )
     print(f"wrote {len(tasks)} tasks to {project_path(args.tasks_out)}")
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -16,6 +17,10 @@ from prepare_swebench import ASTROPY_BUILD_EXT_COMMAND, task_from_record, write_
 from prepare_bugsinpy import discover_candidates, prepare_bugsinpy  # noqa: E402
 from _harness_bench_common import load_tasks, prepare_workspace  # noqa: E402
 from summarize_results import build_markdown_report, load_result_files, make_portable_records  # noqa: E402
+from prepare_all_benchmark_data import build_status_markdown  # noqa: E402
+from compare_runs import build_comparison  # noqa: E402
+from build_trend_report import build_trend_report  # noqa: E402
+from archive_run import archive_run  # noqa: E402
 from codeflow.git_guard import get_changed_files  # noqa: E402
 import run_eval  # noqa: E402
 
@@ -224,6 +229,11 @@ def test_checks_only_does_not_call_mini_agent(tmp_path: Path, monkeypatch) -> No
     assert state.mini_runs == []
     assert state.branch == "baseline"
     assert state.diff == ""
+    manifest = workspace / ".codeflow-benchmark" / "workspace_manifest.json"
+    assert manifest.exists()
+    loaded_manifest = json.loads(manifest.read_text(encoding="utf-8"))
+    assert loaded_manifest["task_id"] == "checks_only_sample"
+    assert loaded_manifest["setup_status"] == "not_required"
 
 
 def test_prepare_workspace_excludes_generated_artifacts(tmp_path: Path) -> None:
@@ -334,3 +344,92 @@ def test_retry_manifest_records_attempt_decisions(tmp_path: Path) -> None:
     assert manifest["will_retry"] is True
     assert manifest["model"] == "deepseekv4"
     assert manifest["workspace"] == str(tmp_path)
+
+
+def test_run_eval_classifies_errors_and_patch_stats() -> None:
+    assert run_eval._classify_error("RuntimeError", "git clone failed") == "checkout_failed"
+    assert run_eval._classify_error("TimeoutError", "mini model timed out") == "llm_timeout"
+    assert run_eval._patch_stats(
+        "diff --git a/a.py b/a.py\n"
+        "--- a/a.py\n"
+        "+++ b/a.py\n"
+        "-old\n"
+        "+new\n"
+    ) == {"files": 1, "additions": 1, "deletions": 1}
+
+
+def test_benchmark_schemas_cover_required_fields() -> None:
+    task_schema = json.loads((ROOT / "benchmark" / "schemas" / "task.schema.json").read_text())
+    result_schema = json.loads((ROOT / "benchmark" / "schemas" / "result.schema.json").read_text())
+
+    assert {"id", "dataset", "source_repo", "task", "checks"} <= set(task_schema["required"])
+    assert {"id", "dataset", "method", "status", "checks_passed"} <= set(result_schema["required"])
+
+    for task_file in (ROOT / "benchmark" / "tasks").glob("*"):
+        if task_file.suffix not in {".yaml", ".jsonl"}:
+            continue
+        for task in load_tasks(task_file):
+            for field in task_schema["required"]:
+                assert field in task, f"{task_file} missing {field} for {task.get('id')}"
+
+
+def test_prepare_all_status_markdown() -> None:
+    report = build_status_markdown(
+        {
+            "suite": "smoke",
+            "created_at": "2026-05-03T00:00:00Z",
+            "proxy_enabled": False,
+            "dry_run": True,
+            "records": [
+                {
+                    "dataset": "harness_bench",
+                    "status": "planned",
+                    "tasks": 3,
+                    "path": "benchmark/workspaces",
+                    "reason": None,
+                }
+            ],
+        }
+    )
+
+    assert "Benchmark Dataset Status" in report
+    assert "| harness_bench | planned | 3 | benchmark/workspaces |  |" in report
+
+
+def test_compare_and_trend_reports(tmp_path: Path) -> None:
+    base = [{"id": "a", "dataset": "d", "method": "codeflow_full", "checks_passed": False}]
+    head = [{"id": "a", "dataset": "d", "method": "codeflow_full", "checks_passed": True}]
+
+    comparison = build_comparison(base, head)
+
+    assert "Fixed tasks: 1" in comparison
+    assert "`d/codeflow_full/a`" in comparison
+
+    first = tmp_path / "first.json"
+    second = tmp_path / "second.json"
+    first.write_text(json.dumps(base), encoding="utf-8")
+    second.write_text(json.dumps(head), encoding="utf-8")
+
+    trend = build_trend_report([first, second])
+
+    assert "Benchmark Trend Report" in trend
+    assert "| first | 1 | 0/1 | 0.0% | 0 | 0.00s |" in trend
+    assert "| second | 1 | 1/1 | 100.0% | 0 | 0.00s |" in trend
+
+
+def test_archive_run_writes_redacted_archive_manifest(tmp_path: Path) -> None:
+    result_dir = tmp_path / "results" / "run"
+    result_dir.mkdir(parents=True)
+    (result_dir / "run_manifest.json").write_text('{"run_id": "run-1"}', encoding="utf-8")
+    (result_dir / "log.txt").write_text("api_key=secret-value\n", encoding="utf-8")
+
+    manifest = archive_run(
+        result_dir,
+        archive_dir=tmp_path / "archives",
+        manifest_dir=tmp_path / "manifests",
+    )
+
+    assert manifest["run_id"] == "run-1"
+    assert manifest["redacted"] is True
+    assert (tmp_path / "archives" / "run-1.tar.gz").exists()
+    assert (tmp_path / "manifests" / "run-1.json").exists()

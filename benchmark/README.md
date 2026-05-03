@@ -17,6 +17,12 @@ benchmark/
 ├── scripts/prepare_harness_bench.py
 ├── scripts/run_eval.py
 ├── scripts/summarize_results.py
+├── scripts/prepare_all_benchmark_data.py
+├── scripts/archive_run.py
+├── scripts/compare_runs.py
+├── scripts/build_trend_report.py
+├── schemas/task.schema.json
+├── schemas/result.schema.json
 └── scripts/fake_mini.py
 ```
 
@@ -51,9 +57,11 @@ benchmark/
 输出：
 
 ```text
+benchmark/results/codeflow_full/run_manifest.json
 benchmark/results/codeflow_full/{task_file_stem}_results.json
 benchmark/results/codeflow_full/{task_file_stem}_report.md
 benchmark/results/codeflow_full/*_review.md
+benchmark/results/codeflow_full/artifacts/{task_id}/attempt_{n}/
 ```
 
 预期现象：
@@ -89,6 +97,36 @@ benchmark/workspaces/{task_id}
 ```
 
 `benchmark/workspaces/` 和 `benchmark/results/` 是生成物，默认不纳入 Git。
+
+## 一键准备 benchmark 数据
+
+`prepare_all_benchmark_data.py` 会生成统一准备 manifest。默认不会强制 checkout BugsInPy /
+SWE-bench 外部 workspace，避免 fresh clone 后因为网络或依赖失败阻断本地 smoke。
+
+```bash
+.venv/bin/python benchmark/scripts/prepare_all_benchmark_data.py \
+  --suite current \
+  --proxy http://127.0.0.1:10087 \
+  --clean
+```
+
+如果需要真实 checkout 外部 workspace：
+
+```bash
+.venv/bin/python benchmark/scripts/prepare_all_benchmark_data.py \
+  --suite current \
+  --prepare-external-workspaces \
+  --proxy http://127.0.0.1:10087 \
+  --clean
+```
+
+输出：
+
+```text
+benchmark/generated/prepare_manifest.json
+benchmark/generated/dataset_status.md
+benchmark/workspaces/{task_id}/.codeflow-benchmark/workspace_manifest.json
+```
 
 ## 使用真实 mini/LLM
 
@@ -330,6 +368,8 @@ benchmark baseline；已完成 setup 的 generated workspace 会带 `.codeflow-b
 真实 LLM 评测可以加 `--max-task-attempts 10`。runner 会为每个任务写入
 `*_retry_manifest.json`，记录每次 attempt 的模型、workspace、状态、耗时、错误和是否继续重试。
 `checks_only` 作为 baseline 不会因为预期失败而重复执行。
+每次运行也会写入 `run_manifest.json`，结果记录中包含 `run_id`、`model`、`provider`、
+`error_category`、`patch_stats` 和 `artifact_paths`。
 
 ## 单独生成汇总报告
 
@@ -357,3 +397,35 @@ benchmark baseline；已完成 setup 的 generated workspace 会带 `.codeflow-b
 
 合并报告会先给出 overall records，再按 `method` 拆分通过率。`checks_only` baseline 和
 `codeflow_full` 结果不要用单个总通过率混读。
+
+## Artifact 归档和趋势
+
+归档单次运行：
+
+```bash
+.venv/bin/python benchmark/scripts/archive_run.py \
+  benchmark/results/quixbugs_extended_full_real_current
+```
+
+比较两次运行：
+
+```bash
+.venv/bin/python benchmark/scripts/compare_runs.py \
+  benchmark/reports/previous.json \
+  benchmark/reports/current_real_results.json \
+  --out benchmark/reports/run_comparison.md
+```
+
+生成趋势报告：
+
+```bash
+.venv/bin/python benchmark/scripts/build_trend_report.py \
+  benchmark/reports/current_real_results.json \
+  --out benchmark/reports/trends.md
+```
+
+详细操作见：
+
+- `benchmark/reports/BENCHMARK_RUNBOOK.md`
+- `benchmark/reports/DATASET_STATUS.md`
+- `benchmark/reports/FAILURE_TAXONOMY.md`

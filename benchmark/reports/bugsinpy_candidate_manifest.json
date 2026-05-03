@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "dataset": "bugsinpy",
+  "created_at": "2026-05-03T13:13:36Z",
+  "source": "benchmark/datasets/bugsinpy",
+  "selected": 20,
+  "tasks_out": "benchmark/tasks/bugsinpy_stable_20.yaml",
+  "prepare_workspaces": false,
+  "proxy_enabled": false,
+  "records": [
+    {
+      "id": "bugsinpy_pysnooper_1",
+      "project": "PySnooper",
+      "bug_id": "1",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_pysnooper_1",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_pysnooper_2",
+      "project": "PySnooper",
+      "bug_id": "2",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_pysnooper_2",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_pysnooper_3",
+      "project": "PySnooper",
+      "bug_id": "3",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_pysnooper_3",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_1",
+      "project": "ansible",
+      "bug_id": "1",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_1",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_10",
+      "project": "ansible",
+      "bug_id": "10",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_10",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_11",
+      "project": "ansible",
+      "bug_id": "11",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_11",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_12",
+      "project": "ansible",
+      "bug_id": "12",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_12",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_13",
+      "project": "ansible",
+      "bug_id": "13",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_13",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_14",
+      "project": "ansible",
+      "bug_id": "14",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_14",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_15",
+      "project": "ansible",
+      "bug_id": "15",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_15",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_16",
+      "project": "ansible",
+      "bug_id": "16",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_16",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_17",
+      "project": "ansible",
+      "bug_id": "17",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_17",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_18",
+      "project": "ansible",
+      "bug_id": "18",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_18",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_2",
+      "project": "ansible",
+      "bug_id": "2",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_2",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_3",
+      "project": "ansible",
+      "bug_id": "3",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_3",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_4",
+      "project": "ansible",
+      "bug_id": "4",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_4",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_5",
+      "project": "ansible",
+      "bug_id": "5",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_5",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_6",
+      "project": "ansible",
+      "bug_id": "6",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_6",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_7",
+      "project": "ansible",
+      "bug_id": "7",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_7",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_8",
+      "project": "ansible",
+      "bug_id": "8",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/bugsinpy_stable_20/bugsinpy_ansible_8",
+      "reason": null
+    }
+  ]
+}

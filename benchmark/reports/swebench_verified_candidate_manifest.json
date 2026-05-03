@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "dataset": "swebench_verified",
+  "hf_dataset": "SWE-bench/SWE-bench_Verified",
+  "split": "test",
+  "created_at": "2026-05-03T13:12:51Z",
+  "selected": 5,
+  "tasks_out": "benchmark/tasks/swebench_verified_5_subset.jsonl",
+  "prepare_workspaces": false,
+  "apply_test_patch": true,
+  "proxy_enabled": false,
+  "repo_cache_dir": null,
+  "records": [
+    {
+      "id": "swebench_verified_astropy__astropy_12907",
+      "instance_id": "astropy__astropy-12907",
+      "repo": "astropy/astropy",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/swebench_verified_5/swebench_verified_astropy__astropy_12907",
+      "reason": null
+    },
+    {
+      "id": "swebench_verified_astropy__astropy_13033",
+      "instance_id": "astropy__astropy-13033",
+      "repo": "astropy/astropy",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/swebench_verified_5/swebench_verified_astropy__astropy_13033",
+      "reason": null
+    },
+    {
+      "id": "swebench_verified_astropy__astropy_13236",
+      "instance_id": "astropy__astropy-13236",
+      "repo": "astropy/astropy",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/swebench_verified_5/swebench_verified_astropy__astropy_13236",
+      "reason": null
+    },
+    {
+      "id": "swebench_verified_astropy__astropy_13398",
+      "instance_id": "astropy__astropy-13398",
+      "repo": "astropy/astropy",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/swebench_verified_5/swebench_verified_astropy__astropy_13398",
+      "reason": null
+    },
+    {
+      "id": "swebench_verified_astropy__astropy_13453",
+      "instance_id": "astropy__astropy-13453",
+      "repo": "astropy/astropy",
+      "status": "metadata_only",
+      "workspace": "benchmark/generated/swebench_verified_5/swebench_verified_astropy__astropy_13453",
+      "reason": null
+    }
+  ]
+}

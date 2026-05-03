@@ -4,6 +4,29 @@
 
 目标是把当前已经能跑通的 benchmark smoke，升级成一个可以长期复现、横向对比、支撑项目展示的评估体系。这里的重点不是单纯追求 pass rate，而是证明 CodeFlow 相比直接调用 agent 的价值：更稳定的任务执行、更可靠的 repair loop、更严格的安全/质量 sensor、更清楚的失败归因，以及可复现的真实 LLM 评估结果。
 
+## 0. 2026-05-03 落地状态
+
+本轮已经完成 benchmark 基础设施的主体改造：
+
+- 已新增 `benchmark/schemas/task.schema.json` 和 `benchmark/schemas/result.schema.json`。
+- 已为 workspace 准备流程写入 `.codeflow-benchmark/workspace_manifest.json`。
+- 已为 `run_eval.py` 增加 `run_manifest.json`、`run_id`、`model/provider`、`error_category`、`patch_stats`、`artifact_paths`、attempt artifact 和最多 10 次 task retry 限制。
+- 已扩展 `summarize_results.py`，新增 expected type、risk tag、retry analysis、failure taxonomy、runtime 和 artifact index。
+- 已新增 `prepare_all_benchmark_data.py`、`archive_run.py`、`compare_runs.py`、`build_trend_report.py`、`inspect_artifact.py`。
+- 已新增 benchmark smoke CI 和手动真实 LLM benchmark workflow。
+- 已新增 `BENCHMARK_RUNBOOK.md`、`DATASET_STATUS.md`、`FAILURE_TAXONOMY.md`。
+- 已生成 `quixbugs_full.yaml`，当前本地 QuixBugs Python 可转换任务为 31 个，并写入 `quixbugs_excluded_manifest.json` 说明 discovered/selected/generated。
+- 已生成 `bugsinpy_stable_20.yaml` 和 `bugsinpy_stable_50.yaml` 作为 metadata 候选集；真实 checkout/eval 仍通过 manifest 单独记录，不把环境失败混入 agent 指标。
+- 已生成 SWE-bench Lite / Verified 5 和 10 条 metadata 子集；真实 workspace checkout 仍是显式 opt-in。
+- 已用 fake mini 跑通 benchmark infra smoke，并用真实 LLM 跑通 1 个 Harness-Bench 任务，验证真实模型路径下的 run manifest、result record 和 attempt artifact。
+
+仍然属于长期扩展而不是本轮基础设施缺口的内容：
+
+- Harness-Bench 从 12 扩到 30/60 个真实设计任务。
+- BugsInPy stable 20/50 的逐个真实 checkout、依赖修复和真实 LLM eval。
+- SWE-bench Lite / Verified 5/10/25 的真实 workspace checkout、setup 和真实 LLM eval。
+- 多模型成本统计；当前 result schema 已预留 token/cost 字段，但底层 mini provider usage 还未统一回填。
+
 ## 1. 当前状态
 
 ### 1.1 已完成的能力

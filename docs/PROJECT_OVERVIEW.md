@@ -408,16 +408,21 @@ Benchmark 代码集中在 `benchmark/scripts/`。
 3. 初始化 Git 仓库并提交 baseline。
 4. 写入 benchmark 专用 `.git/info/exclude`。
 5. 运行指定 method。
-6. 输出 JSON 结果、任务 review 和 Markdown 汇总。
+6. 输出 run manifest、JSON 结果、attempt artifacts、任务 review、retry manifest 和 Markdown 汇总。
 
 结果字段包括：
 
+- `run_id`
 - `id`
 - `dataset`
 - `method`
+- `model`
+- `provider`
 - `status`
 - `checks_passed`
+- `attempts`
 - `repair_rounds`
+- `error_category`
 - `risk_level`
 - `review_risk_level`
 - `unsafe_diff`
@@ -429,6 +434,8 @@ Benchmark 代码集中在 `benchmark/scripts/`。
 - `no_change`
 - `runtime_seconds`
 - `changed_files`
+- `patch_stats`
+- `artifact_paths`
 - `sensor_results`
 - `check_results`
 
@@ -438,16 +445,29 @@ Benchmark 代码集中在 `benchmark/scripts/`。
 - `prepare_quixbugs.py`：从 QuixBugs Python 程序和 JSON testcases 生成 pytest 项目。
 - `prepare_bugsinpy.py`：解析 BugsInPy metadata，可只生成 task YAML，也可通过 `bugsinpy-checkout` 准备真实 workspace。
 - `prepare_swebench.py`：下载 SWE-bench Lite / Verified metadata，可 clone GitHub repo、checkout base commit、应用 test patch、执行 setup recipe。
+- `prepare_all_benchmark_data.py`：一键准备 smoke/current/stable suite，并写入 dataset status manifest。
+- `archive_run.py`：脱敏并压缩单次 benchmark result directory。
+- `compare_runs.py`：比较两次结果，输出 regression/fix/failure category delta。
+- `build_trend_report.py`：从多次结果生成趋势报告。
+- `inspect_artifact.py`：读取 artifact manifest，输出可读摘要。
 - `summarize_results.py`：合并多个 `*_results.json` 并生成 Markdown 报告。
 - `check_llm_env.py`：验证 `.env` 中 LLM API 配置，并做一次最小 chat completions 请求。
 - `fake_mini.py`：确定性 fake mini，用于不调用真实 LLM 的 harness 逻辑测试。
 
+### Schema 和 Manifest
+
+- `benchmark/schemas/task.schema.json`：定义 benchmark task 的基础字段。
+- `benchmark/schemas/result.schema.json`：定义 result record 的基础字段。
+- 每个 workspace 会写入 `.codeflow-benchmark/workspace_manifest.json`。
+- 每次 `run_eval.py` 会写入 `run_manifest.json`。
+- 每个 attempt 会在 result directory 下写入 diff/checks/sensors/review artifact。
+
 ### 已接入数据集
 
 - 自建 Harness-Bench v0：12 个任务，覆盖正常开发和风险场景。
-- QuixBugs：已有 `quixbugs.yaml` smoke 子集和 `quixbugs_extended.yaml` 31 任务扩展子集。
-- BugsInPy：已有 youtube-dl 子集，当前重点是 `bugsinpy_youtubedl_5.yaml`。
-- SWE-bench Lite / Verified：已有 1-task 和 2-task mini subset JSONL，当前真实 runnable 子集主要是 Astropy 任务。
+- QuixBugs：已有 `quixbugs.yaml` smoke 子集、`quixbugs_extended.yaml` 和 `quixbugs_full.yaml` 31 任务扩展子集。
+- BugsInPy：已有 youtube-dl 子集，以及 `bugsinpy_stable_20.yaml` / `bugsinpy_stable_50.yaml` metadata 候选集。
+- SWE-bench Lite / Verified：已有 1-task、2-task、5-task 和 10-task mini subset JSONL；真实 workspace checkout 是显式 opt-in。
 
 ## 15. 当前 benchmark 结果
 

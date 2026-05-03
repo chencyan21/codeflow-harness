@@ -1,0 +1,66 @@
+name: Benchmark Smoke
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+concurrency:
+  group: benchmark-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked --group dev --python 3.11
+
+      - name: Prepare benchmark smoke data
+        run: >
+          uv run python benchmark/scripts/prepare_all_benchmark_data.py
+          --suite smoke
+          --dry-run
+
+      - name: Run fake-mini benchmark smoke
+        run: >
+          uv run python benchmark/scripts/run_eval.py
+          --fake-mini
+          --tasks benchmark/tasks/harness_bench.yaml
+          --limit 3
+          --method codeflow_full
+          --max-repair-rounds 1
+          --out-dir benchmark/results/ci_fake_smoke
+
+      - name: Summarize smoke results
+        run: >
+          uv run python benchmark/scripts/summarize_results.py
+          benchmark/results/ci_fake_smoke/harness_bench_results.json
+          --out benchmark/results/ci_fake_smoke/report.md
+
+      - name: Upload benchmark smoke artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmark-smoke
+          path: |
+            benchmark/results/ci_fake_smoke
+            benchmark/generated/prepare_manifest.json
+            benchmark/generated/dataset_status.md

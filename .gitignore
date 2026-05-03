@@ -19,3 +19,5 @@ benchmark/workspaces/
 benchmark/results/
 benchmark/generated/
 benchmark/datasets/
+benchmark/artifact_archives/
+benchmark/artifacts/manifests/*.json

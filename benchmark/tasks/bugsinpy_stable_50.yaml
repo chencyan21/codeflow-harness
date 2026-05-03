@@ -1,0 +1,1029 @@
+- id: bugsinpy_pysnooper_1
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_pysnooper_1
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest -q -s tests/test_chinese.py::test_chinese
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: PySnooper
+    bug_id: '1'
+    python_version: 3.8.1
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/PySnooper/bugs/1
+    bug_info:
+      python_version: 3.8.1
+      buggy_commit_id: e21a31162f4c54be693d8ca8260e42393b39abd3
+      fixed_commit_id: 56f22f8ffe1c6b2be4d2cf3ad1987fdb66113da2
+      test_file:
+      - tests/test_chinese.py
+- id: bugsinpy_pysnooper_2
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_pysnooper_2
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest -q -s tests/test_pysnooper.py::test_custom_repr_single
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: PySnooper
+    bug_id: '2'
+    python_version: 3.8.1
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/PySnooper/bugs/2
+    bug_info:
+      python_version: 3.8.1
+      buggy_commit_id: e21a31162f4c54be693d8ca8260e42393b39abd3
+      fixed_commit_id: 814abc34a098c1b98cb327105ac396f985d2413e
+      test_file:
+      - tests/test_pysnooper.py
+- id: bugsinpy_pysnooper_3
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_pysnooper_3
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest -q -s tests/test_pysnooper.py::test_file_output
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: PySnooper
+    bug_id: '3'
+    python_version: 3.8.1
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/PySnooper/bugs/3
+    bug_info:
+      python_version: 3.8.1
+      buggy_commit_id: 6e3d797be3fa0a746fb5b1b7c7fea78eb926c208
+      fixed_commit_id: 15555ed760000b049aff8fecc79d29339c1224c3
+      test_file:
+      - tests/test_pysnooper.py
+- id: bugsinpy_ansible_1
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_1
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/galaxy/test_collection.py::test_verify_collections_no_version
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '1'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/1
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 25c5388fdec9e56517a93feb5e8d485680946c25
+      fixed_commit_id: 343ffaa18b63c92e182b16c3ad84b8d81ca4df69
+      test_file:
+      - test/units/galaxy/test_collection.py
+- id: bugsinpy_ansible_10
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_10
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/modules/system/test_pamd.py::PamdServiceTestCase::test_remove_first_rule
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/modules/system/test_pamd.py::PamdServiceTestCase::test_remove_last_rule
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '10'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/10
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: e368f788f71c338cd3f049d5d6bdc643a51c0514
+      fixed_commit_id: a4b59d021368285490f7cda50c11ac4f7a8030b5
+      test_file:
+      - test/units/modules/system/test_pamd.py
+- id: bugsinpy_ansible_11
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_11
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/modules/network/ios/test_ios_banner.py::TestIosBannerModule::test_ios_banner_nochange
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/modules/network/ios/test_ios_banner.py::TestIosBannerIos12Module::test_ios_banner_nochange
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '11'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/11
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: da07b98b7a433493728ddb7ac7efbd20b8988776
+      fixed_commit_id: 52f3ce8a808f943561803bd664e695fed1841fe8
+      test_file:
+      - test/units/modules/network/ios/test_ios_banner.py
+- id: bugsinpy_ansible_12
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_12
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/plugins/lookup/test_env.py
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '12'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/12
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 05e2e1806162393d76542a75c2520c7d61c2d855
+      fixed_commit_id: 2fa8f9cfd80daf32c7d222190edf7cfc7234582a
+      test_file:
+      - test/units/plugins/lookup/test_env.py
+- id: bugsinpy_ansible_13
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_13
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/cli/test_galaxy.py::test_collection_install_with_url
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '13'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/13
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 41472ee3878be215af8b933b2b04b4a72b9165ca
+      fixed_commit_id: 694ef5660d45fcb97c9beea5b2750f6eadcf5e93
+      test_file:
+      - test/units/cli/test_galaxy.py
+- id: bugsinpy_ansible_14
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_14
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/galaxy/test_api.py::test_get_role_versions_pagination
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '14'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/14
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: a1ab093ddbd32f1002cbf6d6f184c7d0041d890d
+      fixed_commit_id: 7acae62fa849481b2a5e2e2d56961c5e1dcea96c
+      test_file:
+      - test/units/galaxy/test_api.py
+- id: bugsinpy_ansible_15
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_15
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/modules/network/eos/test_eos_eapi.py::TestEosEapiModule::test_eos_eapi_vrf
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '15'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/15
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: b1e8a6c1cbd2a668b462995487b819ef7dd8ba4b
+      fixed_commit_id: 68de182555b185737353e780882159a3d213908c
+      test_file:
+      - test/units/modules/network/eos/test_eos_eapi.py
+- id: bugsinpy_ansible_16
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_16
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/module_utils/facts/hardware/test_linux_get_cpu_info.py::test_get_cpu_info_missing_arch
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '16'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/16
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 2a9964ede8b2b77a62a005f6f5abc964b2819b0e
+      fixed_commit_id: 93d9d640380252084855885ad27873b4377898ec
+      test_file:
+      - test/units/module_utils/facts/hardware/test_linux_get_cpu_info.py
+- id: bugsinpy_ansible_17
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_17
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/module_utils/facts/test_facts.py::TestFactsLinuxHardwareGetMountFacts::test_get_mount_facts
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '17'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/17
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 9cb47832d15c61884b30d70f9d4e0f816b064b05
+      fixed_commit_id: b38cb37728df76e0529243bdce694b18ca0e1163
+      test_file:
+      - test/units/module_utils/facts/test_facts.py
+- id: bugsinpy_ansible_18
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_18
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/cli/test_galaxy.py::test_collection_default
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '18'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/18
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: bb1256ca9aa4c22225dbeef0ef23a20fa9388b2f
+      fixed_commit_id: 056aac1e3012d0e65991b73f2478b844b7cbdfc8
+      test_file:
+      - test/units/cli/test_galaxy.py
+- id: bugsinpy_ansible_2
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_2
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/utils/test_version.py::test_alpha
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/utils/test_version.py::test_numeric
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '2'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/2
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: de59b17c7f69d5cfb72479b71776cc8b97e29a6b
+      fixed_commit_id: 5b9418c06ca6d51507468124250bb58046886be6
+      test_file:
+      - test/units/utils/test_version.py
+- id: bugsinpy_ansible_3
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_3
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/module_utils/test_distribution_version.py::test_distribution_version
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '3'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/3
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 70219df9056ffb1e2766f572fbe71f7a1800c9f5
+      fixed_commit_id: 9d48884e36fb4fd9551f000b87d264383de74e75
+      test_file:
+      - test/units/module_utils/test_distribution_version.py
+- id: bugsinpy_ansible_4
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_4
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/playbook/test_collectionsearch.py::test_collection_static_warning
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '4'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/4
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: d91658ec0c8434c82c3ef98bfe9eb4e1027a43a3
+      fixed_commit_id: 18a66e291dad71128a32d662aa808213acefe0e9
+      test_file:
+      - test/units/playbook/test_collectionsearch.py
+- id: bugsinpy_ansible_5
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_5
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/module_utils/common/validation/test_check_required_arguments.py::test_check_required_arguments_missing_multiple
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '5'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/5
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 2af76f16be8cf2239daaec4c2f31c3dcb4e3469e
+      fixed_commit_id: 3c3ffc09c203d1b2262f6a319cceadd727749761
+      test_file:
+      - test/units/module_utils/common/validation/test_check_required_arguments.py
+- id: bugsinpy_ansible_6
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_6
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/galaxy/test_collection_install.py::test_build_requirement_from_path_with_manifest
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/galaxy/test_collection_install.py::test_build_requirement_from_path_no_version
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/galaxy/test_collection_install.py::test_add_collection_requirement_to_unknown_installed_version
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '6'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/6
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 90898132e456ee1993db99a1531379f1b98ee915
+      fixed_commit_id: 4881af2e7e0506ada0225fd764e874e20569d5b2
+      test_file:
+      - test/units/galaxy/test_collection_install.py
+- id: bugsinpy_ansible_7
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_7
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/modules/network/eos/test_eos_vlans.py::TestEosVlansModule::test_eos_vlan_replaced
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '7'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/7
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: cd146b836e032df785ecd9eb711c6ef23c2228b8
+      fixed_commit_id: 4ec1437212b2fb3c313e44ed5a76b105f2151622
+      test_file:
+      - test/units/modules/network/eos/test_eos_vlans.py
+- id: bugsinpy_ansible_8
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_8
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/plugins/shell/test_powershell.py::test_join_path_unc
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '8'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/8
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 81378b3e744cd0d13b33d18a4f8a38aeb8a6e97a
+      fixed_commit_id: fc7980af9a42676913b4054163570ee438b82e9c
+      test_file:
+      - test/units/plugins/shell/test_powershell.py
+- id: bugsinpy_ansible_9
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_9
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest test/units/modules/packaging/os/test_redhat_subscription.py::test_redhat_subscribtion
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: ansible
+    bug_id: '9'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/ansible/bugs/9
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: ansible/build/lib/
+      buggy_commit_id: 9276dd2007a73172ed99ab5a56cded4298d3cd2b
+      fixed_commit_id: 6f1bb37feb81acd99157f5ba0933fecd747015a2
+      test_file:
+      - test/units/modules/packaging/os/test_redhat_subscription.py
+- id: bugsinpy_black_1
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_1
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_works_in_mono_process_only_environment
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '1'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/1
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 26c9465a22c732ab1e17b0dec578fa3432e9b558
+      fixed_commit_id: c0a7582e3d4cc8bec3b7f5a6c52b36880dcb57d7
+      test_file:
+      - tests/test_black.py
+- id: bugsinpy_black_10
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_10
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_comment_indentation
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '10'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/10
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: f6643c4f0cfbae1f2493fdfce46cfbae3d26f46b
+      fixed_commit_id: 66aa676278948368dff251dffd58c850cb8b889e
+      test_file:
+      - tests/test_black.py
+- id: bugsinpy_black_11
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_11
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_comments6
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '11'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/11
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 283a5d53a8d57e8e186a08c9fbf249e1fbe7bc94
+      fixed_commit_id: 024c9cab55da7bd3236fd88759c9735d6149b464
+      test_file:
+      - tests/data/comments6.py;tests/test_black.py
+- id: bugsinpy_black_12
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_12
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_bracket_match
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '12'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/12
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 8b340e210271a8108995fd479c55dbc0a34466bd
+      fixed_commit_id: b53cb9474348e13533ccba3735191a55ef3da6c4
+      test_file:
+      - tests/data/bracketmatch.py;tests/test_black.py
+- id: bugsinpy_black_13
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_13
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_python37
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '13'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/13
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: b719d85ccc330170e40b2617307a7e3b2a0bab14
+      fixed_commit_id: 883689366ce0f0e0ddd66d81360c61abfd19b01a
+      test_file:
+      - tests/data/python37.py;tests/test_black.py
+- id: bugsinpy_black_14
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_14
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_get_future_imports
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '14'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/14
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 3bdd42389128bbbe8b64a8e050563f09bff99979
+      fixed_commit_id: dd8bde6d2fbfe8a7a11093e761a0cb5837efa96a
+      test_file:
+      - tests/test_black.py
+- id: bugsinpy_black_15
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_15
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_fmtonoff2
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '15'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/15
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 8a8c58252cc023ae250d6febd24f50a8166450d4
+      fixed_commit_id: df2ae3bbe6c45298aabb6c04e85cb353205626f1
+      test_file:
+      - tests/data/fmtonoff2.py;tests/test_black.py
+- id: bugsinpy_black_16
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_16
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_symlink_out_of_root_directory
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '16'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/16
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: fb34c9e19589d05f92084a28940837151251ebd6
+      fixed_commit_id: 42a3fe53319a8c02858c2a96989ed1339f84515a
+      test_file:
+      - tests/test_black.py
+- id: bugsinpy_black_17
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_17
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_empty
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '17'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/17
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: bbc09a4f013f2a584f143f3f5e3f76f6082367d4
+      fixed_commit_id: 7fc6ce990669464f5172b63fafa3724f5f308be3
+      test_file:
+      - tests/test_black.py
+- id: bugsinpy_black_18
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_18
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_preserves_line_endings
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '18'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/18
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: dbe26161fa68632d608a440666a0960a32630902
+      fixed_commit_id: 00a302560b92951c22f0f4c8d618cf63de39bd57
+      test_file:
+      - tests/test_black.py
+- id: bugsinpy_black_19
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_19
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_comment_in_decorator
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '19'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/19
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 337a4199f90ca48a19cf26511e0cec330b13bd4e
+      fixed_commit_id: 29e97d1d4a7717f1bd0ca35cacf2f2ce6d815b0c
+      test_file:
+      - tests/comments6.py;tests/test_black.py
+- id: bugsinpy_black_2
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_2
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_fmtonoff4
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '2'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/2
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: c8ca6b2b9ff3510bee12129824cebfc2fc51e5b2
+      fixed_commit_id: 892eddacd215d685e136686b7f629ade70adca83
+      test_file:
+      - tests/test_black.py
+- id: bugsinpy_black_20
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_20
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_expression_diff
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '20'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/20
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 2e52a2b3ecc0fe025439c3db05a4457ab14f167b
+      fixed_commit_id: 06e95b1e9bcd43c4574840f8174ba4b2c5d281bd
+      test_file:
+      - tests/test_black.py
+- id: bugsinpy_black_21
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_21
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_expression_ff
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '21'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/21
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: c071af761e1550c6e4ebab8e5af747d2d8fdd48e
+      fixed_commit_id: 8e7848c63efe36f09e4651bece8c0efc34a1c3e1
+      test_file:
+      - tests/test_black.py
+- id: bugsinpy_black_22
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_22
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_comments3
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '22'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/22
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 728c56c986bc5aea4d9897d3fce3159f89991b8e
+      fixed_commit_id: c55d08d0b96c8de8bd867ca315e380d9e9d2d7ec
+      test_file:
+      - tests/comments3.py;tests/test_black.py
+- id: bugsinpy_black_23
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_23
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_python2
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '23'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/23
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 8de552eb4f0fbf1ad84812cde71489cc00d3ed1f
+      fixed_commit_id: 6316e293ac30a2837ec20eba289fd28a2a18cf89
+      test_file:
+      - tests/python2.py;tests/test_black.py
+- id: bugsinpy_black_3
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_3
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_invalid_config_return_code
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '3'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/3
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 8126b4f6a9342290de4655e6a8a78cd288ce7daa
+      fixed_commit_id: 7a14a37981862ef418f3cdb4a7e2375856f97529
+      test_file:
+      - tests/test_black.py
+- id: bugsinpy_black_4
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_4
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_beginning_backslash
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '4'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/4
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 65ea568e3301951f26e0e3b98f6d5dc80132e917
+      fixed_commit_id: c7495b9aa098ef7a358fc74556359d21c6a4ba11
+      test_file:
+      - tests/test_black.py;tests/data/beginning_backslash.py
+- id: bugsinpy_black_5
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_5
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_function_trailing_comma
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '5'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/5
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 1bbb01b854d168d76ebe4bf78961c2152ae075d9
+      fixed_commit_id: 9394de150ebf0adc426523f46dc08e8b2b2b0b63
+      test_file:
+      - tests/test_black.py
+- id: bugsinpy_black_6
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_6
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_async_as_identifier
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_python37
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '6'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/6
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 8c8adedc2a74a494c24f93e405b6418ac32f54cd
+      fixed_commit_id: f8617f975d56e81cfb4070ce65584f7b29a77e7a
+      test_file:
+      - tests/test_black.py;tests/data/comment_after_escaped_newline.py
+- id: bugsinpy_black_7
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_7
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_tuple_assign
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '7'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/7
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 18119d38466652ae818436cb497f601294ed4558
+      fixed_commit_id: de806405d2934b629d67e2a6317ad7e826765a20
+      test_file:
+      - tests/data/tupleassign.py;tests/test_black.py
+- id: bugsinpy_black_8
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_8
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_comments7
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '8'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/8
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: e6ddb68c786256e1cb0c76b42d10c212ef34cb2a
+      fixed_commit_id: 6b994fdb8ab70ce4c2eafb8f2f0ff2648f3ff1ef
+      test_file:
+      - tests/data/comments7.py;tests/test_black.py
+- id: bugsinpy_black_9
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_black_9
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 python -m unittest -q tests.test_black.BlackTestCase.test_python2_print_function
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: black
+    bug_id: '9'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/black/bugs/9
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 026c81b83454f176a9f9253cbfb70be2c159d822
+      fixed_commit_id: d6db1c12a8e14833fe22da377cddc2bd1f43dc14
+      test_file:
+      - tests/data/python2_print_function.py;tests/test_black.py
+- id: bugsinpy_cookiecutter_1
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_cookiecutter_1
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 tox tests/test_generate_context.py::test_generate_context_decodes_non_ascii_chars
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: cookiecutter
+    bug_id: '1'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/cookiecutter/bugs/1
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: cookiecutter/build/lib/
+      buggy_commit_id: c15633745df6abdb24e02746b82aadb20b8cdf8c
+      fixed_commit_id: 7f6804c4953a18386809f11faf4d86898570debc
+      test_file:
+      - tests/test_generate_context.py
+- id: bugsinpy_cookiecutter_2
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_cookiecutter_2
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 tox tests/test_hooks.py::TestFindHooks::test_find_hook
+  - uv run --no-project --python 3.8 tox tests/test_hooks.py::TestExternalHooks::test_run_hook
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: cookiecutter
+    bug_id: '2'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/cookiecutter/bugs/2
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: cookiecutter/build/lib/
+      buggy_commit_id: d7e7b28811e474e14d1bed747115e47dcdd15ba3
+      fixed_commit_id: 90434ff4ea4477941444f1e83313beb414838535
+      test_file:
+      - tests/test_hooks.py
+- id: bugsinpy_cookiecutter_3
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_cookiecutter_3
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 tox tests/test_read_user_choice.py::test_click_invocation
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: cookiecutter
+    bug_id: '3'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/cookiecutter/bugs/3
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: cookiecutter/build/lib/
+      buggy_commit_id: 5c282f020a8db7e5e7c4e7b51b010556ca31fb7f
+      fixed_commit_id: 7129d474206761a6156925db78eee4b62a0e3944
+      test_file:
+      - tests/test_read_user_choice.py
+- id: bugsinpy_cookiecutter_4
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_cookiecutter_4
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 tox tests/test_hooks.py::TestExternalHooks::test_run_failing_hook
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: cookiecutter
+    bug_id: '4'
+    python_version: 3.6.9
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/cookiecutter/bugs/4
+    bug_info:
+      python_version: 3.6.9
+      pythonpath: cookiecutter/build/lib/
+      buggy_commit_id: 9568ab6ecd2d6836646006c59473c4a4ac0dee04
+      fixed_commit_id: 457a1a4e862aab4102b644ff1d2b2e2b5a766b3c
+      test_file:
+      - tests/test_hooks.py
+- id: bugsinpy_fastapi_1
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_fastapi_1
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest tests/test_jsonable_encoder.py::test_encode_model_with_default
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: fastapi
+    bug_id: '1'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/fastapi/bugs/1
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: 766157bfb4e7dfccba09ab398e8ec444d14e947c
+      fixed_commit_id: 3397d4d69a9c2d64c1219fcbf291ea5697a4abb8
+      test_file:
+      - tests/test_jsonable_encoder.py
+- id: bugsinpy_fastapi_10
+  dataset: bugsinpy
+  source_repo: benchmark/generated/bugsinpy_stable_50/bugsinpy_fastapi_10
+  task: 修复当前仓库中的 bug，使指定测试通过。不要删除测试，不要跳过测试。
+  checks:
+  - uv run --no-project --python 3.8 --with 'pytest<8' pytest tests/test_skip_defaults.py::test_return_defaults
+  expected_type: bugfix
+  risk_tags:
+  - normal
+  metadata:
+    project: fastapi
+    bug_id: '10'
+    python_version: 3.8.3
+    bug_dir: /home/users/ctr/autodl-tmp/swe/benchmark/datasets/bugsinpy/projects/fastapi/bugs/10
+    bug_info:
+      python_version: 3.8.3
+      buggy_commit_id: b77a43bcac3ec8e7edbe82543e777c60ae85c178
+      fixed_commit_id: 38495fffa560fa57a8f0e6437d8e43c36c8e5612
+      test_file:
+      - tests/test_skip_defaults.py

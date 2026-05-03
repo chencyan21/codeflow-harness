@@ -16,9 +16,12 @@ import yaml
 from _harness_bench_common import (
     ROOT,
     benchmark_env,
+    portable_path,
     project_path,
     run_command,
+    utc_now_iso,
     write_benchmark_git_exclude,
+    write_workspace_manifest,
 )
 
 
@@ -223,7 +226,7 @@ def _task_source_repo(path: Path) -> str:
 
 def _checkout_command(source: Path, command_override: str | None = None) -> list[str]:
     if command_override:
-        return command_override.split()
+        return shlex.split(command_override)
     local = source / "framework" / "bin" / "bugsinpy-checkout"
     if local.exists():
         return [str(local)]
@@ -339,6 +342,8 @@ def prepare_bugsinpy(
     python_version_override: str | None = None,
     uv_with: list[str] | None = None,
     proxy: str | None = None,
+    manifest_out: Path | None = None,
+    continue_on_error: bool = False,
 ) -> list[dict[str, Any]]:
     candidates = _select_candidates(discover_candidates(source), project=project, bug_id=bug_id, limit=limit)
     tasks = [
@@ -352,23 +357,94 @@ def prepare_bugsinpy(
         for candidate in candidates
     ]
 
+    manifest_rows: list[dict[str, Any]] = []
     if prepare_workspaces:
         env = benchmark_env(proxy=proxy)
         for candidate, task in zip(candidates, tasks):
             target = project_path(task["source_repo"])
             if target.exists() and not clean:
                 print(f"reuse {task['id']}: {target}")
+                manifest_rows.append(
+                    {
+                        "id": task["id"],
+                        "project": candidate.project,
+                        "bug_id": candidate.bug_id,
+                        "status": "reused",
+                        "workspace": portable_path(target),
+                        "reason": None,
+                    }
+                )
                 continue
             print(f"prepare {task['id']}: {candidate.project} bug {candidate.bug_id}")
-            _checkout_candidate(
-                candidate,
-                source=source,
-                target=target,
-                command_override=checkout_command,
-                env=env,
-            )
+            try:
+                _checkout_candidate(
+                    candidate,
+                    source=source,
+                    target=target,
+                    command_override=checkout_command,
+                    env=env,
+                )
+                write_workspace_manifest(
+                    target,
+                    task,
+                    source_repo=candidate.bug_dir,
+                    setup_commands=[],
+                    setup_status="checkout_passed",
+                    setup_runtime_seconds=0.0,
+                    source_kind="third_party_checkout",
+                    upstream_repo=f"BugsInPy:{candidate.project}",
+                    base_commit=None,
+                )
+                manifest_rows.append(
+                    {
+                        "id": task["id"],
+                        "project": candidate.project,
+                        "bug_id": candidate.bug_id,
+                        "status": "prepared",
+                        "workspace": portable_path(target),
+                        "reason": None,
+                    }
+                )
+            except Exception as exc:
+                manifest_rows.append(
+                    {
+                        "id": task["id"],
+                        "project": candidate.project,
+                        "bug_id": candidate.bug_id,
+                        "status": "checkout_failed",
+                        "workspace": portable_path(target),
+                        "reason": str(exc),
+                    }
+                )
+                if not continue_on_error:
+                    raise
 
     write_tasks(tasks_out, tasks)
+    if manifest_out:
+        manifest_out.parent.mkdir(parents=True, exist_ok=True)
+        manifest = {
+            "schema_version": 1,
+            "dataset": "bugsinpy",
+            "created_at": utc_now_iso(),
+            "source": portable_path(source),
+            "selected": len(candidates),
+            "tasks_out": portable_path(tasks_out),
+            "prepare_workspaces": prepare_workspaces,
+            "proxy_enabled": bool(proxy),
+            "records": manifest_rows
+            or [
+                {
+                    "id": task["id"],
+                    "project": candidate.project,
+                    "bug_id": candidate.bug_id,
+                    "status": "metadata_only",
+                    "workspace": portable_path(project_path(task["source_repo"])),
+                    "reason": None,
+                }
+                for candidate, task in zip(candidates, tasks)
+            ],
+        }
+        manifest_out.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     return tasks
 
 
@@ -422,6 +498,12 @@ def main() -> None:
     )
     parser.add_argument("--uv-with", action="append", default=[], help="Extra package for uv-wrapped checks")
     parser.add_argument("--proxy", help="Proxy URL for checkout, for example http://127.0.0.1:10087")
+    parser.add_argument("--manifest-out", help="Optional dataset preparation manifest JSON path")
+    parser.add_argument(
+        "--continue-on-error",
+        action="store_true",
+        help="Continue preparing other bugs after checkout failures and record failures in the manifest",
+    )
     parser.add_argument("--clean", action="store_true", help="Recreate existing generated workspaces")
     args = parser.parse_args()
 
@@ -455,6 +537,8 @@ def main() -> None:
         python_version_override=args.python_version_override,
         uv_with=args.uv_with,
         proxy=args.proxy,
+        manifest_out=project_path(args.manifest_out) if args.manifest_out else None,
+        continue_on_error=args.continue_on_error,
     )
     print(f"wrote {len(tasks)} tasks to {project_path(args.tasks_out)}")
 

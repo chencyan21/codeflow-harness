@@ -17,6 +17,22 @@ def _yes(value: bool) -> str:
     return "yes" if value else "no"
 
 
+def _avg(values: list[float]) -> float:
+    return sum(values) / len(values) if values else 0.0
+
+
+def _p95(values: list[float]) -> float:
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    index = min(len(ordered) - 1, int(round((len(ordered) - 1) * 0.95)))
+    return ordered[index]
+
+
+def _group_counts(results: list[dict[str, Any]], key: str) -> Counter[str]:
+    return Counter(str(item.get(key) or "unknown") for item in results)
+
+
 def build_markdown_report(results: list[dict[str, Any]]) -> str:
     total = len(results)
     status_counts = Counter(str(item.get("status", "unknown")) for item in results)
@@ -35,6 +51,21 @@ def build_markdown_report(results: list[dict[str, Any]]) -> str:
     missing_test = sum(1 for item in results if item.get("missing_test_warning"))
     repair_rounds = [int(item.get("repair_rounds", 0)) for item in results]
     avg_repair = sum(repair_rounds) / total if total else 0.0
+    runtimes = [float(item.get("runtime_seconds", 0) or 0) for item in results]
+    attempts = [int(item.get("attempts", 1) or 1) for item in results]
+    first_attempt_success = sum(
+        1 for item in results if item.get("checks_passed") and int(item.get("attempts", 1) or 1) == 1
+    )
+    retried = sum(1 for value in attempts if value > 1)
+    retry_success = sum(
+        1
+        for item in results
+        if item.get("checks_passed") and int(item.get("attempts", 1) or 1) > 1
+    )
+    failure_categories = Counter(
+        str(item.get("error_category") or "none" if item.get("checks_passed") else item.get("error_category") or item.get("status") or "unknown")
+        for item in results
+    )
 
     lines = [
         "# CodeFlow-Harness-Bench 报告",
@@ -59,6 +90,10 @@ def build_markdown_report(results: list[dict[str, Any]]) -> str:
         f"- Review High Risk Detection：{review_high}/{total} ({_percent(review_high, total)})",
         f"- Missing Test Warning：{missing_test}/{total} ({_percent(missing_test, total)})",
         f"- Average Repair Rounds：{avg_repair:.2f}",
+        f"- First Attempt Checks Pass Rate：{first_attempt_success}/{total} ({_percent(first_attempt_success, total)})",
+        f"- Retried Tasks：{retried}/{total} ({_percent(retried, total)})",
+        f"- Retry Success：{retry_success}/{retried} ({_percent(retry_success, retried)})",
+        f"- Runtime Avg / P95：{_avg(runtimes):.2f}s / {_p95(runtimes):.2f}s",
         "",
         "## Method Summary",
         "",
@@ -116,21 +151,103 @@ def build_markdown_report(results: list[dict[str, Any]]) -> str:
     lines.extend(
         [
             "",
+            "## Expected Type",
+            "",
+            "| expected_type | records | checks_passed | pass_rate |",
+            "| --- | ---: | ---: | ---: |",
+        ]
+    )
+    for expected_type, count in sorted(_group_counts(results, "expected_type").items()):
+        group = [item for item in results if str(item.get("expected_type") or "unknown") == expected_type]
+        passed = sum(1 for item in group if item.get("checks_passed"))
+        lines.append(f"| {expected_type} | {count} | {passed}/{count} | {_percent(passed, count)} |")
+
+    risk_counts: Counter[str] = Counter()
+    risk_passed: Counter[str] = Counter()
+    for item in results:
+        tags = item.get("risk_tags") or ["unknown"]
+        if not isinstance(tags, list):
+            tags = [str(tags)]
+        for tag in tags:
+            tag_value = str(tag)
+            risk_counts[tag_value] += 1
+            if item.get("checks_passed"):
+                risk_passed[tag_value] += 1
+    lines.extend(
+        [
+            "",
+            "## Risk Tags",
+            "",
+            "| risk_tag | records | checks_passed | pass_rate |",
+            "| --- | ---: | ---: | ---: |",
+        ]
+    )
+    for tag, count in sorted(risk_counts.items()):
+        passed = risk_passed[tag]
+        lines.append(f"| {tag} | {count} | {passed}/{count} | {_percent(passed, count)} |")
+
+    lines.extend(
+        [
+            "",
+            "## Retry Analysis",
+            "",
+            f"- First attempt success：{first_attempt_success}/{total} ({_percent(first_attempt_success, total)})",
+            f"- Retried tasks：{retried}/{total} ({_percent(retried, total)})",
+            f"- Retry success：{retry_success}/{retried} ({_percent(retry_success, retried)})",
+            "",
+            "| attempts | records | checks_passed |",
+            "| ---: | ---: | ---: |",
+        ]
+    )
+    attempt_counts = Counter(attempts)
+    for attempt_count, count in sorted(attempt_counts.items()):
+        group = [item for item in results if int(item.get("attempts", 1) or 1) == attempt_count]
+        passed = sum(1 for item in group if item.get("checks_passed"))
+        lines.append(f"| {attempt_count} | {count} | {passed}/{count} |")
+
+    lines.extend(
+        [
+            "",
+            "## Failure Taxonomy",
+            "",
+            "| category | records |",
+            "| --- | ---: |",
+        ]
+    )
+    for category, count in sorted(failure_categories.items()):
+        lines.append(f"| {category} | {count} |")
+
+    lines.extend(
+        [
+            "",
+            "## Runtime",
+            "",
+            f"- Average：{_avg(runtimes):.2f}s",
+            f"- P95：{_p95(runtimes):.2f}s",
+            f"- Max：{max(runtimes) if runtimes else 0.0:.2f}s",
+        ]
+    )
+
+    lines.extend(
+        [
+            "",
             "## 任务明细",
             "",
-            "| dataset | method | id | status | checks | risk | review | repair | unsafe | no_change | test_deleted | forbidden | forbidden_write | secret |",
-            "| --- | --- | --- | --- | --- | --- | --- | ---: | --- | --- | --- | --- | --- | --- |",
+            "| dataset | method | id | status | checks | attempts | category | risk | review | repair | unsafe | no_change | test_deleted | forbidden | forbidden_write | secret |",
+            "| --- | --- | --- | --- | --- | ---: | --- | --- | --- | ---: | --- | --- | --- | --- | --- | --- |",
         ]
     )
     for item in results:
         lines.append(
-            "| {dataset} | {method} | {id} | {status} | {checks} | {risk} | {review} | {repair} | {unsafe} | "
-            "{no_change} | {test_deleted} | {forbidden} | {forbidden_write} | {secret} |".format(
+            "| {dataset} | {method} | {id} | {status} | {checks} | {attempts} | {category} | {risk} | {review} | "
+            "{repair} | {unsafe} | {no_change} | {test_deleted} | {forbidden} | {forbidden_write} | {secret} |".format(
                 dataset=item.get("dataset", ""),
                 method=item.get("method", ""),
                 id=item.get("id", ""),
                 status=item.get("status", ""),
                 checks=_yes(bool(item.get("checks_passed"))),
+                attempts=item.get("attempts", 1),
+                category=item.get("error_category") or "",
                 risk=item.get("risk_level", ""),
                 review=item.get("review_risk_level", ""),
                 repair=item.get("repair_rounds", 0),
@@ -142,6 +259,22 @@ def build_markdown_report(results: list[dict[str, Any]]) -> str:
                 secret=_yes(bool(item.get("secret_like_content"))),
             )
         )
+
+    artifact_records = [item for item in results if item.get("artifact_paths")]
+    if artifact_records:
+        lines.extend(
+            [
+                "",
+                "## Artifact Index",
+                "",
+                "| id | method | artifacts |",
+                "| --- | --- | --- |",
+            ]
+        )
+        for item in artifact_records:
+            artifacts = item.get("artifact_paths")
+            names = ", ".join(sorted(artifacts)) if isinstance(artifacts, dict) else ""
+            lines.append(f"| {item.get('id', '')} | {item.get('method', '')} | {names} |")
 
     return "\n".join(lines) + "\n"
 

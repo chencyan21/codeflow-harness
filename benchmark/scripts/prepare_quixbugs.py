@@ -8,7 +8,15 @@ from typing import Any
 
 import yaml
 
-from _harness_bench_common import ROOT, project_path, run_command, write_benchmark_git_exclude
+from _harness_bench_common import (
+    ROOT,
+    portable_path,
+    project_path,
+    run_command,
+    utc_now_iso,
+    write_benchmark_git_exclude,
+    write_workspace_manifest,
+)
 
 
 DEFAULT_SOURCE = ROOT / "benchmark" / "datasets" / "quixbugs"
@@ -189,16 +197,27 @@ def prepare_quixbugs(
     tasks_out: Path,
     limit: int | None,
     clean: bool,
+    excluded_out: Path | None = None,
 ) -> list[dict[str, Any]]:
     pairs = _discover_programs(source)
+    discovered = len(pairs)
     if limit is not None:
         pairs = pairs[:limit]
 
     tasks = []
+    excluded: list[dict[str, Any]] = []
     for program, case_file in pairs:
         cases = _load_cases(case_file)
         if not cases:
-            print(f"skip {program.stem}: no convertible test cases in {case_file}")
+            reason = f"no convertible test cases in {case_file}"
+            print(f"skip {program.stem}: {reason}")
+            excluded.append(
+                {
+                    "program": program.stem,
+                    "case_file": portable_path(case_file),
+                    "reason": reason,
+                }
+            )
             continue
 
         task_id = f"quixbugs_{program.stem.lower()}"
@@ -212,6 +231,24 @@ def prepare_quixbugs(
             target.mkdir(parents=True)
             _write_project_files(target, program, cases)
             _init_git(target)
+            write_workspace_manifest(
+                target,
+                {
+                    "id": task_id,
+                    "dataset": "quixbugs",
+                    "source_repo": _task_source_repo(target),
+                    "metadata": {
+                        "source_kind": "generated",
+                        "repo": "https://github.com/jkoppel/QuixBugs",
+                    },
+                },
+                source_repo=program,
+                setup_commands=[],
+                setup_status="not_required",
+                setup_runtime_seconds=0.0,
+                source_kind="generated",
+                upstream_repo="https://github.com/jkoppel/QuixBugs",
+            )
             print(f"prepared {task_id}: {target}")
 
         tasks.append(
@@ -223,6 +260,24 @@ def prepare_quixbugs(
                 "checks": ["timeout 10s pytest -q"],
                 "expected_type": "bugfix",
                 "risk_tags": ["normal"],
+                "difficulty": "small",
+                "language": "python",
+                "framework": "pytest",
+                "source": {
+                    "kind": "generated",
+                    "upstream": "https://github.com/jkoppel/QuixBugs",
+                    "base_commit": None,
+                },
+                "oracle": {
+                    "type": "tests",
+                    "fail_to_pass": ["timeout 10s pytest -q"],
+                    "pass_to_pass": [],
+                },
+                "benchmark": {
+                    "stable": True,
+                    "runnable": True,
+                    "expected_baseline_status": "checks_failed",
+                },
                 "metadata": {
                     "program": program.stem,
                     "case_file": str(case_file),
@@ -233,6 +288,19 @@ def prepare_quixbugs(
 
     tasks_out.parent.mkdir(parents=True, exist_ok=True)
     tasks_out.write_text(yaml.safe_dump(tasks, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    if excluded_out:
+        excluded_out.parent.mkdir(parents=True, exist_ok=True)
+        manifest = {
+            "schema_version": 1,
+            "dataset": "quixbugs",
+            "created_at": utc_now_iso(),
+            "source": portable_path(source),
+            "discovered": discovered,
+            "selected": len(pairs),
+            "generated": len(tasks),
+            "excluded": excluded,
+        }
+        excluded_out.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     return tasks
 
 
@@ -242,6 +310,8 @@ def main() -> None:
     parser.add_argument("--out", default=str(DEFAULT_OUT), help="Generated workspace directory")
     parser.add_argument("--tasks-out", default=str(DEFAULT_TASKS_OUT), help="Generated task YAML path")
     parser.add_argument("--limit", type=int, default=10, help="Maximum number of convertible tasks")
+    parser.add_argument("--all", action="store_true", help="Use every discovered QuixBugs Python task")
+    parser.add_argument("--excluded-out", help="Optional excluded/summary manifest JSON path")
     parser.add_argument("--clean", action="store_true", help="Recreate generated workspaces")
     args = parser.parse_args()
 
@@ -249,8 +319,9 @@ def main() -> None:
         source=project_path(args.source),
         out=project_path(args.out),
         tasks_out=project_path(args.tasks_out),
-        limit=args.limit,
+        limit=None if args.all else args.limit,
         clean=args.clean,
+        excluded_out=project_path(args.excluded_out) if args.excluded_out else None,
     )
     print(f"wrote {len(tasks)} tasks to {project_path(args.tasks_out)}")
 
