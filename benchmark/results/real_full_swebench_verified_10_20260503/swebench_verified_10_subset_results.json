@@ -1,0 +1,1790 @@
+[
+  {
+    "run_id": "real_full_swebench_verified_10_20260503",
+    "id": "swebench_verified_astropy__astropy_12907",
+    "dataset": "swebench_verified",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_verified_10/swebench_verified_astropy__astropy_12907",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_verified_astropy__astropy_12907",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 1,
+    "risk_level": "low",
+    "review_risk_level": "low",
+    "review_risks": [
+      "No obvious high-risk pattern detected."
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 1117.344,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "astropy/modeling/separable.py",
+      "astropy/utils/_compiler.py"
+    ],
+    "patch_stats": {
+      "files": 2,
+      "additions": 4,
+      "deletions": 1
+    },
+    "artifact_paths": {
+      "policy": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/policy.json",
+      "spec": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/spec.json",
+      "initial_prompt": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/initial_prompt.md",
+      "mini_run_0_log": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/mini_run_0.log",
+      "mini_run_0_trajectory": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/mini_run_0.trajectory.json",
+      "mini_run_0_events": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/mini_run_0.events.jsonl",
+      "checks_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/checks_round_0.json",
+      "sensor_report_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/sensor_report_round_0.json",
+      "repair_prompt_1": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/repair_prompt_1.md",
+      "mini_run_1_log": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/mini_run_1.log",
+      "mini_run_1_trajectory": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/mini_run_1.trajectory.json",
+      "mini_run_1_events": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/mini_run_1.events.jsonl",
+      "checks_round_1": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/checks_round_1.json",
+      "sensor_report_round_1": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/sensor_report_round_1.json",
+      "review_summary": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/review_summary.json",
+      "diff": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/diff.patch",
+      "review_report": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/review_report.md",
+      "state": "benchmark/workspaces/swebench_verified_astropy__astropy_12907/.git/codeflow/runs/20260503-144808-modeling-s-separability-matrix-does-not-/state.json",
+      "attempt_diff": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_12907/attempt_1/diff.patch",
+      "attempt_checks": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_12907/attempt_1/checks.json",
+      "attempt_sensors": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_12907/attempt_1/sensors.json",
+      "attempt_review": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_12907/attempt_1/review.md"
+    },
+    "sensor_results": {
+      "check_commands": {
+        "name": "check_commands",
+        "passed": true,
+        "severity": "info",
+        "message": "All validation checks passed.",
+        "details": {
+          "commands": [
+            "python -m pytest 'astropy/modeling/tests/test_separable.py::test_separable[compound_model6-result6]' 'astropy/modeling/tests/test_separable.py::test_separable[compound_model9-result9]' -q"
+          ]
+        }
+      },
+      "shell_check_risk": {
+        "name": "shell_check_risk",
+        "passed": true,
+        "severity": "info",
+        "message": "No high-risk shell check patterns detected.",
+        "details": {}
+      },
+      "forbidden_path": {
+        "name": "forbidden_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No forbidden path modifications detected.",
+        "details": {}
+      },
+      "forbidden_path_write": {
+        "name": "forbidden_path_write",
+        "passed": true,
+        "severity": "info",
+        "message": "No write-capable forbidden path behavior detected.",
+        "details": {}
+      },
+      "allowed_path": {
+        "name": "allowed_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No allowed path restriction configured.",
+        "details": {}
+      },
+      "high_risk_path": {
+        "name": "high_risk_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No configured high-risk path modifications detected.",
+        "details": {}
+      },
+      "test_deletion": {
+        "name": "test_deletion",
+        "passed": true,
+        "severity": "info",
+        "message": "No test deletion detected.",
+        "details": {}
+      },
+      "missing_test_change": {
+        "name": "missing_test_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Test change policy satisfied.",
+        "details": {}
+      },
+      "dependency_change": {
+        "name": "dependency_change",
+        "passed": true,
+        "severity": "info",
+        "message": "No dependency file changes detected.",
+        "details": {}
+      },
+      "secret_like_content": {
+        "name": "secret_like_content",
+        "passed": true,
+        "severity": "info",
+        "message": "No secret-like content detected.",
+        "details": {}
+      },
+      "max_diff": {
+        "name": "max_diff",
+        "passed": true,
+        "severity": "info",
+        "message": "Diff size is within policy: 23 lines.",
+        "details": {
+          "diff_lines": 23,
+          "max_diff_lines": 500
+        }
+      },
+      "no_change": {
+        "name": "no_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Repository changes detected.",
+        "details": {
+          "changed_files": [
+            "astropy/modeling/separable.py",
+            "astropy/utils/_compiler.py"
+          ]
+        }
+      }
+    },
+    "check_results": [
+      {
+        "command": "python -m pytest 'astropy/modeling/tests/test_separable.py::test_separable[compound_model6-result6]' 'astropy/modeling/tests/test_separable.py::test_separable[compound_model9-result9]' -q",
+        "success": true,
+        "returncode": 0,
+        "stdout": "..                                                                       [100%]\n2 passed in 0.22s\n",
+        "stderr": ""
+      }
+    ],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_verified_10_20260503",
+    "id": "swebench_verified_astropy__astropy_13033",
+    "dataset": "swebench_verified",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_verified_10/swebench_verified_astropy__astropy_13033",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_verified_astropy__astropy_13033",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 1,
+    "risk_level": "medium",
+    "review_risk_level": "medium",
+    "review_risks": [
+      "Medium-risk keyword found in diff: config"
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 704.946,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "astropy/timeseries/core.py",
+      "conftest.py"
+    ],
+    "patch_stats": {
+      "files": 2,
+      "additions": 11,
+      "deletions": 3
+    },
+    "artifact_paths": {
+      "policy": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/policy.json",
+      "spec": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/spec.json",
+      "initial_prompt": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/initial_prompt.md",
+      "mini_run_0_log": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/mini_run_0.log",
+      "mini_run_0_trajectory": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/mini_run_0.trajectory.json",
+      "mini_run_0_events": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/mini_run_0.events.jsonl",
+      "checks_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/checks_round_0.json",
+      "sensor_report_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/sensor_report_round_0.json",
+      "repair_prompt_1": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/repair_prompt_1.md",
+      "mini_run_1_log": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/mini_run_1.log",
+      "mini_run_1_trajectory": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/mini_run_1.trajectory.json",
+      "mini_run_1_events": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/mini_run_1.events.jsonl",
+      "checks_round_1": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/checks_round_1.json",
+      "sensor_report_round_1": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/sensor_report_round_1.json",
+      "review_summary": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/review_summary.json",
+      "diff": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/diff.patch",
+      "review_report": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/review_report.md",
+      "state": "benchmark/workspaces/swebench_verified_astropy__astropy_13033/.git/codeflow/runs/20260503-150646-timeseries-misleading-exception-when-req/state.json",
+      "attempt_diff": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13033/attempt_1/diff.patch",
+      "attempt_checks": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13033/attempt_1/checks.json",
+      "attempt_sensors": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13033/attempt_1/sensors.json",
+      "attempt_review": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13033/attempt_1/review.md"
+    },
+    "sensor_results": {
+      "check_commands": {
+        "name": "check_commands",
+        "passed": true,
+        "severity": "info",
+        "message": "All validation checks passed.",
+        "details": {
+          "commands": [
+            "python -m pytest astropy/timeseries/tests/test_sampled.py::test_required_columns -q"
+          ]
+        }
+      },
+      "shell_check_risk": {
+        "name": "shell_check_risk",
+        "passed": true,
+        "severity": "info",
+        "message": "No high-risk shell check patterns detected.",
+        "details": {}
+      },
+      "forbidden_path": {
+        "name": "forbidden_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No forbidden path modifications detected.",
+        "details": {}
+      },
+      "forbidden_path_write": {
+        "name": "forbidden_path_write",
+        "passed": true,
+        "severity": "info",
+        "message": "No write-capable forbidden path behavior detected.",
+        "details": {}
+      },
+      "allowed_path": {
+        "name": "allowed_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No allowed path restriction configured.",
+        "details": {}
+      },
+      "high_risk_path": {
+        "name": "high_risk_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No configured high-risk path modifications detected.",
+        "details": {}
+      },
+      "test_deletion": {
+        "name": "test_deletion",
+        "passed": true,
+        "severity": "info",
+        "message": "No test deletion detected.",
+        "details": {}
+      },
+      "missing_test_change": {
+        "name": "missing_test_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Test change policy satisfied.",
+        "details": {}
+      },
+      "dependency_change": {
+        "name": "dependency_change",
+        "passed": true,
+        "severity": "info",
+        "message": "No dependency file changes detected.",
+        "details": {}
+      },
+      "secret_like_content": {
+        "name": "secret_like_content",
+        "passed": true,
+        "severity": "info",
+        "message": "No secret-like content detected.",
+        "details": {}
+      },
+      "max_diff": {
+        "name": "max_diff",
+        "passed": true,
+        "severity": "info",
+        "message": "Diff size is within policy: 36 lines.",
+        "details": {
+          "diff_lines": 36,
+          "max_diff_lines": 500
+        }
+      },
+      "no_change": {
+        "name": "no_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Repository changes detected.",
+        "details": {
+          "changed_files": [
+            "astropy/timeseries/core.py",
+            "conftest.py"
+          ]
+        }
+      }
+    },
+    "check_results": [
+      {
+        "command": "python -m pytest astropy/timeseries/tests/test_sampled.py::test_required_columns -q",
+        "success": true,
+        "returncode": 0,
+        "stdout": ".                                                                        [100%]\n1 passed in 0.11s\n",
+        "stderr": ""
+      }
+    ],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_verified_10_20260503",
+    "id": "swebench_verified_astropy__astropy_13236",
+    "dataset": "swebench_verified",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_verified_10/swebench_verified_astropy__astropy_13236",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_verified_astropy__astropy_13236",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 1,
+    "risk_level": "medium",
+    "review_risk_level": "medium",
+    "review_risks": [
+      "Medium-risk keyword found in diff: config"
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 446.724,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "astropy/conftest.py",
+      "astropy/table/table.py"
+    ],
+    "patch_stats": {
+      "files": 2,
+      "additions": 2,
+      "deletions": 6
+    },
+    "artifact_paths": {
+      "policy": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/policy.json",
+      "spec": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/spec.json",
+      "initial_prompt": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/initial_prompt.md",
+      "mini_run_0_log": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/mini_run_0.log",
+      "mini_run_0_trajectory": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/mini_run_0.trajectory.json",
+      "mini_run_0_events": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/mini_run_0.events.jsonl",
+      "checks_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/checks_round_0.json",
+      "sensor_report_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/sensor_report_round_0.json",
+      "repair_prompt_1": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/repair_prompt_1.md",
+      "mini_run_1_log": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/mini_run_1.log",
+      "mini_run_1_trajectory": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/mini_run_1.trajectory.json",
+      "mini_run_1_events": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/mini_run_1.events.jsonl",
+      "checks_round_1": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/checks_round_1.json",
+      "sensor_report_round_1": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/sensor_report_round_1.json",
+      "review_summary": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/review_summary.json",
+      "diff": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/diff.patch",
+      "review_report": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/review_report.md",
+      "state": "benchmark/workspaces/swebench_verified_astropy__astropy_13236/.git/codeflow/runs/20260503-151832-consider-removing-auto-transform-of-stru/state.json",
+      "attempt_diff": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13236/attempt_1/diff.patch",
+      "attempt_checks": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13236/attempt_1/checks.json",
+      "attempt_sensors": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13236/attempt_1/sensors.json",
+      "attempt_review": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13236/attempt_1/review.md"
+    },
+    "sensor_results": {
+      "check_commands": {
+        "name": "check_commands",
+        "passed": true,
+        "severity": "info",
+        "message": "All validation checks passed.",
+        "details": {
+          "commands": [
+            "python -m pytest 'astropy/table/tests/test_mixin.py::test_ndarray_mixin[False]' astropy/table/tests/test_table.py::test_structured_masked_column -q"
+          ]
+        }
+      },
+      "shell_check_risk": {
+        "name": "shell_check_risk",
+        "passed": true,
+        "severity": "info",
+        "message": "No high-risk shell check patterns detected.",
+        "details": {}
+      },
+      "forbidden_path": {
+        "name": "forbidden_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No forbidden path modifications detected.",
+        "details": {}
+      },
+      "forbidden_path_write": {
+        "name": "forbidden_path_write",
+        "passed": true,
+        "severity": "info",
+        "message": "No write-capable forbidden path behavior detected.",
+        "details": {}
+      },
+      "allowed_path": {
+        "name": "allowed_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No allowed path restriction configured.",
+        "details": {}
+      },
+      "high_risk_path": {
+        "name": "high_risk_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No configured high-risk path modifications detected.",
+        "details": {}
+      },
+      "test_deletion": {
+        "name": "test_deletion",
+        "passed": true,
+        "severity": "info",
+        "message": "No test deletion detected.",
+        "details": {}
+      },
+      "missing_test_change": {
+        "name": "missing_test_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Test change policy satisfied.",
+        "details": {}
+      },
+      "dependency_change": {
+        "name": "dependency_change",
+        "passed": true,
+        "severity": "info",
+        "message": "No dependency file changes detected.",
+        "details": {}
+      },
+      "secret_like_content": {
+        "name": "secret_like_content",
+        "passed": true,
+        "severity": "info",
+        "message": "No secret-like content detected.",
+        "details": {}
+      },
+      "max_diff": {
+        "name": "max_diff",
+        "passed": true,
+        "severity": "info",
+        "message": "Diff size is within policy: 30 lines.",
+        "details": {
+          "diff_lines": 30,
+          "max_diff_lines": 500
+        }
+      },
+      "no_change": {
+        "name": "no_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Repository changes detected.",
+        "details": {
+          "changed_files": [
+            "astropy/conftest.py",
+            "astropy/table/table.py"
+          ]
+        }
+      }
+    },
+    "check_results": [
+      {
+        "command": "python -m pytest 'astropy/table/tests/test_mixin.py::test_ndarray_mixin[False]' astropy/table/tests/test_table.py::test_structured_masked_column -q",
+        "success": true,
+        "returncode": 0,
+        "stdout": "..                                                                       [100%]\n2 passed in 0.40s\n",
+        "stderr": ""
+      }
+    ],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_verified_10_20260503",
+    "id": "swebench_verified_astropy__astropy_13398",
+    "dataset": "swebench_verified",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_verified_10/swebench_verified_astropy__astropy_13398",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_verified_astropy__astropy_13398",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 1,
+    "risk_level": "low",
+    "review_risk_level": "low",
+    "review_risks": [
+      "No obvious high-risk pattern detected."
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 2526.962,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "astropy/coordinates/builtin_frames/__init__.py",
+      "astropy/coordinates/builtin_frames/intermediate_rotation_transforms.py",
+      "astropy/coordinates/builtin_frames/itrs.py",
+      "astropy/coordinates/builtin_frames/itrs_observed_transforms.py",
+      "astropy/utils/iers/iers.py"
+    ],
+    "patch_stats": {
+      "files": 5,
+      "additions": 136,
+      "deletions": 5
+    },
+    "artifact_paths": {
+      "policy": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/policy.json",
+      "spec": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/spec.json",
+      "initial_prompt": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/initial_prompt.md",
+      "mini_run_0_log": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/mini_run_0.log",
+      "mini_run_0_trajectory": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/mini_run_0.trajectory.json",
+      "mini_run_0_events": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/mini_run_0.events.jsonl",
+      "checks_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/checks_round_0.json",
+      "sensor_report_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/sensor_report_round_0.json",
+      "repair_prompt_1": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/repair_prompt_1.md",
+      "mini_run_1_log": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/mini_run_1.log",
+      "mini_run_1_trajectory": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/mini_run_1.trajectory.json",
+      "mini_run_1_events": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/mini_run_1.events.jsonl",
+      "checks_round_1": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/checks_round_1.json",
+      "sensor_report_round_1": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/sensor_report_round_1.json",
+      "review_summary": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/review_summary.json",
+      "diff": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/diff.patch",
+      "review_report": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/review_report.md",
+      "state": "benchmark/workspaces/swebench_verified_astropy__astropy_13398/.git/codeflow/runs/20260503-162607-a-direct-approach-to-itrs-to-observed-tr/state.json",
+      "attempt_diff": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13398/attempt_2/diff.patch",
+      "attempt_checks": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13398/attempt_2/checks.json",
+      "attempt_sensors": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13398/attempt_2/sensors.json",
+      "attempt_review": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13398/attempt_2/review.md"
+    },
+    "sensor_results": {
+      "check_commands": {
+        "name": "check_commands",
+        "passed": true,
+        "severity": "info",
+        "message": "All validation checks passed.",
+        "details": {
+          "commands": [
+            "python -m pytest astropy/coordinates/tests/test_intermediate_transformations.py::test_itrs_topo_to_altaz_with_refraction astropy/coordinates/tests/test_intermediate_transformations.py::test_itrs_topo_to_hadec_with_refraction astropy/coordinates/tests/test_intermediate_transformations.py::test_cirs_itrs_topo astropy/coordinates/tests/test_intermediate_transformations.py::test_itrs_straight_overhead -q"
+          ]
+        }
+      },
+      "shell_check_risk": {
+        "name": "shell_check_risk",
+        "passed": true,
+        "severity": "info",
+        "message": "No high-risk shell check patterns detected.",
+        "details": {}
+      },
+      "forbidden_path": {
+        "name": "forbidden_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No forbidden path modifications detected.",
+        "details": {}
+      },
+      "forbidden_path_write": {
+        "name": "forbidden_path_write",
+        "passed": true,
+        "severity": "info",
+        "message": "No write-capable forbidden path behavior detected.",
+        "details": {}
+      },
+      "allowed_path": {
+        "name": "allowed_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No allowed path restriction configured.",
+        "details": {}
+      },
+      "high_risk_path": {
+        "name": "high_risk_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No configured high-risk path modifications detected.",
+        "details": {}
+      },
+      "test_deletion": {
+        "name": "test_deletion",
+        "passed": true,
+        "severity": "info",
+        "message": "No test deletion detected.",
+        "details": {}
+      },
+      "missing_test_change": {
+        "name": "missing_test_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Test change policy satisfied.",
+        "details": {}
+      },
+      "dependency_change": {
+        "name": "dependency_change",
+        "passed": true,
+        "severity": "info",
+        "message": "No dependency file changes detected.",
+        "details": {}
+      },
+      "secret_like_content": {
+        "name": "secret_like_content",
+        "passed": true,
+        "severity": "info",
+        "message": "No secret-like content detected.",
+        "details": {}
+      },
+      "max_diff": {
+        "name": "max_diff",
+        "passed": true,
+        "severity": "info",
+        "message": "Diff size is within policy: 220 lines.",
+        "details": {
+          "diff_lines": 220,
+          "max_diff_lines": 500
+        }
+      },
+      "no_change": {
+        "name": "no_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Repository changes detected.",
+        "details": {
+          "changed_files": [
+            "astropy/coordinates/builtin_frames/__init__.py",
+            "astropy/coordinates/builtin_frames/intermediate_rotation_transforms.py",
+            "astropy/coordinates/builtin_frames/itrs.py",
+            "astropy/coordinates/builtin_frames/itrs_observed_transforms.py",
+            "astropy/utils/iers/iers.py"
+          ]
+        }
+      }
+    },
+    "check_results": [
+      {
+        "command": "python -m pytest astropy/coordinates/tests/test_intermediate_transformations.py::test_itrs_topo_to_altaz_with_refraction astropy/coordinates/tests/test_intermediate_transformations.py::test_itrs_topo_to_hadec_with_refraction astropy/coordinates/tests/test_intermediate_transformations.py::test_cirs_itrs_topo astropy/coordinates/tests/test_intermediate_transformations.py::test_itrs_straight_overhead -q",
+        "success": true,
+        "returncode": 0,
+        "stdout": "Internet access disabled\n....                                                                     [100%]\n4 passed in 0.48s\n",
+        "stderr": ""
+      }
+    ],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 2,
+    "first_attempt_success": false,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_verified_10_20260503",
+    "id": "swebench_verified_astropy__astropy_13453",
+    "dataset": "swebench_verified",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_verified_10/swebench_verified_astropy__astropy_13453",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_verified_astropy__astropy_13453",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 0,
+    "risk_level": "low",
+    "review_risk_level": "low",
+    "review_risks": [
+      "No obvious high-risk pattern detected."
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 296.555,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "astropy/io/ascii/html.py"
+    ],
+    "patch_stats": {
+      "files": 1,
+      "additions": 4,
+      "deletions": 0
+    },
+    "artifact_paths": {
+      "policy": "benchmark/workspaces/swebench_verified_astropy__astropy_13453/.git/codeflow/runs/20260503-170814-ascii-table-output-to-html-does-not-supp/policy.json",
+      "spec": "benchmark/workspaces/swebench_verified_astropy__astropy_13453/.git/codeflow/runs/20260503-170814-ascii-table-output-to-html-does-not-supp/spec.json",
+      "initial_prompt": "benchmark/workspaces/swebench_verified_astropy__astropy_13453/.git/codeflow/runs/20260503-170814-ascii-table-output-to-html-does-not-supp/initial_prompt.md",
+      "mini_run_0_log": "benchmark/workspaces/swebench_verified_astropy__astropy_13453/.git/codeflow/runs/20260503-170814-ascii-table-output-to-html-does-not-supp/mini_run_0.log",
+      "mini_run_0_trajectory": "benchmark/workspaces/swebench_verified_astropy__astropy_13453/.git/codeflow/runs/20260503-170814-ascii-table-output-to-html-does-not-supp/mini_run_0.trajectory.json",
+      "mini_run_0_events": "benchmark/workspaces/swebench_verified_astropy__astropy_13453/.git/codeflow/runs/20260503-170814-ascii-table-output-to-html-does-not-supp/mini_run_0.events.jsonl",
+      "checks_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_13453/.git/codeflow/runs/20260503-170814-ascii-table-output-to-html-does-not-supp/checks_round_0.json",
+      "sensor_report_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_13453/.git/codeflow/runs/20260503-170814-ascii-table-output-to-html-does-not-supp/sensor_report_round_0.json",
+      "review_summary": "benchmark/workspaces/swebench_verified_astropy__astropy_13453/.git/codeflow/runs/20260503-170814-ascii-table-output-to-html-does-not-supp/review_summary.json",
+      "diff": "benchmark/workspaces/swebench_verified_astropy__astropy_13453/.git/codeflow/runs/20260503-170814-ascii-table-output-to-html-does-not-supp/diff.patch",
+      "review_report": "benchmark/workspaces/swebench_verified_astropy__astropy_13453/.git/codeflow/runs/20260503-170814-ascii-table-output-to-html-does-not-supp/review_report.md",
+      "state": "benchmark/workspaces/swebench_verified_astropy__astropy_13453/.git/codeflow/runs/20260503-170814-ascii-table-output-to-html-does-not-supp/state.json",
+      "attempt_diff": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13453/attempt_1/diff.patch",
+      "attempt_checks": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13453/attempt_1/checks.json",
+      "attempt_sensors": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13453/attempt_1/sensors.json",
+      "attempt_review": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13453/attempt_1/review.md"
+    },
+    "sensor_results": {
+      "check_commands": {
+        "name": "check_commands",
+        "passed": true,
+        "severity": "info",
+        "message": "All validation checks passed.",
+        "details": {
+          "commands": [
+            "python -m pytest astropy/io/ascii/tests/test_html.py::test_write_table_formatted_columns -q"
+          ]
+        }
+      },
+      "shell_check_risk": {
+        "name": "shell_check_risk",
+        "passed": true,
+        "severity": "info",
+        "message": "No high-risk shell check patterns detected.",
+        "details": {}
+      },
+      "forbidden_path": {
+        "name": "forbidden_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No forbidden path modifications detected.",
+        "details": {}
+      },
+      "forbidden_path_write": {
+        "name": "forbidden_path_write",
+        "passed": true,
+        "severity": "info",
+        "message": "No write-capable forbidden path behavior detected.",
+        "details": {}
+      },
+      "allowed_path": {
+        "name": "allowed_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No allowed path restriction configured.",
+        "details": {}
+      },
+      "high_risk_path": {
+        "name": "high_risk_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No configured high-risk path modifications detected.",
+        "details": {}
+      },
+      "test_deletion": {
+        "name": "test_deletion",
+        "passed": true,
+        "severity": "info",
+        "message": "No test deletion detected.",
+        "details": {}
+      },
+      "missing_test_change": {
+        "name": "missing_test_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Test change policy satisfied.",
+        "details": {}
+      },
+      "dependency_change": {
+        "name": "dependency_change",
+        "passed": true,
+        "severity": "info",
+        "message": "No dependency file changes detected.",
+        "details": {}
+      },
+      "secret_like_content": {
+        "name": "secret_like_content",
+        "passed": true,
+        "severity": "info",
+        "message": "No secret-like content detected.",
+        "details": {}
+      },
+      "max_diff": {
+        "name": "max_diff",
+        "passed": true,
+        "severity": "info",
+        "message": "Diff size is within policy: 15 lines.",
+        "details": {
+          "diff_lines": 15,
+          "max_diff_lines": 500
+        }
+      },
+      "no_change": {
+        "name": "no_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Repository changes detected.",
+        "details": {
+          "changed_files": [
+            "astropy/io/ascii/html.py"
+          ]
+        }
+      }
+    },
+    "check_results": [
+      {
+        "command": "python -m pytest astropy/io/ascii/tests/test_html.py::test_write_table_formatted_columns -q",
+        "success": true,
+        "returncode": 0,
+        "stdout": "Internet access disabled\n.                                                                        [100%]\n1 passed in 0.04s\n",
+        "stderr": ""
+      }
+    ],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_verified_10_20260503",
+    "id": "swebench_verified_astropy__astropy_13579",
+    "dataset": "swebench_verified",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_verified_10/swebench_verified_astropy__astropy_13579",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_verified_astropy__astropy_13579",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 0,
+    "risk_level": "low",
+    "review_risk_level": "low",
+    "review_risks": [
+      "No obvious high-risk pattern detected."
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 419.091,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "astropy/wcs/wcsapi/wrappers/sliced_wcs.py"
+    ],
+    "patch_stats": {
+      "files": 1,
+      "additions": 8,
+      "deletions": 1
+    },
+    "artifact_paths": {
+      "policy": "benchmark/workspaces/swebench_verified_astropy__astropy_13579/.git/codeflow/runs/20260503-171311-inconsistent-behavior-of-world-to-pixel-/policy.json",
+      "spec": "benchmark/workspaces/swebench_verified_astropy__astropy_13579/.git/codeflow/runs/20260503-171311-inconsistent-behavior-of-world-to-pixel-/spec.json",
+      "initial_prompt": "benchmark/workspaces/swebench_verified_astropy__astropy_13579/.git/codeflow/runs/20260503-171311-inconsistent-behavior-of-world-to-pixel-/initial_prompt.md",
+      "mini_run_0_log": "benchmark/workspaces/swebench_verified_astropy__astropy_13579/.git/codeflow/runs/20260503-171311-inconsistent-behavior-of-world-to-pixel-/mini_run_0.log",
+      "mini_run_0_trajectory": "benchmark/workspaces/swebench_verified_astropy__astropy_13579/.git/codeflow/runs/20260503-171311-inconsistent-behavior-of-world-to-pixel-/mini_run_0.trajectory.json",
+      "mini_run_0_events": "benchmark/workspaces/swebench_verified_astropy__astropy_13579/.git/codeflow/runs/20260503-171311-inconsistent-behavior-of-world-to-pixel-/mini_run_0.events.jsonl",
+      "checks_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_13579/.git/codeflow/runs/20260503-171311-inconsistent-behavior-of-world-to-pixel-/checks_round_0.json",
+      "sensor_report_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_13579/.git/codeflow/runs/20260503-171311-inconsistent-behavior-of-world-to-pixel-/sensor_report_round_0.json",
+      "review_summary": "benchmark/workspaces/swebench_verified_astropy__astropy_13579/.git/codeflow/runs/20260503-171311-inconsistent-behavior-of-world-to-pixel-/review_summary.json",
+      "diff": "benchmark/workspaces/swebench_verified_astropy__astropy_13579/.git/codeflow/runs/20260503-171311-inconsistent-behavior-of-world-to-pixel-/diff.patch",
+      "review_report": "benchmark/workspaces/swebench_verified_astropy__astropy_13579/.git/codeflow/runs/20260503-171311-inconsistent-behavior-of-world-to-pixel-/review_report.md",
+      "state": "benchmark/workspaces/swebench_verified_astropy__astropy_13579/.git/codeflow/runs/20260503-171311-inconsistent-behavior-of-world-to-pixel-/state.json",
+      "attempt_diff": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13579/attempt_1/diff.patch",
+      "attempt_checks": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13579/attempt_1/checks.json",
+      "attempt_sensors": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13579/attempt_1/sensors.json",
+      "attempt_review": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13579/attempt_1/review.md"
+    },
+    "sensor_results": {
+      "check_commands": {
+        "name": "check_commands",
+        "passed": true,
+        "severity": "info",
+        "message": "All validation checks passed.",
+        "details": {
+          "commands": [
+            "python -m pytest astropy/wcs/wcsapi/wrappers/tests/test_sliced_wcs.py::test_coupled_world_slicing -q"
+          ]
+        }
+      },
+      "shell_check_risk": {
+        "name": "shell_check_risk",
+        "passed": true,
+        "severity": "info",
+        "message": "No high-risk shell check patterns detected.",
+        "details": {}
+      },
+      "forbidden_path": {
+        "name": "forbidden_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No forbidden path modifications detected.",
+        "details": {}
+      },
+      "forbidden_path_write": {
+        "name": "forbidden_path_write",
+        "passed": true,
+        "severity": "info",
+        "message": "No write-capable forbidden path behavior detected.",
+        "details": {}
+      },
+      "allowed_path": {
+        "name": "allowed_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No allowed path restriction configured.",
+        "details": {}
+      },
+      "high_risk_path": {
+        "name": "high_risk_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No configured high-risk path modifications detected.",
+        "details": {}
+      },
+      "test_deletion": {
+        "name": "test_deletion",
+        "passed": true,
+        "severity": "info",
+        "message": "No test deletion detected.",
+        "details": {}
+      },
+      "missing_test_change": {
+        "name": "missing_test_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Test change policy satisfied.",
+        "details": {}
+      },
+      "dependency_change": {
+        "name": "dependency_change",
+        "passed": true,
+        "severity": "info",
+        "message": "No dependency file changes detected.",
+        "details": {}
+      },
+      "secret_like_content": {
+        "name": "secret_like_content",
+        "passed": true,
+        "severity": "info",
+        "message": "No secret-like content detected.",
+        "details": {}
+      },
+      "max_diff": {
+        "name": "max_diff",
+        "passed": true,
+        "severity": "info",
+        "message": "Diff size is within policy: 25 lines.",
+        "details": {
+          "diff_lines": 25,
+          "max_diff_lines": 500
+        }
+      },
+      "no_change": {
+        "name": "no_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Repository changes detected.",
+        "details": {
+          "changed_files": [
+            "astropy/wcs/wcsapi/wrappers/sliced_wcs.py"
+          ]
+        }
+      }
+    },
+    "check_results": [
+      {
+        "command": "python -m pytest astropy/wcs/wcsapi/wrappers/tests/test_sliced_wcs.py::test_coupled_world_slicing -q",
+        "success": true,
+        "returncode": 0,
+        "stdout": "Internet access disabled\n.                                                                        [100%]\n1 passed in 0.11s\n",
+        "stderr": ""
+      }
+    ],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_verified_10_20260503",
+    "id": "swebench_verified_astropy__astropy_13977",
+    "dataset": "swebench_verified",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_verified_10/swebench_verified_astropy__astropy_13977",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_verified_astropy__astropy_13977",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 1,
+    "risk_level": "medium",
+    "review_risk_level": "medium",
+    "review_risks": [
+      "Medium-risk keyword found in diff: config"
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 1187.484,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "astropy/units/quantity.py",
+      "astropy/units/tests/test_quantity_ufuncs.py",
+      "setup.cfg"
+    ],
+    "patch_stats": {
+      "files": 3,
+      "additions": 33,
+      "deletions": 28
+    },
+    "artifact_paths": {
+      "policy": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/policy.json",
+      "spec": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/spec.json",
+      "initial_prompt": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/initial_prompt.md",
+      "mini_run_0_log": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/mini_run_0.log",
+      "mini_run_0_trajectory": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/mini_run_0.trajectory.json",
+      "mini_run_0_events": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/mini_run_0.events.jsonl",
+      "checks_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/checks_round_0.json",
+      "sensor_report_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/sensor_report_round_0.json",
+      "repair_prompt_1": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/repair_prompt_1.md",
+      "mini_run_1_log": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/mini_run_1.log",
+      "mini_run_1_trajectory": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/mini_run_1.trajectory.json",
+      "mini_run_1_events": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/mini_run_1.events.jsonl",
+      "checks_round_1": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/checks_round_1.json",
+      "sensor_report_round_1": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/sensor_report_round_1.json",
+      "review_summary": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/review_summary.json",
+      "diff": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/diff.patch",
+      "review_report": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/review_report.md",
+      "state": "benchmark/workspaces/swebench_verified_astropy__astropy_13977/.git/codeflow/runs/20260503-172010-should-quantity-array-ufunc-return-notim/state.json",
+      "attempt_diff": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13977/attempt_1/diff.patch",
+      "attempt_checks": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13977/attempt_1/checks.json",
+      "attempt_sensors": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13977/attempt_1/sensors.json",
+      "attempt_review": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_13977/attempt_1/review.md"
+    },
+    "sensor_results": {
+      "check_commands": {
+        "name": "check_commands",
+        "passed": true,
+        "severity": "info",
+        "message": "All validation checks passed.",
+        "details": {
+          "commands": [
+            "python -m pytest 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity0-quantity0-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity0-quantity0-less]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity0-quantity1-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity0-quantity1-less]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity1-quantity0-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity1-quantity0-less]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity1-quantity1-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity1-quantity1-less]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity0-quantity0-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity0-quantity0-multiply]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity0-quantity0-less]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity0-quantity1-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity0-quantity1-multiply]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity0-quantity1-less]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity1-quantity0-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity1-quantity0-multiply]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity1-quantity0-less]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity1-quantity1-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity1-quantity1-multiply]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity1-quantity1-less]' -q"
+          ]
+        }
+      },
+      "shell_check_risk": {
+        "name": "shell_check_risk",
+        "passed": true,
+        "severity": "info",
+        "message": "No high-risk shell check patterns detected.",
+        "details": {}
+      },
+      "forbidden_path": {
+        "name": "forbidden_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No forbidden path modifications detected.",
+        "details": {}
+      },
+      "forbidden_path_write": {
+        "name": "forbidden_path_write",
+        "passed": true,
+        "severity": "info",
+        "message": "No write-capable forbidden path behavior detected.",
+        "details": {}
+      },
+      "allowed_path": {
+        "name": "allowed_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No allowed path restriction configured.",
+        "details": {}
+      },
+      "high_risk_path": {
+        "name": "high_risk_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No configured high-risk path modifications detected.",
+        "details": {}
+      },
+      "test_deletion": {
+        "name": "test_deletion",
+        "passed": true,
+        "severity": "info",
+        "message": "No test deletion detected.",
+        "details": {}
+      },
+      "missing_test_change": {
+        "name": "missing_test_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Test change policy satisfied.",
+        "details": {}
+      },
+      "dependency_change": {
+        "name": "dependency_change",
+        "passed": true,
+        "severity": "info",
+        "message": "No dependency file changes detected.",
+        "details": {}
+      },
+      "secret_like_content": {
+        "name": "secret_like_content",
+        "passed": true,
+        "severity": "info",
+        "message": "No secret-like content detected.",
+        "details": {}
+      },
+      "max_diff": {
+        "name": "max_diff",
+        "passed": true,
+        "severity": "info",
+        "message": "Diff size is within policy: 96 lines.",
+        "details": {
+          "diff_lines": 96,
+          "max_diff_lines": 500
+        }
+      },
+      "no_change": {
+        "name": "no_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Repository changes detected.",
+        "details": {
+          "changed_files": [
+            "astropy/units/quantity.py",
+            "astropy/units/tests/test_quantity_ufuncs.py",
+            "setup.cfg"
+          ]
+        }
+      }
+    },
+    "check_results": [
+      {
+        "command": "python -m pytest 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity0-quantity0-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity0-quantity0-less]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity0-quantity1-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity0-quantity1-less]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity1-quantity0-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity1-quantity0-less]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity1-quantity1-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[None-duck_quantity1-quantity1-less]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity0-quantity0-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity0-quantity0-multiply]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity0-quantity0-less]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity0-quantity1-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity0-quantity1-multiply]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity0-quantity1-less]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity1-quantity0-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity1-quantity0-multiply]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity1-quantity0-less]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity1-quantity1-add]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity1-quantity1-multiply]' 'astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReturnsNotImplemented::TestBinaryUfuncs::test_full[empty-duck_quantity1-quantity1-less]' -q",
+        "success": true,
+        "returncode": 0,
+        "stdout": "Internet access disabled\n\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m                                                     [100%]\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m20 passed\u001b[0m\u001b[32m in 0.14s\u001b[0m\u001b[0m\n",
+        "stderr": "<frozen importlib._bootstrap>:488: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility. Expected 80 from C header, got 96 from PyObject\n"
+      }
+    ],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_verified_10_20260503",
+    "id": "swebench_verified_astropy__astropy_14096",
+    "dataset": "swebench_verified",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_verified_10/swebench_verified_astropy__astropy_14096",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_verified_astropy__astropy_14096",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 0,
+    "risk_level": "low",
+    "review_risk_level": "low",
+    "review_risks": [
+      "No obvious high-risk pattern detected."
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 407.489,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "astropy/coordinates/sky_coordinate.py"
+    ],
+    "patch_stats": {
+      "files": 1,
+      "additions": 8,
+      "deletions": 0
+    },
+    "artifact_paths": {
+      "policy": "benchmark/workspaces/swebench_verified_astropy__astropy_14096/.git/codeflow/runs/20260503-173958-subclassed-skycoord-gives-misleading-att/policy.json",
+      "spec": "benchmark/workspaces/swebench_verified_astropy__astropy_14096/.git/codeflow/runs/20260503-173958-subclassed-skycoord-gives-misleading-att/spec.json",
+      "initial_prompt": "benchmark/workspaces/swebench_verified_astropy__astropy_14096/.git/codeflow/runs/20260503-173958-subclassed-skycoord-gives-misleading-att/initial_prompt.md",
+      "mini_run_0_log": "benchmark/workspaces/swebench_verified_astropy__astropy_14096/.git/codeflow/runs/20260503-173958-subclassed-skycoord-gives-misleading-att/mini_run_0.log",
+      "mini_run_0_trajectory": "benchmark/workspaces/swebench_verified_astropy__astropy_14096/.git/codeflow/runs/20260503-173958-subclassed-skycoord-gives-misleading-att/mini_run_0.trajectory.json",
+      "mini_run_0_events": "benchmark/workspaces/swebench_verified_astropy__astropy_14096/.git/codeflow/runs/20260503-173958-subclassed-skycoord-gives-misleading-att/mini_run_0.events.jsonl",
+      "checks_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_14096/.git/codeflow/runs/20260503-173958-subclassed-skycoord-gives-misleading-att/checks_round_0.json",
+      "sensor_report_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_14096/.git/codeflow/runs/20260503-173958-subclassed-skycoord-gives-misleading-att/sensor_report_round_0.json",
+      "review_summary": "benchmark/workspaces/swebench_verified_astropy__astropy_14096/.git/codeflow/runs/20260503-173958-subclassed-skycoord-gives-misleading-att/review_summary.json",
+      "diff": "benchmark/workspaces/swebench_verified_astropy__astropy_14096/.git/codeflow/runs/20260503-173958-subclassed-skycoord-gives-misleading-att/diff.patch",
+      "review_report": "benchmark/workspaces/swebench_verified_astropy__astropy_14096/.git/codeflow/runs/20260503-173958-subclassed-skycoord-gives-misleading-att/review_report.md",
+      "state": "benchmark/workspaces/swebench_verified_astropy__astropy_14096/.git/codeflow/runs/20260503-173958-subclassed-skycoord-gives-misleading-att/state.json",
+      "attempt_diff": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_14096/attempt_1/diff.patch",
+      "attempt_checks": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_14096/attempt_1/checks.json",
+      "attempt_sensors": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_14096/attempt_1/sensors.json",
+      "attempt_review": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_14096/attempt_1/review.md"
+    },
+    "sensor_results": {
+      "check_commands": {
+        "name": "check_commands",
+        "passed": true,
+        "severity": "info",
+        "message": "All validation checks passed.",
+        "details": {
+          "commands": [
+            "python -m pytest astropy/coordinates/tests/test_sky_coord.py::test_subclass_property_exception_error -q"
+          ]
+        }
+      },
+      "shell_check_risk": {
+        "name": "shell_check_risk",
+        "passed": true,
+        "severity": "info",
+        "message": "No high-risk shell check patterns detected.",
+        "details": {}
+      },
+      "forbidden_path": {
+        "name": "forbidden_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No forbidden path modifications detected.",
+        "details": {}
+      },
+      "forbidden_path_write": {
+        "name": "forbidden_path_write",
+        "passed": true,
+        "severity": "info",
+        "message": "No write-capable forbidden path behavior detected.",
+        "details": {}
+      },
+      "allowed_path": {
+        "name": "allowed_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No allowed path restriction configured.",
+        "details": {}
+      },
+      "high_risk_path": {
+        "name": "high_risk_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No configured high-risk path modifications detected.",
+        "details": {}
+      },
+      "test_deletion": {
+        "name": "test_deletion",
+        "passed": true,
+        "severity": "info",
+        "message": "No test deletion detected.",
+        "details": {}
+      },
+      "missing_test_change": {
+        "name": "missing_test_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Test change policy satisfied.",
+        "details": {}
+      },
+      "dependency_change": {
+        "name": "dependency_change",
+        "passed": true,
+        "severity": "info",
+        "message": "No dependency file changes detected.",
+        "details": {}
+      },
+      "secret_like_content": {
+        "name": "secret_like_content",
+        "passed": true,
+        "severity": "info",
+        "message": "No secret-like content detected.",
+        "details": {}
+      },
+      "max_diff": {
+        "name": "max_diff",
+        "passed": true,
+        "severity": "info",
+        "message": "Diff size is within policy: 19 lines.",
+        "details": {
+          "diff_lines": 19,
+          "max_diff_lines": 500
+        }
+      },
+      "no_change": {
+        "name": "no_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Repository changes detected.",
+        "details": {
+          "changed_files": [
+            "astropy/coordinates/sky_coordinate.py"
+          ]
+        }
+      }
+    },
+    "check_results": [
+      {
+        "command": "python -m pytest astropy/coordinates/tests/test_sky_coord.py::test_subclass_property_exception_error -q",
+        "success": true,
+        "returncode": 0,
+        "stdout": "Internet access disabled\n\u001b[32m.\u001b[0m\u001b[32m                                                                        [100%]\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m1 passed\u001b[0m\u001b[32m in 0.21s\u001b[0m\u001b[0m\n",
+        "stderr": ""
+      }
+    ],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_verified_10_20260503",
+    "id": "swebench_verified_astropy__astropy_14182",
+    "dataset": "swebench_verified",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_verified_10/swebench_verified_astropy__astropy_14182",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_verified_astropy__astropy_14182",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 0,
+    "risk_level": "low",
+    "review_risk_level": "low",
+    "review_risks": [
+      "No obvious high-risk pattern detected."
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 296.652,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "astropy/io/ascii/rst.py"
+    ],
+    "patch_stats": {
+      "files": 1,
+      "additions": 12,
+      "deletions": 3
+    },
+    "artifact_paths": {
+      "policy": "benchmark/workspaces/swebench_verified_astropy__astropy_14182/.git/codeflow/runs/20260503-174645-please-support-header-rows-in-restructur/policy.json",
+      "spec": "benchmark/workspaces/swebench_verified_astropy__astropy_14182/.git/codeflow/runs/20260503-174645-please-support-header-rows-in-restructur/spec.json",
+      "initial_prompt": "benchmark/workspaces/swebench_verified_astropy__astropy_14182/.git/codeflow/runs/20260503-174645-please-support-header-rows-in-restructur/initial_prompt.md",
+      "mini_run_0_log": "benchmark/workspaces/swebench_verified_astropy__astropy_14182/.git/codeflow/runs/20260503-174645-please-support-header-rows-in-restructur/mini_run_0.log",
+      "mini_run_0_trajectory": "benchmark/workspaces/swebench_verified_astropy__astropy_14182/.git/codeflow/runs/20260503-174645-please-support-header-rows-in-restructur/mini_run_0.trajectory.json",
+      "mini_run_0_events": "benchmark/workspaces/swebench_verified_astropy__astropy_14182/.git/codeflow/runs/20260503-174645-please-support-header-rows-in-restructur/mini_run_0.events.jsonl",
+      "checks_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_14182/.git/codeflow/runs/20260503-174645-please-support-header-rows-in-restructur/checks_round_0.json",
+      "sensor_report_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_14182/.git/codeflow/runs/20260503-174645-please-support-header-rows-in-restructur/sensor_report_round_0.json",
+      "review_summary": "benchmark/workspaces/swebench_verified_astropy__astropy_14182/.git/codeflow/runs/20260503-174645-please-support-header-rows-in-restructur/review_summary.json",
+      "diff": "benchmark/workspaces/swebench_verified_astropy__astropy_14182/.git/codeflow/runs/20260503-174645-please-support-header-rows-in-restructur/diff.patch",
+      "review_report": "benchmark/workspaces/swebench_verified_astropy__astropy_14182/.git/codeflow/runs/20260503-174645-please-support-header-rows-in-restructur/review_report.md",
+      "state": "benchmark/workspaces/swebench_verified_astropy__astropy_14182/.git/codeflow/runs/20260503-174645-please-support-header-rows-in-restructur/state.json",
+      "attempt_diff": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_14182/attempt_1/diff.patch",
+      "attempt_checks": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_14182/attempt_1/checks.json",
+      "attempt_sensors": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_14182/attempt_1/sensors.json",
+      "attempt_review": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_14182/attempt_1/review.md"
+    },
+    "sensor_results": {
+      "check_commands": {
+        "name": "check_commands",
+        "passed": true,
+        "severity": "info",
+        "message": "All validation checks passed.",
+        "details": {
+          "commands": [
+            "python -m pytest astropy/io/ascii/tests/test_rst.py::test_rst_with_header_rows -q"
+          ]
+        }
+      },
+      "shell_check_risk": {
+        "name": "shell_check_risk",
+        "passed": true,
+        "severity": "info",
+        "message": "No high-risk shell check patterns detected.",
+        "details": {}
+      },
+      "forbidden_path": {
+        "name": "forbidden_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No forbidden path modifications detected.",
+        "details": {}
+      },
+      "forbidden_path_write": {
+        "name": "forbidden_path_write",
+        "passed": true,
+        "severity": "info",
+        "message": "No write-capable forbidden path behavior detected.",
+        "details": {}
+      },
+      "allowed_path": {
+        "name": "allowed_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No allowed path restriction configured.",
+        "details": {}
+      },
+      "high_risk_path": {
+        "name": "high_risk_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No configured high-risk path modifications detected.",
+        "details": {}
+      },
+      "test_deletion": {
+        "name": "test_deletion",
+        "passed": true,
+        "severity": "info",
+        "message": "No test deletion detected.",
+        "details": {}
+      },
+      "missing_test_change": {
+        "name": "missing_test_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Test change policy satisfied.",
+        "details": {}
+      },
+      "dependency_change": {
+        "name": "dependency_change",
+        "passed": true,
+        "severity": "info",
+        "message": "No dependency file changes detected.",
+        "details": {}
+      },
+      "secret_like_content": {
+        "name": "secret_like_content",
+        "passed": true,
+        "severity": "info",
+        "message": "No secret-like content detected.",
+        "details": {}
+      },
+      "max_diff": {
+        "name": "max_diff",
+        "passed": true,
+        "severity": "info",
+        "message": "Diff size is within policy: 27 lines.",
+        "details": {
+          "diff_lines": 27,
+          "max_diff_lines": 500
+        }
+      },
+      "no_change": {
+        "name": "no_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Repository changes detected.",
+        "details": {
+          "changed_files": [
+            "astropy/io/ascii/rst.py"
+          ]
+        }
+      }
+    },
+    "check_results": [
+      {
+        "command": "python -m pytest astropy/io/ascii/tests/test_rst.py::test_rst_with_header_rows -q",
+        "success": true,
+        "returncode": 0,
+        "stdout": "Internet access disabled\n\u001b[32m.\u001b[0m\u001b[32m                                                                        [100%]\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m1 passed\u001b[0m\u001b[32m in 0.04s\u001b[0m\u001b[0m\n",
+        "stderr": ""
+      }
+    ],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_verified_10_20260503",
+    "id": "swebench_verified_astropy__astropy_14309",
+    "dataset": "swebench_verified",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_verified_10/swebench_verified_astropy__astropy_14309",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_verified_astropy__astropy_14309",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 0,
+    "risk_level": "low",
+    "review_risk_level": "low",
+    "review_risks": [
+      "No obvious high-risk pattern detected."
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 155.756,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "astropy/io/fits/connect.py"
+    ],
+    "patch_stats": {
+      "files": 1,
+      "additions": 1,
+      "deletions": 0
+    },
+    "artifact_paths": {
+      "policy": "benchmark/workspaces/swebench_verified_astropy__astropy_14309/.git/codeflow/runs/20260503-175141-indexerror-tuple-index-out-of-range-in-i/policy.json",
+      "spec": "benchmark/workspaces/swebench_verified_astropy__astropy_14309/.git/codeflow/runs/20260503-175141-indexerror-tuple-index-out-of-range-in-i/spec.json",
+      "initial_prompt": "benchmark/workspaces/swebench_verified_astropy__astropy_14309/.git/codeflow/runs/20260503-175141-indexerror-tuple-index-out-of-range-in-i/initial_prompt.md",
+      "mini_run_0_log": "benchmark/workspaces/swebench_verified_astropy__astropy_14309/.git/codeflow/runs/20260503-175141-indexerror-tuple-index-out-of-range-in-i/mini_run_0.log",
+      "mini_run_0_trajectory": "benchmark/workspaces/swebench_verified_astropy__astropy_14309/.git/codeflow/runs/20260503-175141-indexerror-tuple-index-out-of-range-in-i/mini_run_0.trajectory.json",
+      "mini_run_0_events": "benchmark/workspaces/swebench_verified_astropy__astropy_14309/.git/codeflow/runs/20260503-175141-indexerror-tuple-index-out-of-range-in-i/mini_run_0.events.jsonl",
+      "checks_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_14309/.git/codeflow/runs/20260503-175141-indexerror-tuple-index-out-of-range-in-i/checks_round_0.json",
+      "sensor_report_round_0": "benchmark/workspaces/swebench_verified_astropy__astropy_14309/.git/codeflow/runs/20260503-175141-indexerror-tuple-index-out-of-range-in-i/sensor_report_round_0.json",
+      "review_summary": "benchmark/workspaces/swebench_verified_astropy__astropy_14309/.git/codeflow/runs/20260503-175141-indexerror-tuple-index-out-of-range-in-i/review_summary.json",
+      "diff": "benchmark/workspaces/swebench_verified_astropy__astropy_14309/.git/codeflow/runs/20260503-175141-indexerror-tuple-index-out-of-range-in-i/diff.patch",
+      "review_report": "benchmark/workspaces/swebench_verified_astropy__astropy_14309/.git/codeflow/runs/20260503-175141-indexerror-tuple-index-out-of-range-in-i/review_report.md",
+      "state": "benchmark/workspaces/swebench_verified_astropy__astropy_14309/.git/codeflow/runs/20260503-175141-indexerror-tuple-index-out-of-range-in-i/state.json",
+      "attempt_diff": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_14309/attempt_1/diff.patch",
+      "attempt_checks": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_14309/attempt_1/checks.json",
+      "attempt_sensors": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_14309/attempt_1/sensors.json",
+      "attempt_review": "benchmark/results/real_full_swebench_verified_10_20260503/artifacts/swebench_verified_astropy__astropy_14309/attempt_1/review.md"
+    },
+    "sensor_results": {
+      "check_commands": {
+        "name": "check_commands",
+        "passed": true,
+        "severity": "info",
+        "message": "All validation checks passed.",
+        "details": {
+          "commands": [
+            "python -m pytest astropy/io/fits/tests/test_connect.py::test_is_fits_gh_14305 -q"
+          ]
+        }
+      },
+      "shell_check_risk": {
+        "name": "shell_check_risk",
+        "passed": true,
+        "severity": "info",
+        "message": "No high-risk shell check patterns detected.",
+        "details": {}
+      },
+      "forbidden_path": {
+        "name": "forbidden_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No forbidden path modifications detected.",
+        "details": {}
+      },
+      "forbidden_path_write": {
+        "name": "forbidden_path_write",
+        "passed": true,
+        "severity": "info",
+        "message": "No write-capable forbidden path behavior detected.",
+        "details": {}
+      },
+      "allowed_path": {
+        "name": "allowed_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No allowed path restriction configured.",
+        "details": {}
+      },
+      "high_risk_path": {
+        "name": "high_risk_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No configured high-risk path modifications detected.",
+        "details": {}
+      },
+      "test_deletion": {
+        "name": "test_deletion",
+        "passed": true,
+        "severity": "info",
+        "message": "No test deletion detected.",
+        "details": {}
+      },
+      "missing_test_change": {
+        "name": "missing_test_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Test change policy satisfied.",
+        "details": {}
+      },
+      "dependency_change": {
+        "name": "dependency_change",
+        "passed": true,
+        "severity": "info",
+        "message": "No dependency file changes detected.",
+        "details": {}
+      },
+      "secret_like_content": {
+        "name": "secret_like_content",
+        "passed": true,
+        "severity": "info",
+        "message": "No secret-like content detected.",
+        "details": {}
+      },
+      "max_diff": {
+        "name": "max_diff",
+        "passed": true,
+        "severity": "info",
+        "message": "Diff size is within policy: 12 lines.",
+        "details": {
+          "diff_lines": 12,
+          "max_diff_lines": 500
+        }
+      },
+      "no_change": {
+        "name": "no_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Repository changes detected.",
+        "details": {
+          "changed_files": [
+            "astropy/io/fits/connect.py"
+          ]
+        }
+      }
+    },
+    "check_results": [
+      {
+        "command": "python -m pytest astropy/io/fits/tests/test_connect.py::test_is_fits_gh_14305 -q",
+        "success": true,
+        "returncode": 0,
+        "stdout": "Internet access disabled\n\u001b[32m.\u001b[0m\u001b[32m                                                                        [100%]\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m1 passed\u001b[0m\u001b[32m in 0.18s\u001b[0m\u001b[0m\n",
+        "stderr": ""
+      }
+    ],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  }
+]

@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "dataset": "swebench_lite",
+  "hf_dataset": "princeton-nlp/SWE-bench_Lite",
+  "split": "test",
+  "created_at": "2026-05-03T18:05:47Z",
+  "selected": 12,
+  "tasks_out": "benchmark/tasks/swebench_lite_10_subset.jsonl",
+  "prepare_workspaces": true,
+  "apply_test_patch": true,
+  "proxy_enabled": true,
+  "repo_cache_dir": "benchmark/generated/swebench_repo_cache",
+  "records": [
+    {
+      "id": "swebench_lite_astropy__astropy_12907",
+      "instance_id": "astropy__astropy-12907",
+      "repo": "astropy/astropy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_12907",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_astropy__astropy_14182",
+      "instance_id": "astropy__astropy-14182",
+      "repo": "astropy/astropy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_14182",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_astropy__astropy_14365",
+      "instance_id": "astropy__astropy-14365",
+      "repo": "astropy/astropy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_14365",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_astropy__astropy_14995",
+      "instance_id": "astropy__astropy-14995",
+      "repo": "astropy/astropy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_14995",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_astropy__astropy_6938",
+      "instance_id": "astropy__astropy-6938",
+      "repo": "astropy/astropy",
+      "status": "prepare_failed",
+      "workspace": "benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_6938",
+      "reason": "uv run --no-project --python 3.11 --with \"setuptools<70\" --with setuptools-scm --with extension-helpers --with cython --with \"numpy<2\" --with jinja2 python setup.py build_ext --inplace failed in /home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_6938: Initializing astropy_helpers submodule with: `git submodule update --init -- astropy_helpers`\nTraceback (most recent call last):\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_6938/setup.py\", line 42, in <module>\n    package_info = get_package_info()\n                   ^^^^^^^^^^^^^^^^^^\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_6938/astropy_helpers/astropy_helpers/setup_helpers.py\", line 424, in get_package_info\n    ext_modules.extend(setuppkg.get_extensions())\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"astropy/wcs/setup_package.py\", line 239, in get_extensions\n    generate_c_docstrings()\n  File \"astropy/wcs/setup_package.py\", line 116, in generate_c_docstrings\n    from astropy.wcs import docstrings\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_6938/astropy/wcs/__init__.py\", line 29, in <module>\n    from .wcs import *\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_6938/astropy/wcs/wcs.py\", line 47, in <module>\n    from ..io import fits\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_6938/astropy/io/fits/__init__.py\", line 70, in <module>\n    from . import convenience\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_6938/astropy/io/fits/convenience.py\", line 64, in <module>\n    from .diff import FITSDiff, HDUDiff\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_6938/astropy/io/fits/diff.py\", line 31, in <module>\n    from .header import Header\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_6938/astropy/io/fits/header.py\", line 1904, in <module>\n    collections.MutableSequence.register(Header)\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'collections' has no attribute 'MutableSequence'"
+    },
+    {
+      "id": "swebench_lite_astropy__astropy_7746",
+      "instance_id": "astropy__astropy-7746",
+      "repo": "astropy/astropy",
+      "status": "prepare_failed",
+      "workspace": "benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_7746",
+      "reason": "uv run --no-project --python 3.11 --with \"setuptools<70\" --with setuptools-scm --with extension-helpers --with cython --with \"numpy<2\" --with jinja2 python setup.py build_ext --inplace failed in /home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_7746: Initializing astropy_helpers submodule with: `git submodule update --init -- astropy_helpers`\n/home/users/ctr/.cache/uv/archive-v0/nA_ymHh0SVGDQ5PRCGnf_/lib/python3.11/site-packages/vcs_versioning/overrides.py:609: UserWarning: No GlobalOverrides context is active. Auto-creating one with SETUPTOOLS_SCM prefix for backwards compatibility. Consider using 'with GlobalOverrides.from_env(\"YOUR_TOOL\"):' explicitly.\n  return get_active_overrides().subprocess_timeout\nwarning: no previously-included files found matching '*.pyc'\nwarning: no previously-included files found matching '*.o'\nno previously-included directories found matching 'build'\nTraceback (most recent call last):\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_7746/setup.py\", line 51, in <module>\n    package_info = get_package_info()\n                   ^^^^^^^^^^^^^^^^^^\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_7746/astropy_helpers/astropy_helpers/setup_helpers.py\", line 388, in get_package_info\n    ext_modules.extend(setuppkg.get_extensions())\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"astropy/wcs/setup_package.py\", line 239, in get_extensions\n    generate_c_docstrings()\n  File \"astropy/wcs/setup_package.py\", line 116, in generate_c_docstrings\n    from astropy.wcs import docstrings\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_7746/astropy/wcs/__init__.py\", line 29, in <module>\n    from .wcs import *\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_7746/astropy/wcs/wcs.py\", line 47, in <module>\n    from ..io import fits\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_7746/astropy/io/fits/__init__.py\", line 70, in <module>\n    from . import convenience\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_7746/astropy/io/fits/convenience.py\", line 64, in <module>\n    from .diff import FITSDiff, HDUDiff\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_7746/astropy/io/fits/diff.py\", line 25, in <module>\n    from .header import Header\n  File \"/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_7746/astropy/io/fits/header.py\", line 1907, in <module>\n    collections.MutableSequence.register(Header)\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'collections' has no attribute 'MutableSequence'"
+    },
+    {
+      "id": "swebench_lite_django__django_10914",
+      "instance_id": "django__django-10914",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_10/swebench_lite_django__django_10914",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_10924",
+      "instance_id": "django__django-10924",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_10/swebench_lite_django__django_10924",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11001",
+      "instance_id": "django__django-11001",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_10/swebench_lite_django__django_11001",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11019",
+      "instance_id": "django__django-11019",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_10/swebench_lite_django__django_11019",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11039",
+      "instance_id": "django__django-11039",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_10/swebench_lite_django__django_11039",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11049",
+      "instance_id": "django__django-11049",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_10/swebench_lite_django__django_11049",
+      "reason": null
+    }
+  ]
+}

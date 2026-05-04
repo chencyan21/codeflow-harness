@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shlex
 import shutil
 import subprocess
@@ -11,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from _harness_bench_common import (
+    BENCHMARK_META_DIR,
     ROOT,
     benchmark_env,
     mark_setup_done,
@@ -75,10 +77,31 @@ def _dataset_label(dataset: str) -> str:
     return "swebench"
 
 
-def _checks_for_fail_to_pass(fail_to_pass: list[str], *, check_prefix: str | None = None) -> list[str]:
+def _django_unittest_targets(fail_to_pass: list[str]) -> list[str] | None:
+    converted = []
+    for target in fail_to_pass:
+        match = re.fullmatch(r"(?P<method>[\w_]+) \((?P<class_path>[\w.]+)\)", target.strip())
+        if not match:
+            return None
+        converted.append(f"{match.group('class_path')}.{match.group('method')}")
+    return converted
+
+
+def _checks_for_fail_to_pass(
+    fail_to_pass: list[str],
+    *,
+    repo: str | None = None,
+    check_prefix: str | None = None,
+) -> list[str]:
     if not fail_to_pass:
         command = "python -m pytest -q"
         return [f"{check_prefix} {command}" if check_prefix else command]
+    if repo == "django/django":
+        django_targets = _django_unittest_targets(fail_to_pass)
+        if django_targets:
+            tests = " ".join(shlex.quote(test) for test in django_targets)
+            command = f"python tests/runtests.py {tests} --verbosity 0"
+            return [f"{check_prefix} {command}" if check_prefix else command]
     tests = " ".join(shlex.quote(test) for test in fail_to_pass)
     command = f"python -m pytest {tests} -q"
     return [f"{check_prefix} {command}" if check_prefix else command]
@@ -127,7 +150,11 @@ def task_from_record(
         "dataset": _dataset_label(dataset),
         "source_repo": _task_source_repo(workspace),
         "task": str(record.get("problem_statement", "")).strip(),
-        "checks": _checks_for_fail_to_pass(fail_to_pass, check_prefix=check_prefix),
+        "checks": _checks_for_fail_to_pass(
+            fail_to_pass,
+            repo=str(record.get("repo") or ""),
+            check_prefix=check_prefix,
+        ),
         "expected_type": "bugfix",
         "risk_tags": ["normal"],
         "metadata": {
@@ -181,15 +208,36 @@ def _repo_cache_path(repo: str, repo_cache_dir: Path) -> Path:
     return repo_cache_dir / _safe_id(repo)
 
 
+def _is_partial_clone(repo: Path) -> bool:
+    result = subprocess.run(
+        ["git", "config", "--get", "remote.origin.promisor"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+    )
+    if result.returncode == 0 and result.stdout.strip().lower() == "true":
+        return True
+    result = subprocess.run(
+        ["git", "config", "--get", "extensions.partialclone"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+    )
+    return result.returncode == 0 and bool(result.stdout.strip())
+
+
 def _ensure_repo_cache(repo: str, *, repo_cache_dir: Path, env: dict[str, str]) -> Path:
     cache_path = _repo_cache_path(repo, repo_cache_dir)
     clone_url = f"https://github.com/{repo}.git"
     if cache_path.exists():
-        subprocess.run(["git", "fetch", "--all", "--prune"], cwd=cache_path, text=True, check=True, env=env)
-        return cache_path
+        if _is_partial_clone(cache_path):
+            shutil.rmtree(cache_path)
+        else:
+            subprocess.run(["git", "fetch", "--all", "--prune"], cwd=cache_path, text=True, check=True, env=env)
+            return cache_path
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(
-        ["git", "clone", "--filter=blob:none", clone_url, str(cache_path)],
+        ["git", "clone", clone_url, str(cache_path)],
         text=True,
         check=True,
         env=env,
@@ -218,7 +266,7 @@ def _clone_workspace(
         shutil.rmtree(target)
     target.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(
-        ["git", "clone", "--filter=blob:none", clone_source, str(target)],
+        ["git", "clone", clone_source, str(target)],
         text=True,
         check=True,
         env=env,
@@ -328,22 +376,27 @@ def prepare_swebench(
         for record in records
     ]
     manifest_rows: list[dict[str, Any]] = []
+    prepared_task_ids: set[str] = set()
     if prepare_workspaces:
         for record, task in zip(records, tasks):
             target = project_path(task["source_repo"])
             if target.exists() and not clean:
-                print(f"reuse {task['id']}: {target}")
-                manifest_rows.append(
-                    {
-                        "id": task["id"],
-                        "instance_id": record.get("instance_id"),
-                        "repo": record.get("repo"),
-                        "status": "reused",
-                        "workspace": portable_path(target),
-                        "reason": None,
-                    }
-                )
-                continue
+                manifest_path = target / BENCHMARK_META_DIR / "workspace_manifest.json"
+                if manifest_path.exists():
+                    print(f"reuse {task['id']}: {target}")
+                    prepared_task_ids.add(str(task["id"]))
+                    manifest_rows.append(
+                        {
+                            "id": task["id"],
+                            "instance_id": record.get("instance_id"),
+                            "repo": record.get("repo"),
+                            "status": "reused",
+                            "workspace": portable_path(target),
+                            "reason": None,
+                        }
+                    )
+                    continue
+                shutil.rmtree(target)
             print(f"prepare {task['id']}: {record['repo']}@{record['base_commit']}")
             try:
                 _clone_workspace(
@@ -354,6 +407,7 @@ def prepare_swebench(
                     setup_commands=[str(command) for command in task.get("setup_commands", [])],
                     repo_cache_dir=repo_cache_dir,
                 )
+                prepared_task_ids.add(str(task["id"]))
                 manifest_rows.append(
                     {
                         "id": task["id"],
@@ -378,6 +432,8 @@ def prepare_swebench(
                 if not continue_on_error:
                     raise
 
+    if prepare_workspaces:
+        tasks = [task for task in tasks if str(task["id"]) in prepared_task_ids]
     write_jsonl(tasks_out, tasks)
     if manifest_out:
         manifest_out.parent.mkdir(parents=True, exist_ok=True)

@@ -240,6 +240,12 @@ def test_prepare_workspace_excludes_generated_artifacts(tmp_path: Path) -> None:
     source = tmp_path / "source"
     source.mkdir()
     (source / "buggy.py").write_text("VALUE = 1\n", encoding="utf-8")
+    docs = source / "docs"
+    docs.mkdir()
+    try:
+        (docs / "missing_target.md").symlink_to("does-not-exist.md")
+    except (NotImplementedError, OSError):
+        pass
     task = {
         "id": "artifact_filter_sample",
         "source_repo": str(source),
@@ -252,6 +258,12 @@ def test_prepare_workspace_excludes_generated_artifacts(tmp_path: Path) -> None:
     pycache.mkdir()
     (pycache / "buggy.cpython-313.pyc").write_bytes(b"pyc")
     (workspace / "uv.lock").write_text("version = 1\n", encoding="utf-8")
+    egg_info = workspace / "sample.egg-info"
+    egg_info.mkdir()
+    (egg_info / "PKG-INFO").write_text("Metadata-Version: 2.1\n", encoding="utf-8")
+    (workspace / "Grammar3.13.9.final.0.pickle").write_bytes(b"cache")
+    if (source / "docs" / "missing_target.md").is_symlink():
+        assert (workspace / "docs" / "missing_target.md").is_symlink()
 
     assert get_changed_files(str(workspace)) == []
 

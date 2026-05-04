@@ -14,6 +14,7 @@ from typing import Any
 import yaml
 
 from _harness_bench_common import (
+    BENCHMARK_META_DIR,
     ROOT,
     benchmark_env,
     portable_path,
@@ -269,7 +270,13 @@ def _checkout_candidate(
             env=env,
         )
         checkout = _locate_checkout(temp_dir, candidate.project)
-        shutil.copytree(checkout, target, ignore=shutil.ignore_patterns(*IGNORE_PATTERNS))
+        shutil.copytree(
+            checkout,
+            target,
+            ignore=shutil.ignore_patterns(*IGNORE_PATTERNS),
+            symlinks=True,
+            ignore_dangling_symlinks=True,
+        )
 
     run_command(["git", "init"], target)
     run_command(["git", "add", "."], target)
@@ -358,23 +365,28 @@ def prepare_bugsinpy(
     ]
 
     manifest_rows: list[dict[str, Any]] = []
+    prepared_task_ids: set[str] = set()
     if prepare_workspaces:
         env = benchmark_env(proxy=proxy)
         for candidate, task in zip(candidates, tasks):
             target = project_path(task["source_repo"])
             if target.exists() and not clean:
-                print(f"reuse {task['id']}: {target}")
-                manifest_rows.append(
-                    {
-                        "id": task["id"],
-                        "project": candidate.project,
-                        "bug_id": candidate.bug_id,
-                        "status": "reused",
-                        "workspace": portable_path(target),
-                        "reason": None,
-                    }
-                )
-                continue
+                manifest_path = target / BENCHMARK_META_DIR / "workspace_manifest.json"
+                if manifest_path.exists():
+                    print(f"reuse {task['id']}: {target}")
+                    prepared_task_ids.add(str(task["id"]))
+                    manifest_rows.append(
+                        {
+                            "id": task["id"],
+                            "project": candidate.project,
+                            "bug_id": candidate.bug_id,
+                            "status": "reused",
+                            "workspace": portable_path(target),
+                            "reason": None,
+                        }
+                    )
+                    continue
+                shutil.rmtree(target)
             print(f"prepare {task['id']}: {candidate.project} bug {candidate.bug_id}")
             try:
                 _checkout_candidate(
@@ -395,6 +407,7 @@ def prepare_bugsinpy(
                     upstream_repo=f"BugsInPy:{candidate.project}",
                     base_commit=None,
                 )
+                prepared_task_ids.add(str(task["id"]))
                 manifest_rows.append(
                     {
                         "id": task["id"],
@@ -419,6 +432,8 @@ def prepare_bugsinpy(
                 if not continue_on_error:
                     raise
 
+    if prepare_workspaces:
+        tasks = [task for task in tasks if str(task["id"]) in prepared_task_ids]
     write_tasks(tasks_out, tasks)
     if manifest_out:
         manifest_out.parent.mkdir(parents=True, exist_ok=True)

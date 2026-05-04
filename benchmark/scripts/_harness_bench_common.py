@@ -22,6 +22,7 @@ TaskItem = dict[str, Any]
 
 IGNORE_PATTERNS = (
     ".git",
+    ".codeflow-benchmark",
     "__pycache__",
     ".pytest_cache",
     ".ruff_cache",
@@ -41,6 +42,9 @@ BENCHMARK_GIT_EXCLUDE_PATTERNS = (
     ".coverage",
     "htmlcov/",
     "uv.lock",
+    "*.egg-info/",
+    "*.egg-info",
+    "*.pickle",
 )
 
 BENCHMARK_META_DIR = ".codeflow-benchmark"
@@ -307,6 +311,8 @@ def prepare_workspace(
     shutil.copytree(
         source,
         destination,
+        symlinks=True,
+        ignore_dangling_symlinks=True,
         ignore=shutil.ignore_patterns(*IGNORE_PATTERNS),
     )
     setup_commands = [str(command) for command in task.get("setup_commands", []) or []]

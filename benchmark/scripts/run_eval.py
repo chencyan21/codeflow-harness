@@ -173,6 +173,8 @@ def _should_retry_record(record: dict[str, Any], *, method: str, attempt: int, m
     if attempt >= max_attempts or method == "checks_only":
         return False
     successful_statuses = {"checks_passed", "committed", "kept_uncommitted"}
+    if record.get("status") in successful_statuses and record.get("checks_passed", False):
+        return False
     return (
         record.get("status") == "error"
         or record.get("status") not in successful_statuses

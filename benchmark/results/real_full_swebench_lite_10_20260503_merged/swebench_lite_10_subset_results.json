@@ -1,0 +1,1165 @@
+[
+  {
+    "run_id": "real_full_swebench_lite_10_20260503_merged",
+    "id": "swebench_lite_astropy__astropy_12907",
+    "dataset": "swebench_lite",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_12907",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_lite_astropy__astropy_12907",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 0,
+    "risk_level": "low",
+    "review_risk_level": "low",
+    "review_risks": [
+      "No obvious high-risk pattern detected."
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 252.776,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "astropy/modeling/separable.py"
+    ],
+    "patch_stats": {
+      "files": 1,
+      "additions": 0,
+      "deletions": 0,
+      "diff_lines": 13
+    },
+    "artifact_paths": {
+      "review_report": "benchmark/results/real_full_swebench_lite_10_20260503_rerun/swebench_lite_astropy__astropy_12907_review.md"
+    },
+    "sensor_results": {},
+    "check_results": [],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_lite_10_20260503_merged",
+    "id": "swebench_lite_astropy__astropy_14182",
+    "dataset": "swebench_lite",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_14182",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_lite_astropy__astropy_14182",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 0,
+    "risk_level": "low",
+    "review_risk_level": "low",
+    "review_risks": [
+      "No obvious high-risk pattern detected."
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 344.052,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "astropy/io/ascii/rst.py"
+    ],
+    "patch_stats": {
+      "files": 1,
+      "additions": 0,
+      "deletions": 0,
+      "diff_lines": 25
+    },
+    "artifact_paths": {
+      "review_report": "benchmark/results/real_full_swebench_lite_10_20260503_rerun/swebench_lite_astropy__astropy_14182_review.md"
+    },
+    "sensor_results": {},
+    "check_results": [],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_lite_10_20260503_merged",
+    "id": "swebench_lite_astropy__astropy_14365",
+    "dataset": "swebench_lite",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_14365",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_lite_astropy__astropy_14365",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 0,
+    "risk_level": "low",
+    "review_risk_level": "low",
+    "review_risks": [
+      "No obvious high-risk pattern detected."
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 212.852,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "astropy/io/ascii/qdp.py"
+    ],
+    "patch_stats": {
+      "files": 1,
+      "additions": 0,
+      "deletions": 0,
+      "diff_lines": 22
+    },
+    "artifact_paths": {
+      "review_report": "benchmark/results/real_full_swebench_lite_10_20260503_rerun/swebench_lite_astropy__astropy_14365_review.md"
+    },
+    "sensor_results": {},
+    "check_results": [],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_lite_10_20260503_merged",
+    "id": "swebench_lite_astropy__astropy_14995",
+    "dataset": "swebench_lite",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_lite_10/swebench_lite_astropy__astropy_14995",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_lite_astropy__astropy_14995",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 0,
+    "risk_level": "low",
+    "review_risk_level": "low",
+    "review_risks": [
+      "No obvious high-risk pattern detected."
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 3126.276,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "astropy/nddata/mixins/ndarithmetic.py"
+    ],
+    "patch_stats": {
+      "files": 1,
+      "additions": 0,
+      "deletions": 0,
+      "diff_lines": 30
+    },
+    "artifact_paths": {
+      "review_report": "benchmark/results/real_full_swebench_lite_10_20260503_rerun/swebench_lite_astropy__astropy_14995_review.md"
+    },
+    "sensor_results": {},
+    "check_results": [],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_lite_10_20260503_merged",
+    "id": "swebench_lite_django__django_10914",
+    "dataset": "swebench_lite",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_lite_10/swebench_lite_django__django_10914",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_lite_django__django_10914",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 1,
+    "risk_level": "high",
+    "review_risk_level": "high",
+    "review_risks": [
+      "High-risk keyword found in diff: auth",
+      "High-risk keyword found in diff: secret",
+      "High-risk keyword found in diff: password"
+    ],
+    "unsafe_diff": true,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 1184.173,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "django/conf/global_settings.py",
+      "tests/conftest.py",
+      "tests/test_sqlite.py",
+      "pytest.ini"
+    ],
+    "patch_stats": {
+      "files": 4,
+      "additions": 0,
+      "deletions": 0,
+      "diff_lines": 97
+    },
+    "artifact_paths": {
+      "review_report": "benchmark/results/real_full_swebench_lite_10_20260503_rerun/swebench_lite_django__django_10914_review.md"
+    },
+    "sensor_results": {},
+    "check_results": [],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 2,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_lite_10_20260503_merged",
+    "id": "swebench_lite_django__django_10924",
+    "dataset": "swebench_lite",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_lite_10/swebench_lite_django__django_10924",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_lite_django__django_10924",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 0,
+    "risk_level": "low",
+    "review_risk_level": "low",
+    "review_risks": [
+      "No obvious high-risk pattern detected."
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 110.1,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "django/db/models/fields/__init__.py"
+    ],
+    "patch_stats": {
+      "files": 1,
+      "additions": 5,
+      "deletions": 1
+    },
+    "artifact_paths": {
+      "policy": "benchmark/workspaces/swebench_lite_django__django_10924/.git/codeflow/runs/20260503-180636-allow-filepathfield-path-to-accept-a-cal/policy.json",
+      "spec": "benchmark/workspaces/swebench_lite_django__django_10924/.git/codeflow/runs/20260503-180636-allow-filepathfield-path-to-accept-a-cal/spec.json",
+      "initial_prompt": "benchmark/workspaces/swebench_lite_django__django_10924/.git/codeflow/runs/20260503-180636-allow-filepathfield-path-to-accept-a-cal/initial_prompt.md",
+      "mini_run_0_log": "benchmark/workspaces/swebench_lite_django__django_10924/.git/codeflow/runs/20260503-180636-allow-filepathfield-path-to-accept-a-cal/mini_run_0.log",
+      "mini_run_0_trajectory": "benchmark/workspaces/swebench_lite_django__django_10924/.git/codeflow/runs/20260503-180636-allow-filepathfield-path-to-accept-a-cal/mini_run_0.trajectory.json",
+      "mini_run_0_events": "benchmark/workspaces/swebench_lite_django__django_10924/.git/codeflow/runs/20260503-180636-allow-filepathfield-path-to-accept-a-cal/mini_run_0.events.jsonl",
+      "checks_round_0": "benchmark/workspaces/swebench_lite_django__django_10924/.git/codeflow/runs/20260503-180636-allow-filepathfield-path-to-accept-a-cal/checks_round_0.json",
+      "sensor_report_round_0": "benchmark/workspaces/swebench_lite_django__django_10924/.git/codeflow/runs/20260503-180636-allow-filepathfield-path-to-accept-a-cal/sensor_report_round_0.json",
+      "review_summary": "benchmark/workspaces/swebench_lite_django__django_10924/.git/codeflow/runs/20260503-180636-allow-filepathfield-path-to-accept-a-cal/review_summary.json",
+      "diff": "benchmark/workspaces/swebench_lite_django__django_10924/.git/codeflow/runs/20260503-180636-allow-filepathfield-path-to-accept-a-cal/diff.patch",
+      "review_report": "benchmark/workspaces/swebench_lite_django__django_10924/.git/codeflow/runs/20260503-180636-allow-filepathfield-path-to-accept-a-cal/review_report.md",
+      "state": "benchmark/workspaces/swebench_lite_django__django_10924/.git/codeflow/runs/20260503-180636-allow-filepathfield-path-to-accept-a-cal/state.json",
+      "attempt_diff": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_10924/attempt_1/diff.patch",
+      "attempt_checks": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_10924/attempt_1/checks.json",
+      "attempt_sensors": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_10924/attempt_1/sensors.json",
+      "attempt_review": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_10924/attempt_1/review.md"
+    },
+    "sensor_results": {
+      "check_commands": {
+        "name": "check_commands",
+        "passed": true,
+        "severity": "info",
+        "message": "All validation checks passed.",
+        "details": {
+          "commands": [
+            "python tests/runtests.py model_fields.test_filepathfield.FilePathFieldTests.test_callable_path --verbosity 0"
+          ]
+        }
+      },
+      "shell_check_risk": {
+        "name": "shell_check_risk",
+        "passed": true,
+        "severity": "info",
+        "message": "No high-risk shell check patterns detected.",
+        "details": {}
+      },
+      "forbidden_path": {
+        "name": "forbidden_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No forbidden path modifications detected.",
+        "details": {}
+      },
+      "forbidden_path_write": {
+        "name": "forbidden_path_write",
+        "passed": true,
+        "severity": "info",
+        "message": "No write-capable forbidden path behavior detected.",
+        "details": {}
+      },
+      "allowed_path": {
+        "name": "allowed_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No allowed path restriction configured.",
+        "details": {}
+      },
+      "high_risk_path": {
+        "name": "high_risk_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No configured high-risk path modifications detected.",
+        "details": {}
+      },
+      "test_deletion": {
+        "name": "test_deletion",
+        "passed": true,
+        "severity": "info",
+        "message": "No test deletion detected.",
+        "details": {}
+      },
+      "missing_test_change": {
+        "name": "missing_test_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Test change policy satisfied.",
+        "details": {}
+      },
+      "dependency_change": {
+        "name": "dependency_change",
+        "passed": true,
+        "severity": "info",
+        "message": "No dependency file changes detected.",
+        "details": {}
+      },
+      "secret_like_content": {
+        "name": "secret_like_content",
+        "passed": true,
+        "severity": "info",
+        "message": "No secret-like content detected.",
+        "details": {}
+      },
+      "max_diff": {
+        "name": "max_diff",
+        "passed": true,
+        "severity": "info",
+        "message": "Diff size is within policy: 18 lines.",
+        "details": {
+          "diff_lines": 18,
+          "max_diff_lines": 500
+        }
+      },
+      "no_change": {
+        "name": "no_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Repository changes detected.",
+        "details": {
+          "changed_files": [
+            "django/db/models/fields/__init__.py"
+          ]
+        }
+      }
+    },
+    "check_results": [
+      {
+        "command": "python tests/runtests.py model_fields.test_filepathfield.FilePathFieldTests.test_callable_path --verbosity 0",
+        "success": true,
+        "returncode": 0,
+        "stdout": "System check identified no issues (0 silenced).\n",
+        "stderr": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+      }
+    ],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_lite_10_20260503_merged",
+    "id": "swebench_lite_django__django_11001",
+    "dataset": "swebench_lite",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_lite_10/swebench_lite_django__django_11001",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_lite_django__django_11001",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 0,
+    "risk_level": "low",
+    "review_risk_level": "low",
+    "review_risks": [
+      "No obvious high-risk pattern detected."
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 295.312,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "django/db/models/sql/compiler.py"
+    ],
+    "patch_stats": {
+      "files": 1,
+      "additions": 4,
+      "deletions": 2
+    },
+    "artifact_paths": {
+      "policy": "benchmark/workspaces/swebench_lite_django__django_11001/.git/codeflow/runs/20260503-180829-incorrect-removal-of-order-by-clause-cre/policy.json",
+      "spec": "benchmark/workspaces/swebench_lite_django__django_11001/.git/codeflow/runs/20260503-180829-incorrect-removal-of-order-by-clause-cre/spec.json",
+      "initial_prompt": "benchmark/workspaces/swebench_lite_django__django_11001/.git/codeflow/runs/20260503-180829-incorrect-removal-of-order-by-clause-cre/initial_prompt.md",
+      "mini_run_0_log": "benchmark/workspaces/swebench_lite_django__django_11001/.git/codeflow/runs/20260503-180829-incorrect-removal-of-order-by-clause-cre/mini_run_0.log",
+      "mini_run_0_trajectory": "benchmark/workspaces/swebench_lite_django__django_11001/.git/codeflow/runs/20260503-180829-incorrect-removal-of-order-by-clause-cre/mini_run_0.trajectory.json",
+      "mini_run_0_events": "benchmark/workspaces/swebench_lite_django__django_11001/.git/codeflow/runs/20260503-180829-incorrect-removal-of-order-by-clause-cre/mini_run_0.events.jsonl",
+      "checks_round_0": "benchmark/workspaces/swebench_lite_django__django_11001/.git/codeflow/runs/20260503-180829-incorrect-removal-of-order-by-clause-cre/checks_round_0.json",
+      "sensor_report_round_0": "benchmark/workspaces/swebench_lite_django__django_11001/.git/codeflow/runs/20260503-180829-incorrect-removal-of-order-by-clause-cre/sensor_report_round_0.json",
+      "review_summary": "benchmark/workspaces/swebench_lite_django__django_11001/.git/codeflow/runs/20260503-180829-incorrect-removal-of-order-by-clause-cre/review_summary.json",
+      "diff": "benchmark/workspaces/swebench_lite_django__django_11001/.git/codeflow/runs/20260503-180829-incorrect-removal-of-order-by-clause-cre/diff.patch",
+      "review_report": "benchmark/workspaces/swebench_lite_django__django_11001/.git/codeflow/runs/20260503-180829-incorrect-removal-of-order-by-clause-cre/review_report.md",
+      "state": "benchmark/workspaces/swebench_lite_django__django_11001/.git/codeflow/runs/20260503-180829-incorrect-removal-of-order-by-clause-cre/state.json",
+      "attempt_diff": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11001/attempt_1/diff.patch",
+      "attempt_checks": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11001/attempt_1/checks.json",
+      "attempt_sensors": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11001/attempt_1/sensors.json",
+      "attempt_review": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11001/attempt_1/review.md"
+    },
+    "sensor_results": {
+      "check_commands": {
+        "name": "check_commands",
+        "passed": true,
+        "severity": "info",
+        "message": "All validation checks passed.",
+        "details": {
+          "commands": [
+            "python tests/runtests.py expressions.tests.BasicExpressionsTests.test_order_by_multiline_sql expressions.tests.BasicExpressionsTests.test_order_of_operations --verbosity 0"
+          ]
+        }
+      },
+      "shell_check_risk": {
+        "name": "shell_check_risk",
+        "passed": true,
+        "severity": "info",
+        "message": "No high-risk shell check patterns detected.",
+        "details": {}
+      },
+      "forbidden_path": {
+        "name": "forbidden_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No forbidden path modifications detected.",
+        "details": {}
+      },
+      "forbidden_path_write": {
+        "name": "forbidden_path_write",
+        "passed": true,
+        "severity": "info",
+        "message": "No write-capable forbidden path behavior detected.",
+        "details": {}
+      },
+      "allowed_path": {
+        "name": "allowed_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No allowed path restriction configured.",
+        "details": {}
+      },
+      "high_risk_path": {
+        "name": "high_risk_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No configured high-risk path modifications detected.",
+        "details": {}
+      },
+      "test_deletion": {
+        "name": "test_deletion",
+        "passed": true,
+        "severity": "info",
+        "message": "No test deletion detected.",
+        "details": {}
+      },
+      "missing_test_change": {
+        "name": "missing_test_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Test change policy satisfied.",
+        "details": {}
+      },
+      "dependency_change": {
+        "name": "dependency_change",
+        "passed": true,
+        "severity": "info",
+        "message": "No dependency file changes detected.",
+        "details": {}
+      },
+      "secret_like_content": {
+        "name": "secret_like_content",
+        "passed": true,
+        "severity": "info",
+        "message": "No secret-like content detected.",
+        "details": {}
+      },
+      "max_diff": {
+        "name": "max_diff",
+        "passed": true,
+        "severity": "info",
+        "message": "Diff size is within policy: 24 lines.",
+        "details": {
+          "diff_lines": 24,
+          "max_diff_lines": 500
+        }
+      },
+      "no_change": {
+        "name": "no_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Repository changes detected.",
+        "details": {
+          "changed_files": [
+            "django/db/models/sql/compiler.py"
+          ]
+        }
+      }
+    },
+    "check_results": [
+      {
+        "command": "python tests/runtests.py expressions.tests.BasicExpressionsTests.test_order_by_multiline_sql expressions.tests.BasicExpressionsTests.test_order_of_operations --verbosity 0",
+        "success": true,
+        "returncode": 0,
+        "stdout": "System check identified no issues (0 silenced).\n",
+        "stderr": "----------------------------------------------------------------------\nRan 2 tests in 0.003s\n\nOK\n"
+      }
+    ],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_lite_10_20260503_merged",
+    "id": "swebench_lite_django__django_11019",
+    "dataset": "swebench_lite",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_lite_10/swebench_lite_django__django_11019",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_lite_django__django_11019",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 1,
+    "risk_level": "low",
+    "review_risk_level": "low",
+    "review_risks": [
+      "No obvious high-risk pattern detected."
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 843.129,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "django/forms/widgets.py",
+      "django/test/runner.py"
+    ],
+    "patch_stats": {
+      "files": 2,
+      "additions": 40,
+      "deletions": 40
+    },
+    "artifact_paths": {
+      "policy": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/policy.json",
+      "spec": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/spec.json",
+      "initial_prompt": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/initial_prompt.md",
+      "mini_run_0_log": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/mini_run_0.log",
+      "mini_run_0_trajectory": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/mini_run_0.trajectory.json",
+      "mini_run_0_events": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/mini_run_0.events.jsonl",
+      "checks_round_0": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/checks_round_0.json",
+      "sensor_report_round_0": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/sensor_report_round_0.json",
+      "repair_prompt_1": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/repair_prompt_1.md",
+      "mini_run_1_log": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/mini_run_1.log",
+      "mini_run_1_trajectory": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/mini_run_1.trajectory.json",
+      "mini_run_1_events": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/mini_run_1.events.jsonl",
+      "checks_round_1": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/checks_round_1.json",
+      "sensor_report_round_1": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/sensor_report_round_1.json",
+      "review_summary": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/review_summary.json",
+      "diff": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/diff.patch",
+      "review_report": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/review_report.md",
+      "state": "benchmark/workspaces/swebench_lite_django__django_11019/.git/codeflow/runs/20260503-181324-merging-3-or-more-media-objects-can-thro/state.json",
+      "attempt_diff": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11019/attempt_1/diff.patch",
+      "attempt_checks": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11019/attempt_1/checks.json",
+      "attempt_sensors": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11019/attempt_1/sensors.json",
+      "attempt_review": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11019/attempt_1/review.md"
+    },
+    "sensor_results": {
+      "check_commands": {
+        "name": "check_commands",
+        "passed": true,
+        "severity": "info",
+        "message": "All validation checks passed.",
+        "details": {
+          "commands": [
+            "python tests/runtests.py forms_tests.tests.test_media.FormsMediaTestCase.test_combine_media forms_tests.tests.test_media.FormsMediaTestCase.test_construction forms_tests.tests.test_media.FormsMediaTestCase.test_form_media forms_tests.tests.test_media.FormsMediaTestCase.test_media_deduplication forms_tests.tests.test_media.FormsMediaTestCase.test_media_inheritance forms_tests.tests.test_media.FormsMediaTestCase.test_media_inheritance_extends forms_tests.tests.test_media.FormsMediaTestCase.test_media_property_parent_references forms_tests.tests.test_media.FormsMediaTestCase.test_merge forms_tests.tests.test_media.FormsMediaTestCase.test_merge_css_three_way forms_tests.tests.test_media.FormsMediaTestCase.test_merge_js_three_way forms_tests.tests.test_media.FormsMediaTestCase.test_merge_js_three_way2 forms_tests.tests.test_media.FormsMediaTestCase.test_merge_warning forms_tests.tests.test_media.FormsMediaTestCase.test_multi_widget admin_widgets.test_autocomplete_widget.AutocompleteMixinTests.test_media admin_widgets.test_autocomplete_widget.AutocompleteMixinTests.test_render_options admin_inlines.tests.TestInlineMedia.test_inline_media_only_inline --verbosity 0"
+          ]
+        }
+      },
+      "shell_check_risk": {
+        "name": "shell_check_risk",
+        "passed": true,
+        "severity": "info",
+        "message": "No high-risk shell check patterns detected.",
+        "details": {}
+      },
+      "forbidden_path": {
+        "name": "forbidden_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No forbidden path modifications detected.",
+        "details": {}
+      },
+      "forbidden_path_write": {
+        "name": "forbidden_path_write",
+        "passed": true,
+        "severity": "info",
+        "message": "No write-capable forbidden path behavior detected.",
+        "details": {}
+      },
+      "allowed_path": {
+        "name": "allowed_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No allowed path restriction configured.",
+        "details": {}
+      },
+      "high_risk_path": {
+        "name": "high_risk_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No configured high-risk path modifications detected.",
+        "details": {}
+      },
+      "test_deletion": {
+        "name": "test_deletion",
+        "passed": true,
+        "severity": "info",
+        "message": "No test deletion detected.",
+        "details": {}
+      },
+      "missing_test_change": {
+        "name": "missing_test_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Test change policy satisfied.",
+        "details": {}
+      },
+      "dependency_change": {
+        "name": "dependency_change",
+        "passed": true,
+        "severity": "info",
+        "message": "No dependency file changes detected.",
+        "details": {}
+      },
+      "secret_like_content": {
+        "name": "secret_like_content",
+        "passed": true,
+        "severity": "info",
+        "message": "No secret-like content detected.",
+        "details": {}
+      },
+      "max_diff": {
+        "name": "max_diff",
+        "passed": true,
+        "severity": "info",
+        "message": "Diff size is within policy: 127 lines.",
+        "details": {
+          "diff_lines": 127,
+          "max_diff_lines": 500
+        }
+      },
+      "no_change": {
+        "name": "no_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Repository changes detected.",
+        "details": {
+          "changed_files": [
+            "django/forms/widgets.py",
+            "django/test/runner.py"
+          ]
+        }
+      }
+    },
+    "check_results": [
+      {
+        "command": "python tests/runtests.py forms_tests.tests.test_media.FormsMediaTestCase.test_combine_media forms_tests.tests.test_media.FormsMediaTestCase.test_construction forms_tests.tests.test_media.FormsMediaTestCase.test_form_media forms_tests.tests.test_media.FormsMediaTestCase.test_media_deduplication forms_tests.tests.test_media.FormsMediaTestCase.test_media_inheritance forms_tests.tests.test_media.FormsMediaTestCase.test_media_inheritance_extends forms_tests.tests.test_media.FormsMediaTestCase.test_media_property_parent_references forms_tests.tests.test_media.FormsMediaTestCase.test_merge forms_tests.tests.test_media.FormsMediaTestCase.test_merge_css_three_way forms_tests.tests.test_media.FormsMediaTestCase.test_merge_js_three_way forms_tests.tests.test_media.FormsMediaTestCase.test_merge_js_three_way2 forms_tests.tests.test_media.FormsMediaTestCase.test_merge_warning forms_tests.tests.test_media.FormsMediaTestCase.test_multi_widget admin_widgets.test_autocomplete_widget.AutocompleteMixinTests.test_media admin_widgets.test_autocomplete_widget.AutocompleteMixinTests.test_render_options admin_inlines.tests.TestInlineMedia.test_inline_media_only_inline --verbosity 0",
+        "success": true,
+        "returncode": 0,
+        "stdout": "System check identified no issues (0 silenced).\n",
+        "stderr": "----------------------------------------------------------------------\nRan 16 tests in 0.266s\n\nOK\n"
+      }
+    ],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_lite_10_20260503_merged",
+    "id": "swebench_lite_django__django_11039",
+    "dataset": "swebench_lite",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_lite_10/swebench_lite_django__django_11039",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_lite_django__django_11039",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 0,
+    "risk_level": "high",
+    "review_risk_level": "high",
+    "review_risks": [
+      "High-risk keyword found in diff: migration"
+    ],
+    "unsafe_diff": true,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 228.67,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "django/core/management/commands/sqlmigrate.py"
+    ],
+    "patch_stats": {
+      "files": 1,
+      "additions": 1,
+      "deletions": 1
+    },
+    "artifact_paths": {
+      "policy": "benchmark/workspaces/swebench_lite_django__django_11039/.git/codeflow/runs/20260503-182727-sqlmigrate-wraps-it-s-outpout-in-begin-c/policy.json",
+      "spec": "benchmark/workspaces/swebench_lite_django__django_11039/.git/codeflow/runs/20260503-182727-sqlmigrate-wraps-it-s-outpout-in-begin-c/spec.json",
+      "initial_prompt": "benchmark/workspaces/swebench_lite_django__django_11039/.git/codeflow/runs/20260503-182727-sqlmigrate-wraps-it-s-outpout-in-begin-c/initial_prompt.md",
+      "mini_run_0_log": "benchmark/workspaces/swebench_lite_django__django_11039/.git/codeflow/runs/20260503-182727-sqlmigrate-wraps-it-s-outpout-in-begin-c/mini_run_0.log",
+      "mini_run_0_trajectory": "benchmark/workspaces/swebench_lite_django__django_11039/.git/codeflow/runs/20260503-182727-sqlmigrate-wraps-it-s-outpout-in-begin-c/mini_run_0.trajectory.json",
+      "mini_run_0_events": "benchmark/workspaces/swebench_lite_django__django_11039/.git/codeflow/runs/20260503-182727-sqlmigrate-wraps-it-s-outpout-in-begin-c/mini_run_0.events.jsonl",
+      "checks_round_0": "benchmark/workspaces/swebench_lite_django__django_11039/.git/codeflow/runs/20260503-182727-sqlmigrate-wraps-it-s-outpout-in-begin-c/checks_round_0.json",
+      "sensor_report_round_0": "benchmark/workspaces/swebench_lite_django__django_11039/.git/codeflow/runs/20260503-182727-sqlmigrate-wraps-it-s-outpout-in-begin-c/sensor_report_round_0.json",
+      "review_summary": "benchmark/workspaces/swebench_lite_django__django_11039/.git/codeflow/runs/20260503-182727-sqlmigrate-wraps-it-s-outpout-in-begin-c/review_summary.json",
+      "diff": "benchmark/workspaces/swebench_lite_django__django_11039/.git/codeflow/runs/20260503-182727-sqlmigrate-wraps-it-s-outpout-in-begin-c/diff.patch",
+      "review_report": "benchmark/workspaces/swebench_lite_django__django_11039/.git/codeflow/runs/20260503-182727-sqlmigrate-wraps-it-s-outpout-in-begin-c/review_report.md",
+      "state": "benchmark/workspaces/swebench_lite_django__django_11039/.git/codeflow/runs/20260503-182727-sqlmigrate-wraps-it-s-outpout-in-begin-c/state.json",
+      "attempt_diff": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11039/attempt_1/diff.patch",
+      "attempt_checks": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11039/attempt_1/checks.json",
+      "attempt_sensors": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11039/attempt_1/sensors.json",
+      "attempt_review": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11039/attempt_1/review.md"
+    },
+    "sensor_results": {
+      "check_commands": {
+        "name": "check_commands",
+        "passed": true,
+        "severity": "info",
+        "message": "All validation checks passed.",
+        "details": {
+          "commands": [
+            "python tests/runtests.py migrations.test_commands.MigrateTests.test_sqlmigrate_for_non_transactional_databases --verbosity 0"
+          ]
+        }
+      },
+      "shell_check_risk": {
+        "name": "shell_check_risk",
+        "passed": true,
+        "severity": "info",
+        "message": "No high-risk shell check patterns detected.",
+        "details": {}
+      },
+      "forbidden_path": {
+        "name": "forbidden_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No forbidden path modifications detected.",
+        "details": {}
+      },
+      "forbidden_path_write": {
+        "name": "forbidden_path_write",
+        "passed": true,
+        "severity": "info",
+        "message": "No write-capable forbidden path behavior detected.",
+        "details": {}
+      },
+      "allowed_path": {
+        "name": "allowed_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No allowed path restriction configured.",
+        "details": {}
+      },
+      "high_risk_path": {
+        "name": "high_risk_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No configured high-risk path modifications detected.",
+        "details": {}
+      },
+      "test_deletion": {
+        "name": "test_deletion",
+        "passed": true,
+        "severity": "info",
+        "message": "No test deletion detected.",
+        "details": {}
+      },
+      "missing_test_change": {
+        "name": "missing_test_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Test change policy satisfied.",
+        "details": {}
+      },
+      "dependency_change": {
+        "name": "dependency_change",
+        "passed": true,
+        "severity": "info",
+        "message": "No dependency file changes detected.",
+        "details": {}
+      },
+      "secret_like_content": {
+        "name": "secret_like_content",
+        "passed": true,
+        "severity": "info",
+        "message": "No secret-like content detected.",
+        "details": {}
+      },
+      "max_diff": {
+        "name": "max_diff",
+        "passed": true,
+        "severity": "info",
+        "message": "Diff size is within policy: 13 lines.",
+        "details": {
+          "diff_lines": 13,
+          "max_diff_lines": 500
+        }
+      },
+      "no_change": {
+        "name": "no_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Repository changes detected.",
+        "details": {
+          "changed_files": [
+            "django/core/management/commands/sqlmigrate.py"
+          ]
+        }
+      }
+    },
+    "check_results": [
+      {
+        "command": "python tests/runtests.py migrations.test_commands.MigrateTests.test_sqlmigrate_for_non_transactional_databases --verbosity 0",
+        "success": true,
+        "returncode": 0,
+        "stdout": "System check identified no issues (0 silenced).\n",
+        "stderr": "----------------------------------------------------------------------\nRan 1 test in 0.009s\n\nOK\n"
+      }
+    ],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  },
+  {
+    "run_id": "real_full_swebench_lite_10_20260503_merged",
+    "id": "swebench_lite_django__django_11049",
+    "dataset": "swebench_lite",
+    "method": "codeflow_full",
+    "source_repo": "benchmark/generated/swebench_lite_10/swebench_lite_django__django_11049",
+    "workspace": "/home/users/ctr/autodl-tmp/swe/benchmark/workspaces/swebench_lite_django__django_11049",
+    "status": "checks_passed",
+    "checks_passed": true,
+    "repair_rounds": 0,
+    "risk_level": "low",
+    "review_risk_level": "low",
+    "review_risks": [
+      "No obvious high-risk pattern detected."
+    ],
+    "unsafe_diff": false,
+    "test_deleted": false,
+    "forbidden_path_modified": false,
+    "forbidden_path_write": false,
+    "secret_like_content": false,
+    "missing_test_warning": false,
+    "no_change": false,
+    "runtime_seconds": 211.37,
+    "error_type": null,
+    "error_category": null,
+    "error": null,
+    "model": "openai/deepseek-v4-flash",
+    "provider": "openai-compatible",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_tokens": null,
+    "completion_tokens": null,
+    "total_tokens": null,
+    "estimated_cost_usd": null,
+    "blocking_reasons": [],
+    "changed_files": [
+      "django/db/models/fields/__init__.py"
+    ],
+    "patch_stats": {
+      "files": 1,
+      "additions": 1,
+      "deletions": 1
+    },
+    "artifact_paths": {
+      "policy": "benchmark/workspaces/swebench_lite_django__django_11049/.git/codeflow/runs/20260503-183116-correct-expected-format-in-invalid-durat/policy.json",
+      "spec": "benchmark/workspaces/swebench_lite_django__django_11049/.git/codeflow/runs/20260503-183116-correct-expected-format-in-invalid-durat/spec.json",
+      "initial_prompt": "benchmark/workspaces/swebench_lite_django__django_11049/.git/codeflow/runs/20260503-183116-correct-expected-format-in-invalid-durat/initial_prompt.md",
+      "mini_run_0_log": "benchmark/workspaces/swebench_lite_django__django_11049/.git/codeflow/runs/20260503-183116-correct-expected-format-in-invalid-durat/mini_run_0.log",
+      "mini_run_0_trajectory": "benchmark/workspaces/swebench_lite_django__django_11049/.git/codeflow/runs/20260503-183116-correct-expected-format-in-invalid-durat/mini_run_0.trajectory.json",
+      "mini_run_0_events": "benchmark/workspaces/swebench_lite_django__django_11049/.git/codeflow/runs/20260503-183116-correct-expected-format-in-invalid-durat/mini_run_0.events.jsonl",
+      "checks_round_0": "benchmark/workspaces/swebench_lite_django__django_11049/.git/codeflow/runs/20260503-183116-correct-expected-format-in-invalid-durat/checks_round_0.json",
+      "sensor_report_round_0": "benchmark/workspaces/swebench_lite_django__django_11049/.git/codeflow/runs/20260503-183116-correct-expected-format-in-invalid-durat/sensor_report_round_0.json",
+      "review_summary": "benchmark/workspaces/swebench_lite_django__django_11049/.git/codeflow/runs/20260503-183116-correct-expected-format-in-invalid-durat/review_summary.json",
+      "diff": "benchmark/workspaces/swebench_lite_django__django_11049/.git/codeflow/runs/20260503-183116-correct-expected-format-in-invalid-durat/diff.patch",
+      "review_report": "benchmark/workspaces/swebench_lite_django__django_11049/.git/codeflow/runs/20260503-183116-correct-expected-format-in-invalid-durat/review_report.md",
+      "state": "benchmark/workspaces/swebench_lite_django__django_11049/.git/codeflow/runs/20260503-183116-correct-expected-format-in-invalid-durat/state.json",
+      "attempt_diff": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11049/attempt_1/diff.patch",
+      "attempt_checks": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11049/attempt_1/checks.json",
+      "attempt_sensors": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11049/attempt_1/sensors.json",
+      "attempt_review": "benchmark/results/real_full_swebench_lite_remaining_20260503_rerun/artifacts/swebench_lite_django__django_11049/attempt_1/review.md"
+    },
+    "sensor_results": {
+      "check_commands": {
+        "name": "check_commands",
+        "passed": true,
+        "severity": "info",
+        "message": "All validation checks passed.",
+        "details": {
+          "commands": [
+            "python tests/runtests.py model_fields.test_durationfield.TestValidation.test_invalid_string --verbosity 0"
+          ]
+        }
+      },
+      "shell_check_risk": {
+        "name": "shell_check_risk",
+        "passed": true,
+        "severity": "info",
+        "message": "No high-risk shell check patterns detected.",
+        "details": {}
+      },
+      "forbidden_path": {
+        "name": "forbidden_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No forbidden path modifications detected.",
+        "details": {}
+      },
+      "forbidden_path_write": {
+        "name": "forbidden_path_write",
+        "passed": true,
+        "severity": "info",
+        "message": "No write-capable forbidden path behavior detected.",
+        "details": {}
+      },
+      "allowed_path": {
+        "name": "allowed_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No allowed path restriction configured.",
+        "details": {}
+      },
+      "high_risk_path": {
+        "name": "high_risk_path",
+        "passed": true,
+        "severity": "info",
+        "message": "No configured high-risk path modifications detected.",
+        "details": {}
+      },
+      "test_deletion": {
+        "name": "test_deletion",
+        "passed": true,
+        "severity": "info",
+        "message": "No test deletion detected.",
+        "details": {}
+      },
+      "missing_test_change": {
+        "name": "missing_test_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Test change policy satisfied.",
+        "details": {}
+      },
+      "dependency_change": {
+        "name": "dependency_change",
+        "passed": true,
+        "severity": "info",
+        "message": "No dependency file changes detected.",
+        "details": {}
+      },
+      "secret_like_content": {
+        "name": "secret_like_content",
+        "passed": true,
+        "severity": "info",
+        "message": "No secret-like content detected.",
+        "details": {}
+      },
+      "max_diff": {
+        "name": "max_diff",
+        "passed": true,
+        "severity": "info",
+        "message": "Diff size is within policy: 13 lines.",
+        "details": {
+          "diff_lines": 13,
+          "max_diff_lines": 500
+        }
+      },
+      "no_change": {
+        "name": "no_change",
+        "passed": true,
+        "severity": "info",
+        "message": "Repository changes detected.",
+        "details": {
+          "changed_files": [
+            "django/db/models/fields/__init__.py"
+          ]
+        }
+      }
+    },
+    "check_results": [
+      {
+        "command": "python tests/runtests.py model_fields.test_durationfield.TestValidation.test_invalid_string --verbosity 0",
+        "success": true,
+        "returncode": 0,
+        "stdout": "System check identified no issues (0 silenced).\n",
+        "stderr": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+      }
+    ],
+    "expected_type": "bugfix",
+    "risk_tags": [
+      "normal"
+    ],
+    "attempts": 1,
+    "first_attempt_success": true,
+    "final_attempt": true
+  }
+]

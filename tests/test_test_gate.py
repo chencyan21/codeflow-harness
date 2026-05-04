@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import shlex
+import subprocess
 import sys
 from pathlib import Path
 
@@ -61,6 +62,27 @@ def test_run_checks_redacts_secret_like_output(tmp_path: Path) -> None:
     assert result.success is True
     assert "sk-secret" not in result.stdout
     assert "[REDACTED]" in result.stdout
+
+
+def test_run_checks_isolates_uv_from_active_virtualenv(monkeypatch, tmp_path: Path) -> None:
+    captured_envs: list[dict[str, str] | None] = []
+
+    def fake_run(*args, **kwargs):
+        captured_envs.append(kwargs.get("env"))
+        return subprocess.CompletedProcess(args[0], 0, "ok", "")
+
+    monkeypatch.setenv("VIRTUAL_ENV", "/tmp/current-venv")
+    monkeypatch.setenv("CONDA_PREFIX", "/tmp/current-conda")
+    monkeypatch.setenv("CONDA_DEFAULT_ENV", "current-conda")
+    monkeypatch.setattr("codeflow.test_gate.subprocess.run", fake_run)
+
+    result = run_checks(str(tmp_path), ["uv run --no-project python -V"])[0]
+
+    assert result.success is True
+    assert captured_envs[0] is not None
+    assert "VIRTUAL_ENV" not in captured_envs[0]
+    assert "CONDA_PREFIX" not in captured_envs[0]
+    assert "CONDA_DEFAULT_ENV" not in captured_envs[0]
 
 
 def test_scan_shell_check_risk_detects_dangerous_patterns() -> None:

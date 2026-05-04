@@ -1,0 +1,412 @@
+{
+  "schema_version": 1,
+  "dataset": "bugsinpy",
+  "created_at": "2026-05-03T16:40:11Z",
+  "source": "benchmark/datasets/bugsinpy",
+  "selected": 50,
+  "tasks_out": "benchmark/tasks/bugsinpy_stable_50.yaml",
+  "prepare_workspaces": true,
+  "proxy_enabled": true,
+  "records": [
+    {
+      "id": "bugsinpy_pysnooper_1",
+      "project": "PySnooper",
+      "bug_id": "1",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_pysnooper_1",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_pysnooper_2",
+      "project": "PySnooper",
+      "bug_id": "2",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_pysnooper_2",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_pysnooper_3",
+      "project": "PySnooper",
+      "bug_id": "3",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_pysnooper_3",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_1",
+      "project": "ansible",
+      "bug_id": "1",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_1",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_10",
+      "project": "ansible",
+      "bug_id": "10",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_10",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_11",
+      "project": "ansible",
+      "bug_id": "11",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_11",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_12",
+      "project": "ansible",
+      "bug_id": "12",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_12",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_13",
+      "project": "ansible",
+      "bug_id": "13",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_13",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_14",
+      "project": "ansible",
+      "bug_id": "14",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_14",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_15",
+      "project": "ansible",
+      "bug_id": "15",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_15",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_16",
+      "project": "ansible",
+      "bug_id": "16",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_16",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_17",
+      "project": "ansible",
+      "bug_id": "17",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_17",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_18",
+      "project": "ansible",
+      "bug_id": "18",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_18",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_2",
+      "project": "ansible",
+      "bug_id": "2",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_2",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_3",
+      "project": "ansible",
+      "bug_id": "3",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_3",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_4",
+      "project": "ansible",
+      "bug_id": "4",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_4",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_5",
+      "project": "ansible",
+      "bug_id": "5",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_5",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_6",
+      "project": "ansible",
+      "bug_id": "6",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_6",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_7",
+      "project": "ansible",
+      "bug_id": "7",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_7",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_8",
+      "project": "ansible",
+      "bug_id": "8",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_8",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_ansible_9",
+      "project": "ansible",
+      "bug_id": "9",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_ansible_9",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_1",
+      "project": "black",
+      "bug_id": "1",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_1",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_10",
+      "project": "black",
+      "bug_id": "10",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_10",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_11",
+      "project": "black",
+      "bug_id": "11",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_11",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_12",
+      "project": "black",
+      "bug_id": "12",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_12",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_13",
+      "project": "black",
+      "bug_id": "13",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_13",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_14",
+      "project": "black",
+      "bug_id": "14",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_14",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_15",
+      "project": "black",
+      "bug_id": "15",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_15",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_16",
+      "project": "black",
+      "bug_id": "16",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_16",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_17",
+      "project": "black",
+      "bug_id": "17",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_17",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_18",
+      "project": "black",
+      "bug_id": "18",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_18",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_19",
+      "project": "black",
+      "bug_id": "19",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_19",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_2",
+      "project": "black",
+      "bug_id": "2",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_2",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_20",
+      "project": "black",
+      "bug_id": "20",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_20",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_21",
+      "project": "black",
+      "bug_id": "21",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_21",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_22",
+      "project": "black",
+      "bug_id": "22",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_22",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_23",
+      "project": "black",
+      "bug_id": "23",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_23",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_3",
+      "project": "black",
+      "bug_id": "3",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_3",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_4",
+      "project": "black",
+      "bug_id": "4",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_4",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_5",
+      "project": "black",
+      "bug_id": "5",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_5",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_6",
+      "project": "black",
+      "bug_id": "6",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_6",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_7",
+      "project": "black",
+      "bug_id": "7",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_7",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_8",
+      "project": "black",
+      "bug_id": "8",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_8",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_black_9",
+      "project": "black",
+      "bug_id": "9",
+      "status": "prepared",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_black_9",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_cookiecutter_1",
+      "project": "cookiecutter",
+      "bug_id": "1",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_cookiecutter_1",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_cookiecutter_2",
+      "project": "cookiecutter",
+      "bug_id": "2",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_cookiecutter_2",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_cookiecutter_3",
+      "project": "cookiecutter",
+      "bug_id": "3",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_cookiecutter_3",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_cookiecutter_4",
+      "project": "cookiecutter",
+      "bug_id": "4",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_cookiecutter_4",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_fastapi_1",
+      "project": "fastapi",
+      "bug_id": "1",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_fastapi_1",
+      "reason": null
+    },
+    {
+      "id": "bugsinpy_fastapi_10",
+      "project": "fastapi",
+      "bug_id": "10",
+      "status": "reused",
+      "workspace": "benchmark/generated/bugsinpy_stable_50/bugsinpy_fastapi_10",
+      "reason": null
+    }
+  ]
+}

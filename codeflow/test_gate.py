@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import os
+import re
 import shlex
 import shutil
 import subprocess
-import re
 from pathlib import Path
 
 from codeflow.models import CheckResult
@@ -39,6 +40,15 @@ def scan_shell_check_risk(command: str) -> list[str]:
         return []
     shell_command = stripped.removeprefix(SHELL_CHECK_PREFIX).strip()
     return [message for pattern, message in SHELL_RISK_PATTERNS if pattern.search(shell_command)]
+
+
+def _isolated_uv_env(executable: str) -> dict[str, str] | None:
+    if Path(executable).name != "uv":
+        return None
+    env = os.environ.copy()
+    for key in ("VIRTUAL_ENV", "CONDA_PREFIX", "CONDA_DEFAULT_ENV"):
+        env.pop(key, None)
+    return env
 
 
 def run_check(repo: str, command: str, *, allow_shell: bool = False) -> CheckResult:
@@ -101,6 +111,7 @@ def run_check(repo: str, command: str, *, allow_shell: bool = False) -> CheckRes
             shell=False,
             text=True,
             capture_output=True,
+            env=_isolated_uv_env(parts[0]),
         )
     except OSError as exc:
         return CheckResult(
