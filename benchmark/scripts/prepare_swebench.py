@@ -30,11 +30,20 @@ DEFAULT_LITE_DATASET = "princeton-nlp/SWE-bench_Lite"
 DEFAULT_VERIFIED_DATASET = "SWE-bench/SWE-bench_Verified"
 DEFAULT_OUT = ROOT / "benchmark" / "generated" / "swebench_lite"
 DEFAULT_TASKS_OUT = ROOT / "benchmark" / "tasks" / "swebench_lite_subset.jsonl"
+ASTROPY_SETUP_COMPAT_SNIPPET = (
+    "import collections, collections.abc, runpy, sys; "
+    "aliases = ('Callable', 'Iterable', 'Iterator', 'Mapping', "
+    "'MutableMapping', 'MutableSequence', 'Sequence'); "
+    "[setattr(collections, name, getattr(collections.abc, name)) "
+    "for name in aliases if not hasattr(collections, name)]; "
+    "sys.argv = ['setup.py', 'build_ext', '--inplace']; "
+    "runpy.run_path('setup.py', run_name='__main__')"
+)
 ASTROPY_BUILD_EXT_COMMAND = (
     "uv run --no-project --python 3.11 "
     '--with "setuptools<70" --with setuptools-scm --with extension-helpers '
     '--with cython --with "numpy<2" --with jinja2 '
-    "python setup.py build_ext --inplace"
+    f"python -c {shlex.quote(ASTROPY_SETUP_COMPAT_SNIPPET)}"
 )
 SETUP_RECIPES = {
     "astropy/astropy": [ASTROPY_BUILD_EXT_COMMAND],

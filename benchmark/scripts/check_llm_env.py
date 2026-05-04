@@ -23,9 +23,7 @@ PROXY_ENV_KEYS = (
 
 
 def _mask_secret(value: str) -> str:
-    if len(value) <= 8:
-        return "***"
-    return f"{value[:4]}...{value[-4:]}"
+    return "loaded" if value else "missing"
 
 
 def _chat_completions_url(base_url: str) -> str:

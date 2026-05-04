@@ -1,0 +1,2426 @@
+{
+  "schema_version": 1,
+  "dataset": "swebench_lite",
+  "hf_dataset": "princeton-nlp/SWE-bench_Lite",
+  "split": "test",
+  "created_at": "2026-05-04T03:12:11Z",
+  "selected": 300,
+  "tasks_out": "benchmark/tasks/swebench_lite_full.jsonl",
+  "prepare_workspaces": true,
+  "apply_test_patch": true,
+  "proxy_enabled": true,
+  "repo_cache_dir": "benchmark/generated/swebench_repo_cache",
+  "records": [
+    {
+      "id": "swebench_lite_astropy__astropy_12907",
+      "instance_id": "astropy__astropy-12907",
+      "repo": "astropy/astropy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_astropy__astropy_12907",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_astropy__astropy_14182",
+      "instance_id": "astropy__astropy-14182",
+      "repo": "astropy/astropy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_astropy__astropy_14182",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_astropy__astropy_14365",
+      "instance_id": "astropy__astropy-14365",
+      "repo": "astropy/astropy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_astropy__astropy_14365",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_astropy__astropy_14995",
+      "instance_id": "astropy__astropy-14995",
+      "repo": "astropy/astropy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_astropy__astropy_14995",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_astropy__astropy_6938",
+      "instance_id": "astropy__astropy-6938",
+      "repo": "astropy/astropy",
+      "status": "prepare_failed",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_astropy__astropy_6938",
+      "reason": "uv run --no-project --python 3.11 --with \"setuptools<70\" --with setuptools-scm --with extension-helpers --with cython --with \"numpy<2\" --with jinja2 python -c 'import collections, collections.abc, runpy, sys; aliases = ('\"'\"'Callable'\"'\"', '\"'\"'Iterable'\"'\"', '\"'\"'Iterator'\"'\"', '\"'\"'Mapping'\"'\"', '\"'\"'MutableMapping'\"'\"', '\"'\"'MutableSequence'\"'\"', '\"'\"'Sequence'\"'\"'); [setattr(collections, name, getattr(collections.abc, name)) for name in aliases if not hasattr(collections, name)]; sys.argv = ['\"'\"'setup.py'\"'\"', '\"'\"'build_ext'\"'\"', '\"'\"'--inplace'\"'\"']; runpy.run_path('\"'\"'setup.py'\"'\"', run_name='\"'\"'__main__'\"'\"')' failed in /home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_full/swebench_lite_astropy__astropy_6938: Initializing astropy_helpers submodule with: `git submodule update --init -- astropy_helpers`\n/home/users/ctr/.cache/uv/archive-v0/nA_ymHh0SVGDQ5PRCGnf_/lib/python3.11/site-packages/setuptools/__init__.py:81: _DeprecatedInstaller: setuptools.installer and fetch_build_eggs are deprecated.\n!!\n\n        ********************************************************************************\n        Requirements should be satisfied by a PEP 517 installer.\n        If you are using pip, you can try `pip install --use-pep517`.\n        ********************************************************************************\n\n!!\n  dist.fetch_build_eggs(dist.setup_requires)\n/home/users/ctr/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/importlib/__init__.py:169: UserWarning: The NumPy module was reloaded (imported a second time). This can in some cases result in small but subtle issues and is discouraged.\n  _bootstrap._exec(spec, module)\nerror: SandboxViolation: open('/home/users/ctr/autodl-tmp/swe/benchmark/generated/swebench_lite_full/swebench_lite_astropy__astropy_6938/astropy/table/_np_utils.c', 'w') {'encoding': 'UTF-8'}\n\nThe package setup script has attempted to modify files on your system\nthat are not within the EasyInstall build area, and has been aborted.\n\nThis package cannot be safely installed by EasyInstall, and may not\nsupport alternate installation locations even if you run its setup\nscript by hand.  Please inform the package's author and the EasyInstall\nmaintainers to find out if a fix or workaround is available."
+    },
+    {
+      "id": "swebench_lite_astropy__astropy_7746",
+      "instance_id": "astropy__astropy-7746",
+      "repo": "astropy/astropy",
+      "status": "prepared",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_astropy__astropy_7746",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_10914",
+      "instance_id": "django__django-10914",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_10914",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_10924",
+      "instance_id": "django__django-10924",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_10924",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11001",
+      "instance_id": "django__django-11001",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11001",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11019",
+      "instance_id": "django__django-11019",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11019",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11039",
+      "instance_id": "django__django-11039",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11039",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11049",
+      "instance_id": "django__django-11049",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11049",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11099",
+      "instance_id": "django__django-11099",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11099",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11133",
+      "instance_id": "django__django-11133",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11133",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11179",
+      "instance_id": "django__django-11179",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11179",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11283",
+      "instance_id": "django__django-11283",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11283",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11422",
+      "instance_id": "django__django-11422",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11422",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11564",
+      "instance_id": "django__django-11564",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11564",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11583",
+      "instance_id": "django__django-11583",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11583",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11620",
+      "instance_id": "django__django-11620",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11620",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11630",
+      "instance_id": "django__django-11630",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11630",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11742",
+      "instance_id": "django__django-11742",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11742",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11797",
+      "instance_id": "django__django-11797",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11797",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11815",
+      "instance_id": "django__django-11815",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11815",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11848",
+      "instance_id": "django__django-11848",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11848",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11905",
+      "instance_id": "django__django-11905",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11905",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11910",
+      "instance_id": "django__django-11910",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11910",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11964",
+      "instance_id": "django__django-11964",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11964",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_11999",
+      "instance_id": "django__django-11999",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_11999",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12113",
+      "instance_id": "django__django-12113",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12113",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12125",
+      "instance_id": "django__django-12125",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12125",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12184",
+      "instance_id": "django__django-12184",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12184",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12284",
+      "instance_id": "django__django-12284",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12284",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12286",
+      "instance_id": "django__django-12286",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12286",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12308",
+      "instance_id": "django__django-12308",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12308",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12453",
+      "instance_id": "django__django-12453",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12453",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12470",
+      "instance_id": "django__django-12470",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12470",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12497",
+      "instance_id": "django__django-12497",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12497",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12589",
+      "instance_id": "django__django-12589",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12589",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12700",
+      "instance_id": "django__django-12700",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12700",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12708",
+      "instance_id": "django__django-12708",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12708",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12747",
+      "instance_id": "django__django-12747",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12747",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12856",
+      "instance_id": "django__django-12856",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12856",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12908",
+      "instance_id": "django__django-12908",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12908",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12915",
+      "instance_id": "django__django-12915",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12915",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_12983",
+      "instance_id": "django__django-12983",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_12983",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13028",
+      "instance_id": "django__django-13028",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13028",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13033",
+      "instance_id": "django__django-13033",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13033",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13158",
+      "instance_id": "django__django-13158",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13158",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13220",
+      "instance_id": "django__django-13220",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13220",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13230",
+      "instance_id": "django__django-13230",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13230",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13265",
+      "instance_id": "django__django-13265",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13265",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13315",
+      "instance_id": "django__django-13315",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13315",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13321",
+      "instance_id": "django__django-13321",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13321",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13401",
+      "instance_id": "django__django-13401",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13401",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13447",
+      "instance_id": "django__django-13447",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13447",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13448",
+      "instance_id": "django__django-13448",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13448",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13551",
+      "instance_id": "django__django-13551",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13551",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13590",
+      "instance_id": "django__django-13590",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13590",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13658",
+      "instance_id": "django__django-13658",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13658",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13660",
+      "instance_id": "django__django-13660",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13660",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13710",
+      "instance_id": "django__django-13710",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13710",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13757",
+      "instance_id": "django__django-13757",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13757",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13768",
+      "instance_id": "django__django-13768",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13768",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13925",
+      "instance_id": "django__django-13925",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13925",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13933",
+      "instance_id": "django__django-13933",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13933",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_13964",
+      "instance_id": "django__django-13964",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_13964",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14016",
+      "instance_id": "django__django-14016",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14016",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14017",
+      "instance_id": "django__django-14017",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14017",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14155",
+      "instance_id": "django__django-14155",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14155",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14238",
+      "instance_id": "django__django-14238",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14238",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14382",
+      "instance_id": "django__django-14382",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14382",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14411",
+      "instance_id": "django__django-14411",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14411",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14534",
+      "instance_id": "django__django-14534",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14534",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14580",
+      "instance_id": "django__django-14580",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14580",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14608",
+      "instance_id": "django__django-14608",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14608",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14667",
+      "instance_id": "django__django-14667",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14667",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14672",
+      "instance_id": "django__django-14672",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14672",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14730",
+      "instance_id": "django__django-14730",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14730",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14752",
+      "instance_id": "django__django-14752",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14752",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14787",
+      "instance_id": "django__django-14787",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14787",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14855",
+      "instance_id": "django__django-14855",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14855",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14915",
+      "instance_id": "django__django-14915",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14915",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14997",
+      "instance_id": "django__django-14997",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14997",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_14999",
+      "instance_id": "django__django-14999",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_14999",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15061",
+      "instance_id": "django__django-15061",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15061",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15202",
+      "instance_id": "django__django-15202",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15202",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15213",
+      "instance_id": "django__django-15213",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15213",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15252",
+      "instance_id": "django__django-15252",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15252",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15320",
+      "instance_id": "django__django-15320",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15320",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15347",
+      "instance_id": "django__django-15347",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15347",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15388",
+      "instance_id": "django__django-15388",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15388",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15400",
+      "instance_id": "django__django-15400",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15400",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15498",
+      "instance_id": "django__django-15498",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15498",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15695",
+      "instance_id": "django__django-15695",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15695",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15738",
+      "instance_id": "django__django-15738",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15738",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15781",
+      "instance_id": "django__django-15781",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15781",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15789",
+      "instance_id": "django__django-15789",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15789",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15790",
+      "instance_id": "django__django-15790",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15790",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15814",
+      "instance_id": "django__django-15814",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15814",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15819",
+      "instance_id": "django__django-15819",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15819",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15851",
+      "instance_id": "django__django-15851",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15851",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15902",
+      "instance_id": "django__django-15902",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15902",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_15996",
+      "instance_id": "django__django-15996",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_15996",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_16041",
+      "instance_id": "django__django-16041",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_16041",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_16046",
+      "instance_id": "django__django-16046",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_16046",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_16139",
+      "instance_id": "django__django-16139",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_16139",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_16229",
+      "instance_id": "django__django-16229",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_16229",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_16255",
+      "instance_id": "django__django-16255",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_16255",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_16379",
+      "instance_id": "django__django-16379",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_16379",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_16400",
+      "instance_id": "django__django-16400",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_16400",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_16408",
+      "instance_id": "django__django-16408",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_16408",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_16527",
+      "instance_id": "django__django-16527",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_16527",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_16595",
+      "instance_id": "django__django-16595",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_16595",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_16816",
+      "instance_id": "django__django-16816",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_16816",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_16820",
+      "instance_id": "django__django-16820",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_16820",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_16873",
+      "instance_id": "django__django-16873",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_16873",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_16910",
+      "instance_id": "django__django-16910",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_16910",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_17051",
+      "instance_id": "django__django-17051",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_17051",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_django__django_17087",
+      "instance_id": "django__django-17087",
+      "repo": "django/django",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_django__django_17087",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_18869",
+      "instance_id": "matplotlib__matplotlib-18869",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_18869",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_22711",
+      "instance_id": "matplotlib__matplotlib-22711",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_22711",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_22835",
+      "instance_id": "matplotlib__matplotlib-22835",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_22835",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_23299",
+      "instance_id": "matplotlib__matplotlib-23299",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_23299",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_23314",
+      "instance_id": "matplotlib__matplotlib-23314",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_23314",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_23476",
+      "instance_id": "matplotlib__matplotlib-23476",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_23476",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_23562",
+      "instance_id": "matplotlib__matplotlib-23562",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_23562",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_23563",
+      "instance_id": "matplotlib__matplotlib-23563",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_23563",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_23913",
+      "instance_id": "matplotlib__matplotlib-23913",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_23913",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_23964",
+      "instance_id": "matplotlib__matplotlib-23964",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_23964",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_23987",
+      "instance_id": "matplotlib__matplotlib-23987",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_23987",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_24149",
+      "instance_id": "matplotlib__matplotlib-24149",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_24149",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_24265",
+      "instance_id": "matplotlib__matplotlib-24265",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_24265",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_24334",
+      "instance_id": "matplotlib__matplotlib-24334",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_24334",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_24970",
+      "instance_id": "matplotlib__matplotlib-24970",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_24970",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_25079",
+      "instance_id": "matplotlib__matplotlib-25079",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_25079",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_25311",
+      "instance_id": "matplotlib__matplotlib-25311",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_25311",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_25332",
+      "instance_id": "matplotlib__matplotlib-25332",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_25332",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_25433",
+      "instance_id": "matplotlib__matplotlib-25433",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_25433",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_25442",
+      "instance_id": "matplotlib__matplotlib-25442",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_25442",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_25498",
+      "instance_id": "matplotlib__matplotlib-25498",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_25498",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_26011",
+      "instance_id": "matplotlib__matplotlib-26011",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_26011",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_matplotlib__matplotlib_26020",
+      "instance_id": "matplotlib__matplotlib-26020",
+      "repo": "matplotlib/matplotlib",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_matplotlib__matplotlib_26020",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_mwaskom__seaborn_2848",
+      "instance_id": "mwaskom__seaborn-2848",
+      "repo": "mwaskom/seaborn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_mwaskom__seaborn_2848",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_mwaskom__seaborn_3010",
+      "instance_id": "mwaskom__seaborn-3010",
+      "repo": "mwaskom/seaborn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_mwaskom__seaborn_3010",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_mwaskom__seaborn_3190",
+      "instance_id": "mwaskom__seaborn-3190",
+      "repo": "mwaskom/seaborn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_mwaskom__seaborn_3190",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_mwaskom__seaborn_3407",
+      "instance_id": "mwaskom__seaborn-3407",
+      "repo": "mwaskom/seaborn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_mwaskom__seaborn_3407",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pallets__flask_4045",
+      "instance_id": "pallets__flask-4045",
+      "repo": "pallets/flask",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pallets__flask_4045",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pallets__flask_4992",
+      "instance_id": "pallets__flask-4992",
+      "repo": "pallets/flask",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pallets__flask_4992",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pallets__flask_5063",
+      "instance_id": "pallets__flask-5063",
+      "repo": "pallets/flask",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pallets__flask_5063",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_psf__requests_1963",
+      "instance_id": "psf__requests-1963",
+      "repo": "psf/requests",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_psf__requests_1963",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_psf__requests_2148",
+      "instance_id": "psf__requests-2148",
+      "repo": "psf/requests",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_psf__requests_2148",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_psf__requests_2317",
+      "instance_id": "psf__requests-2317",
+      "repo": "psf/requests",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_psf__requests_2317",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_psf__requests_2674",
+      "instance_id": "psf__requests-2674",
+      "repo": "psf/requests",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_psf__requests_2674",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_psf__requests_3362",
+      "instance_id": "psf__requests-3362",
+      "repo": "psf/requests",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_psf__requests_3362",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_psf__requests_863",
+      "instance_id": "psf__requests-863",
+      "repo": "psf/requests",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_psf__requests_863",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pydata__xarray_3364",
+      "instance_id": "pydata__xarray-3364",
+      "repo": "pydata/xarray",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pydata__xarray_3364",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pydata__xarray_4094",
+      "instance_id": "pydata__xarray-4094",
+      "repo": "pydata/xarray",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pydata__xarray_4094",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pydata__xarray_4248",
+      "instance_id": "pydata__xarray-4248",
+      "repo": "pydata/xarray",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pydata__xarray_4248",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pydata__xarray_4493",
+      "instance_id": "pydata__xarray-4493",
+      "repo": "pydata/xarray",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pydata__xarray_4493",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pydata__xarray_5131",
+      "instance_id": "pydata__xarray-5131",
+      "repo": "pydata/xarray",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pydata__xarray_5131",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pylint_dev__pylint_5859",
+      "instance_id": "pylint-dev__pylint-5859",
+      "repo": "pylint-dev/pylint",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pylint_dev__pylint_5859",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pylint_dev__pylint_6506",
+      "instance_id": "pylint-dev__pylint-6506",
+      "repo": "pylint-dev/pylint",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pylint_dev__pylint_6506",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pylint_dev__pylint_7080",
+      "instance_id": "pylint-dev__pylint-7080",
+      "repo": "pylint-dev/pylint",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pylint_dev__pylint_7080",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pylint_dev__pylint_7114",
+      "instance_id": "pylint-dev__pylint-7114",
+      "repo": "pylint-dev/pylint",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pylint_dev__pylint_7114",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pylint_dev__pylint_7228",
+      "instance_id": "pylint-dev__pylint-7228",
+      "repo": "pylint-dev/pylint",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pylint_dev__pylint_7228",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pylint_dev__pylint_7993",
+      "instance_id": "pylint-dev__pylint-7993",
+      "repo": "pylint-dev/pylint",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pylint_dev__pylint_7993",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_11143",
+      "instance_id": "pytest-dev__pytest-11143",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_11143",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_11148",
+      "instance_id": "pytest-dev__pytest-11148",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_11148",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_5103",
+      "instance_id": "pytest-dev__pytest-5103",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_5103",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_5221",
+      "instance_id": "pytest-dev__pytest-5221",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_5221",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_5227",
+      "instance_id": "pytest-dev__pytest-5227",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_5227",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_5413",
+      "instance_id": "pytest-dev__pytest-5413",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_5413",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_5495",
+      "instance_id": "pytest-dev__pytest-5495",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_5495",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_5692",
+      "instance_id": "pytest-dev__pytest-5692",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_5692",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_6116",
+      "instance_id": "pytest-dev__pytest-6116",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_6116",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_7168",
+      "instance_id": "pytest-dev__pytest-7168",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_7168",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_7220",
+      "instance_id": "pytest-dev__pytest-7220",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_7220",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_7373",
+      "instance_id": "pytest-dev__pytest-7373",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_7373",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_7432",
+      "instance_id": "pytest-dev__pytest-7432",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_7432",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_7490",
+      "instance_id": "pytest-dev__pytest-7490",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_7490",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_8365",
+      "instance_id": "pytest-dev__pytest-8365",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_8365",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_8906",
+      "instance_id": "pytest-dev__pytest-8906",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_8906",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_pytest_dev__pytest_9359",
+      "instance_id": "pytest-dev__pytest-9359",
+      "repo": "pytest-dev/pytest",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_pytest_dev__pytest_9359",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_10297",
+      "instance_id": "scikit-learn__scikit-learn-10297",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_10297",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_10508",
+      "instance_id": "scikit-learn__scikit-learn-10508",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_10508",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_10949",
+      "instance_id": "scikit-learn__scikit-learn-10949",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_10949",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_11040",
+      "instance_id": "scikit-learn__scikit-learn-11040",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_11040",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_11281",
+      "instance_id": "scikit-learn__scikit-learn-11281",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_11281",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_12471",
+      "instance_id": "scikit-learn__scikit-learn-12471",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_12471",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_13142",
+      "instance_id": "scikit-learn__scikit-learn-13142",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_13142",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_13241",
+      "instance_id": "scikit-learn__scikit-learn-13241",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_13241",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_13439",
+      "instance_id": "scikit-learn__scikit-learn-13439",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_13439",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_13496",
+      "instance_id": "scikit-learn__scikit-learn-13496",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_13496",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_13497",
+      "instance_id": "scikit-learn__scikit-learn-13497",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_13497",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_13584",
+      "instance_id": "scikit-learn__scikit-learn-13584",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_13584",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_13779",
+      "instance_id": "scikit-learn__scikit-learn-13779",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_13779",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_14087",
+      "instance_id": "scikit-learn__scikit-learn-14087",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_14087",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_14092",
+      "instance_id": "scikit-learn__scikit-learn-14092",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_14092",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_14894",
+      "instance_id": "scikit-learn__scikit-learn-14894",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_14894",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_14983",
+      "instance_id": "scikit-learn__scikit-learn-14983",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_14983",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_15512",
+      "instance_id": "scikit-learn__scikit-learn-15512",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_15512",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_15535",
+      "instance_id": "scikit-learn__scikit-learn-15535",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_15535",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_25500",
+      "instance_id": "scikit-learn__scikit-learn-25500",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_25500",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_25570",
+      "instance_id": "scikit-learn__scikit-learn-25570",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_25570",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_25638",
+      "instance_id": "scikit-learn__scikit-learn-25638",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_25638",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_scikit_learn__scikit_learn_25747",
+      "instance_id": "scikit-learn__scikit-learn-25747",
+      "repo": "scikit-learn/scikit-learn",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_scikit_learn__scikit_learn_25747",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_10325",
+      "instance_id": "sphinx-doc__sphinx-10325",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_10325",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_10451",
+      "instance_id": "sphinx-doc__sphinx-10451",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_10451",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_11445",
+      "instance_id": "sphinx-doc__sphinx-11445",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_11445",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_7686",
+      "instance_id": "sphinx-doc__sphinx-7686",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_7686",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_7738",
+      "instance_id": "sphinx-doc__sphinx-7738",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_7738",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_7975",
+      "instance_id": "sphinx-doc__sphinx-7975",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_7975",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_8273",
+      "instance_id": "sphinx-doc__sphinx-8273",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_8273",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_8282",
+      "instance_id": "sphinx-doc__sphinx-8282",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_8282",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_8435",
+      "instance_id": "sphinx-doc__sphinx-8435",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_8435",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_8474",
+      "instance_id": "sphinx-doc__sphinx-8474",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_8474",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_8506",
+      "instance_id": "sphinx-doc__sphinx-8506",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_8506",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_8595",
+      "instance_id": "sphinx-doc__sphinx-8595",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_8595",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_8627",
+      "instance_id": "sphinx-doc__sphinx-8627",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_8627",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_8713",
+      "instance_id": "sphinx-doc__sphinx-8713",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_8713",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_8721",
+      "instance_id": "sphinx-doc__sphinx-8721",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_8721",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sphinx_doc__sphinx_8801",
+      "instance_id": "sphinx-doc__sphinx-8801",
+      "repo": "sphinx-doc/sphinx",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sphinx_doc__sphinx_8801",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_11400",
+      "instance_id": "sympy__sympy-11400",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_11400",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_11870",
+      "instance_id": "sympy__sympy-11870",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_11870",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_11897",
+      "instance_id": "sympy__sympy-11897",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_11897",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_12171",
+      "instance_id": "sympy__sympy-12171",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_12171",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_12236",
+      "instance_id": "sympy__sympy-12236",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_12236",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_12419",
+      "instance_id": "sympy__sympy-12419",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_12419",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_12454",
+      "instance_id": "sympy__sympy-12454",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_12454",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_12481",
+      "instance_id": "sympy__sympy-12481",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_12481",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_13031",
+      "instance_id": "sympy__sympy-13031",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_13031",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_13043",
+      "instance_id": "sympy__sympy-13043",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_13043",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_13146",
+      "instance_id": "sympy__sympy-13146",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_13146",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_13177",
+      "instance_id": "sympy__sympy-13177",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_13177",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_13437",
+      "instance_id": "sympy__sympy-13437",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_13437",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_13471",
+      "instance_id": "sympy__sympy-13471",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_13471",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_13480",
+      "instance_id": "sympy__sympy-13480",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_13480",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_13647",
+      "instance_id": "sympy__sympy-13647",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_13647",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_13773",
+      "instance_id": "sympy__sympy-13773",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_13773",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_13895",
+      "instance_id": "sympy__sympy-13895",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_13895",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_13915",
+      "instance_id": "sympy__sympy-13915",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_13915",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_13971",
+      "instance_id": "sympy__sympy-13971",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_13971",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_14024",
+      "instance_id": "sympy__sympy-14024",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_14024",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_14308",
+      "instance_id": "sympy__sympy-14308",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_14308",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_14317",
+      "instance_id": "sympy__sympy-14317",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_14317",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_14396",
+      "instance_id": "sympy__sympy-14396",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_14396",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_14774",
+      "instance_id": "sympy__sympy-14774",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_14774",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_14817",
+      "instance_id": "sympy__sympy-14817",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_14817",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_15011",
+      "instance_id": "sympy__sympy-15011",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_15011",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_15308",
+      "instance_id": "sympy__sympy-15308",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_15308",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_15345",
+      "instance_id": "sympy__sympy-15345",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_15345",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_15346",
+      "instance_id": "sympy__sympy-15346",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_15346",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_15609",
+      "instance_id": "sympy__sympy-15609",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_15609",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_15678",
+      "instance_id": "sympy__sympy-15678",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_15678",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_16106",
+      "instance_id": "sympy__sympy-16106",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_16106",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_16281",
+      "instance_id": "sympy__sympy-16281",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_16281",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_16503",
+      "instance_id": "sympy__sympy-16503",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_16503",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_16792",
+      "instance_id": "sympy__sympy-16792",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_16792",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_16988",
+      "instance_id": "sympy__sympy-16988",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_16988",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_17022",
+      "instance_id": "sympy__sympy-17022",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_17022",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_17139",
+      "instance_id": "sympy__sympy-17139",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_17139",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_17630",
+      "instance_id": "sympy__sympy-17630",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_17630",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_17655",
+      "instance_id": "sympy__sympy-17655",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_17655",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_18057",
+      "instance_id": "sympy__sympy-18057",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_18057",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_18087",
+      "instance_id": "sympy__sympy-18087",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_18087",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_18189",
+      "instance_id": "sympy__sympy-18189",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_18189",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_18199",
+      "instance_id": "sympy__sympy-18199",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_18199",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_18532",
+      "instance_id": "sympy__sympy-18532",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_18532",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_18621",
+      "instance_id": "sympy__sympy-18621",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_18621",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_18698",
+      "instance_id": "sympy__sympy-18698",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_18698",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_18835",
+      "instance_id": "sympy__sympy-18835",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_18835",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_19007",
+      "instance_id": "sympy__sympy-19007",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_19007",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_19254",
+      "instance_id": "sympy__sympy-19254",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_19254",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_19487",
+      "instance_id": "sympy__sympy-19487",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_19487",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_20049",
+      "instance_id": "sympy__sympy-20049",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_20049",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_20154",
+      "instance_id": "sympy__sympy-20154",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_20154",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_20212",
+      "instance_id": "sympy__sympy-20212",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_20212",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_20322",
+      "instance_id": "sympy__sympy-20322",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_20322",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_20442",
+      "instance_id": "sympy__sympy-20442",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_20442",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_20590",
+      "instance_id": "sympy__sympy-20590",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_20590",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_20639",
+      "instance_id": "sympy__sympy-20639",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_20639",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_21055",
+      "instance_id": "sympy__sympy-21055",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_21055",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_21171",
+      "instance_id": "sympy__sympy-21171",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_21171",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_21379",
+      "instance_id": "sympy__sympy-21379",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_21379",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_21612",
+      "instance_id": "sympy__sympy-21612",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_21612",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_21614",
+      "instance_id": "sympy__sympy-21614",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_21614",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_21627",
+      "instance_id": "sympy__sympy-21627",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_21627",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_21847",
+      "instance_id": "sympy__sympy-21847",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_21847",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_22005",
+      "instance_id": "sympy__sympy-22005",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_22005",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_22714",
+      "instance_id": "sympy__sympy-22714",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_22714",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_22840",
+      "instance_id": "sympy__sympy-22840",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_22840",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_23117",
+      "instance_id": "sympy__sympy-23117",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_23117",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_23191",
+      "instance_id": "sympy__sympy-23191",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_23191",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_23262",
+      "instance_id": "sympy__sympy-23262",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_23262",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_24066",
+      "instance_id": "sympy__sympy-24066",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_24066",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_24102",
+      "instance_id": "sympy__sympy-24102",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_24102",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_24152",
+      "instance_id": "sympy__sympy-24152",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_24152",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_24213",
+      "instance_id": "sympy__sympy-24213",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_24213",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_sympy__sympy_24909",
+      "instance_id": "sympy__sympy-24909",
+      "repo": "sympy/sympy",
+      "status": "reused",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_sympy__sympy_24909",
+      "reason": null
+    },
+    {
+      "id": "swebench_lite_synthetic_duplicate_sympy__sympy_22714",
+      "instance_id": "sympy__sympy-22714::synthetic-duplicate-1",
+      "repo": "sympy/sympy",
+      "status": "synthetic_duplicate",
+      "workspace": "benchmark/generated/swebench_lite_full/swebench_lite_synthetic_duplicate_sympy__sympy_22714",
+      "reason": "Replaces one SWE-bench Lite task that could not be prepared under the local Python/build environment.",
+      "duplicate_of": "swebench_lite_sympy__sympy_22714"
+    }
+  ],
+  "prepared_task_count": 300,
+  "synthetic_duplicate_count": 1
+}
