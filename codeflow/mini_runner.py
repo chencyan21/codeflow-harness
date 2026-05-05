@@ -299,9 +299,6 @@ def _mini_command() -> tuple[list[str], dict[str, str] | None]:
     if configured:
         return shlex.split(configured), None
 
-    if shutil.which("mini"):
-        return ["mini"], None
-
     return [sys.executable, "-m", "minisweagent.run.mini"], None
 
 
