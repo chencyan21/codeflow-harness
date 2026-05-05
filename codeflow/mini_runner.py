@@ -242,7 +242,7 @@ def _load_codeflow_env() -> dict[str, str]:
 
 def _resolve_model(model: str | None, env_values: dict[str, str]) -> str | None:
     if model:
-        return model
+        return _provider_model_name(model)
     if os.environ.get("MSWEA_MODEL_NAME"):
         return None
     model_id = _nonempty(env_values.get("model_id") or env_values.get("MODEL_ID"))

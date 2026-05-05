@@ -110,6 +110,27 @@ def test_explicit_model_overrides_env_model_id(
     assert capture["argv"][capture["argv"].index("--model") + 1] == "openai/explicit-model"
 
 
+def test_explicit_openai_compatible_model_gets_provider_prefix(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_repo(repo)
+    capture_file = tmp_path / "capture.json"
+    script = _capture_script(tmp_path)
+
+    monkeypatch.setenv("CODEFLOW_MINI_COMMAND", f"{sys.executable} {script}")
+    monkeypatch.setenv("CODEFLOW_CAPTURE_FILE", str(capture_file))
+    monkeypatch.delenv("MSWEA_MODEL_NAME", raising=False)
+
+    run_mini_agent(str(repo), "prompt", model="deepseek-v4-flash")
+
+    capture = json.loads(capture_file.read_text(encoding="utf-8"))
+    assert capture["MSWEA_MODEL_NAME"] == "openai/deepseek-v4-flash"
+    assert capture["argv"][capture["argv"].index("--model") + 1] == "openai/deepseek-v4-flash"
+
+
 def test_existing_openai_env_values_are_preserved(
     tmp_path: Path,
     monkeypatch,
