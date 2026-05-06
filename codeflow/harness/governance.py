@@ -73,7 +73,8 @@ def print_governance_summary(state: RunState, console: Console) -> None:
         "[t] show checks\n"
         "[s] show sensors\n"
         "[f] show changed files\n"
-        "[q] quit"
+        "[q] quit",
+        markup=False,
     )
 
 
