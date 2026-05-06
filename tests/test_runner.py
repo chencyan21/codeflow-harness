@@ -18,21 +18,11 @@ def _run(cmd: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
 
 def _init_repo(path: Path) -> None:
     _run(["git", "init"], path)
+    _run(["git", "config", "user.email", "test@example.local"], path)
+    _run(["git", "config", "user.name", "Test"], path)
     (path / "README.md").write_text("hello\n", encoding="utf-8")
     _run(["git", "add", "."], path)
-    _run(
-        [
-            "git",
-            "-c",
-            "user.email=test@example.local",
-            "-c",
-            "user.name=Test",
-            "commit",
-            "-m",
-            "init",
-        ],
-        path,
-    )
+    _run(["git", "commit", "-m", "init"], path)
 
 
 def _head(path: Path) -> str:
