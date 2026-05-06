@@ -7,7 +7,6 @@ import io
 import json
 import os
 import shlex
-import shutil
 import signal
 import subprocess
 import sys
